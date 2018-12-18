@@ -9,6 +9,7 @@ using Unity.Transforms;
 using Unity.Jobs;
 using UnityEngine.Experimental.PlayerLoop;
 using Unity.Rendering;
+using System;
 
 namespace BioCrowds
 {
@@ -17,7 +18,7 @@ namespace BioCrowds
     public class SpawnAgentBarrier : BarrierSystem { }
 
 
-
+    [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateBefore(typeof(CellTagSystem))]
     public class AgentSpawner : JobComponentSystem
     {
         [Inject] public SpawnAgentBarrier barrier;
@@ -35,7 +36,7 @@ namespace BioCrowds
 
         }
 
-        public NativeArray<Parameters> spawnList;
+        public NativeList<Parameters> spawnList;
         public static EntityArchetype AgentArchetype;
         public static MeshInstanceRenderer AgentRenderer;
 
@@ -62,12 +63,17 @@ namespace BioCrowds
 
                 int startID = 0;
 
-                for (int i = index; i >= 0; i--)
+                for (int i = index-1; i >= 0; i--)
                 {
-                    startID += spawnList[index].qtdAgents;
+                    startID += spawnList[i].qtdAgents;
                 }
+
+                System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
+
+                //Problema total agents
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
                 {
+                   
                     if (doNotFreeze > qtdAgtTotal)
                     {
                         doNotFreeze = 0;
@@ -75,8 +81,8 @@ namespace BioCrowds
                         maxX += 2;
                     }
 
-                    float x = UnityEngine.Random.Range(minX, maxX);
-                    float z = UnityEngine.Random.Range(minZ, maxZ);
+                    float x = (float)r.NextDouble() * (maxX - minX) + minX;
+                    float z = (float)r.NextDouble() * (maxZ - minZ) + minZ;
                     float y = 0;
 
                     int CellX = ((int)x)/2 + 1;
@@ -140,7 +146,6 @@ namespace BioCrowds
         protected override void OnCreateManager()
         {
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
-            AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentMesh");
             AgentArchetype = entityManager.CreateArchetype(
                ComponentType.Create<Position>(),
                ComponentType.Create<Rotation>(),
@@ -152,10 +157,15 @@ namespace BioCrowds
                ComponentType.Create<Counter>());
 
 
-            spawnList = new NativeArray<Parameters>();
+            spawnList = new NativeList<Parameters>(1, Allocator.Persistent);
+            //spawnList[0] = new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 50, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) };
+            spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 50, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) });
 
+        }
 
-
+        protected override void OnStartRunning()
+        {
+            AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -175,12 +185,17 @@ namespace BioCrowds
             {
                 lastAgentId += spawnList[i].qtdAgents;
             }
+            Settings.agentQuantity = lastAgentId;
 
+            spawnList.Clear();
             return SpawnGroupHandle;
         }
 
-     
-        
+        protected override void OnDestroyManager()
+        {
+            spawnList.Dispose();
+        }
+
 
     }
 }

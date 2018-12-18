@@ -317,6 +317,7 @@ namespace BioCrowds
         public static MeshInstanceRenderer GetLookFromPrototype(string protoName)
         {
             var proto = GameObject.Find(protoName);
+            if (!proto) Debug.Log("asdasdas");
             var result = proto.GetComponent<MeshInstanceRendererComponent>().Value;
             Object.Destroy(proto);
             return result;

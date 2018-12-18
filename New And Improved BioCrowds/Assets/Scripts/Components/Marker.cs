@@ -151,27 +151,7 @@ namespace BioCrowds
             var takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, Settings.BatchSize, inputDeps);
             takeMakersHandle.Complete();
 
-            //NativeMultiHashMap<int, float3> agtM = AgentMarkers;
-
-            //NativeMultiHashMapIterator<int> iter;
-            //float3 marker;
-            //for (int i = 0; i < agentGroup.Length; i++)
-            //{
-            //    bool keepGoing = agtM.TryGetFirstValue(agentGroup.AgentData[i].ID, out marker, out iter);
-            //    if (keepGoing)
-            //    {
-            //        //Debug.Log(i);
-
-            //        Debug.DrawLine(agentGroup.Positions[i].Value, marker);
-            //        while (agtM.TryGetNextValue(out marker, ref iter))
-            //        {
-            //            Debug.DrawLine(agentGroup.Positions[i].Value, marker);
-
-            //        }
-
-            //    }
-
-            //}
+            
 
             return takeMakersHandle;
         }

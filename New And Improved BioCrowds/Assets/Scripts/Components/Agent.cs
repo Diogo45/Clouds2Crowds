@@ -43,7 +43,7 @@ namespace BioCrowds
     [UpdateAfter(typeof(EarlyUpdate))]
     public class CellTagSystem : JobComponentSystem
     {
-
+        
         public NativeMultiHashMap<int3, int> CellToMarkedAgents;
         public NativeHashMap<int, float3> AgentIDToPos;
         
