@@ -162,127 +162,41 @@ namespace BioCrowds
                 qtdPerCell = qtdMarkers
             });
 
-            //Debug.Log("Marker per Cell " + qtdMarkers);
-            //MarkerRenderer = GetLookFromPrototype("MarkerMesh");
 
-            //FUTURE: Test other methods for the dicretization of space
-            //for (int c = 0; c < cellNames.Length; c++)
+
+            //List<Group> groups = new List<Group>();
+            //int group = 1;
+            //foreach(SpawnArea area in Settings.instance.SpawnAreas)
             //{
-            //    NativeList<Position> tempCellMarkers = new NativeList<Position>(qtdMarkers, Allocator.Persistent);
-            //    // NativeList<Entity> temptemp = new NativeList<Entity>(qtdMarkers, Allocator.Persistent);
-            //    int flag = 0;
-            //    //para de usa o pc do conrado sem avisa
-            //    int markersAdded = 0;
-
-            //    for (int i = 0; i < qtdMarkers; i++)
+            //    List<GameObject> res;
+            //    FindGoals(group, out res);
+            //    group++;
+            //    Group i = new Group
             //    {
-            //        //FUTURE: Add a proper 'y' coordinate
-            //        float x = UnityEngine.Random.Range(cellNames[c].x - 0.99f, cellNames[c].x + 0.99f);
-            //        float y = 0f;
-            //        float z = UnityEngine.Random.Range(cellNames[c].z - 0.99f, cellNames[c].z + 0.99f);
+            //        goals = res,
+            //        //TODO:Hardcode MaxSpeed
+            //        maxSpeed = 1.3f,
+            //        qtdAgents = area.Size,
+            //        maxX = area.max.x,
+            //        minX = area.min.x,
+            //        maxZ = area.max.z,
+            //        minZ = area.min.z
 
-            //        bool canInstantiate = true;
-
-            //        for (int j = 0; j < tempCellMarkers.Length; j++)
-            //        {
-            //            float distanceAA = Distance(new float3(x, y, z), tempCellMarkers[j].Value);
-            //            if (distanceAA < markerRadius)
-            //            {
-            //                canInstantiate = false;
-            //                break;
-            //            }
-            //        }
-            //        if (canInstantiate)
-            //        {
-            //            //DONOW: Add collider or change method
-
-            //            //var markersInCell = entityManager.GetComponentData<MarkerData>()
-            //            //if(colliders.Length > 0)
-            //            //{
-            //            //    canInstantiate = false;                           
-            //            //}
-            //        }
-            //        if (canInstantiate)
-            //        {
-            //            var newMarker = entityManager.CreateEntity(MakerArchetype);
-
-            //            entityManager.SetComponentData(newMarker, new Position
-            //            {
-            //                Value = new float3(x, y, z)
-            //            });
-            //            entityManager.SetComponentData(newMarker, new MarkerData
-            //            {
-            //                id = markersAdded
-            //            });
-            //            entityManager.SetComponentData(newMarker, new CellName
-            //            {
-            //                Value = cellNames[c]
-            //            });
-                        
-            //            markersAdded++;
-
-            //            if (showMarkers) entityManager.AddSharedComponentData(newMarker, MarkerRenderer);
-            //            tempCellMarkers.Add(entityManager.GetComponentData<Position>(newMarker));
-            //            //temptemp.Add(newMarker);
-            //        }
-            //        else
-            //        {
-            //            flag++;
-            //            i--;
-            //        }
-            //        if (flag > qtdMarkers * 2)
-            //        {
-            //            flag = 0;
-            //            break;
-            //        }
-            //    }
-
-            //    //Debug.Log("MarkersAdded " + markersAdded);
-            //    //for (int xablau = 0; xablau < tempCellMarkers.Capacity; xablau++)
-            //    //{
-            //    //    var cellsNames = entityManager.GetSharedComponentData<CellName>(temptemp[xablau]);
-            //    //    var makerPos = entityManager.GetComponentData<Position>(temptemp[xablau]);
-            //    //    Debug.Log("MarkerPos " + makerPos.Value + xablau + " " + c + " " + cellsNames.Value);
-
-            //    //}
-            //    //temptemp.Dispose();
-            //    tempCellMarkers.Dispose();
-
+            //    };
+            //    Settings.agentQuantity += area.Size;
+            //    groups.Add(i);
             //}
-
-            List<Group> groups = new List<Group>();
-            int group = 1;
-            foreach(SpawnArea area in Settings.instance.SpawnAreas)
-            {
-                List<GameObject> res;
-                FindGoals(group, out res);
-                group++;
-                Group i = new Group
-                {
-                    goals = res,
-                    //TODO:Hardcode MaxSpeed
-                    maxSpeed = 1.3f,
-                    qtdAgents = area.Size,
-                    maxX = area.max.x,
-                    minX = area.min.x,
-                    maxZ = area.max.z,
-                    minZ = area.min.z
-
-                };
-                Settings.agentQuantity += area.Size;
-                groups.Add(i);
-            }
-            group = 0;
-            int startID = 0;
-            foreach (Group g in groups)
-            {
-                int frameRate = Settings.instance.FramesPerSecond;
-                var renderer = Settings.instance.Renderers[group];
-                int lastID;
-                SpawnAgent(frameRate, entityManager, g, startID, out lastID, renderer);
-                startID = lastID;
-                group++;
-            }
+            //group = 0;
+            //int startID = 0;
+            //foreach (Group g in groups)
+            //{
+            //    int frameRate = Settings.instance.FramesPerSecond;
+            //    var renderer = Settings.instance.Renderers[group];
+            //    int lastID;
+            //    SpawnAgent(frameRate, entityManager, g, startID, out lastID, renderer);
+            //    startID = lastID;
+            //    group++;
+            //}
 
 
             cellMarkersCache.Dispose();
