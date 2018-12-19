@@ -132,10 +132,10 @@ namespace BioCrowds
                     
                     int index = i * qtdX + j;
                     //Debug.Log(index + " " + i + " " + x + " " + z);
-                    //entityManager.SetComponentData(cells[index], new Position
-                    //{
-                    //    Value = new float3(x, y, z)
-                    //});
+                    entityManager.SetComponentData(cells[index], new Position
+                    {
+                        Value = new float3(x, y, z)
+                    });
 
 
                     entityManager.SetComponentData(cells[index], new CellName
@@ -147,8 +147,8 @@ namespace BioCrowds
 
 
                     cellsPersistent.Add(cells[index]);
-                    if (showCells)
-                        entityManager.AddSharedComponentData(cells[index], CellRenderer);
+                    if (showCells) entityManager.AddSharedComponentData(cells[index], CellRenderer);
+
                     cellNames.Add(entityManager.GetComponentData<CellName>(cells[index]).Value);
 
                 }

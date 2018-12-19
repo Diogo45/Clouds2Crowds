@@ -43,8 +43,8 @@ namespace BioCrowds
         {
             [ReadOnly] public ComponentDataArray<Position> Position;
             [ReadOnly] public ComponentDataArray<MarkerData> Data;
-            [ReadOnly] public ComponentDataArray<Active> Active;
-            [ReadOnly] public EntityArray Entities;
+            //[ReadOnly] public ComponentDataArray<Active> Active;
+            //[ReadOnly] public EntityArray Entities;
             [ReadOnly] public ComponentDataArray<CellName> MarkerCell;
             [ReadOnly] public readonly int Length;
         }
@@ -56,8 +56,8 @@ namespace BioCrowds
             [WriteOnly] public NativeMultiHashMap<int, float3>.Concurrent AgentMarkers;
             [ReadOnly] public NativeHashMap<int, float3> AgentIDToPos;
             [ReadOnly] public NativeMultiHashMap<int3, int> cellToAgent;
-            public EntityCommandBuffer.Concurrent CommandBuffer;
-            [ReadOnly] public EntityArray Entities;
+            //public EntityCommandBuffer.Concurrent CommandBuffer;
+            //[ReadOnly] public EntityArray Entities;
 
             [ReadOnly] public ComponentDataArray<CellName> MarkerCell;
             [ReadOnly] public ComponentDataArray<Position> MarkerPos;
@@ -78,10 +78,10 @@ namespace BioCrowds
                 if (!keepgoing)
                 {
                     //CommandBuffer.RemoveComponent(index, Entities[index], typeof(Active));
-
                     return;
                 }
-                
+
+                //Debug.Log("Passou: " + MarkerCell[index].Value);
 
                 float3 agentPos;
                 AgentIDToPos.TryGetValue(currentAgent, out agentPos);
@@ -104,12 +104,15 @@ namespace BioCrowds
                         {
                             closestDistance = dist;
                             bestAgent = currentAgent;
+                            //Debug.Log(MarkerCell[index].Value + " " + bestAgent);
                         }
                         else
                         {
                             if(bestAgent > currentAgent)
                             {
                                 bestAgent = currentAgent;
+                                //Debug.Log(MarkerCell[index].Value + " " + bestAgent);
+
                                 closestDistance = dist;
                             }
                         }
@@ -142,9 +145,9 @@ namespace BioCrowds
                 AgentMarkers = AgentMarkers.ToConcurrent(),
                 cellToAgent = CellTagSystem.CellToMarkedAgents,
                 MarkerCell = markerGroup.MarkerCell,
-                MarkerPos = markerGroup.Position,
-                Entities = markerGroup.Entities,
-                CommandBuffer = m_SpawnerBarrier.CreateCommandBuffer().ToConcurrent()
+                MarkerPos = markerGroup.Position
+                //Entities = markerGroup.Entities,
+                //CommandBuffer = m_SpawnerBarrier.CreateCommandBuffer().ToConcurrent()
             };
 
 

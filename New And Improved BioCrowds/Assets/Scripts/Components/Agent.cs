@@ -79,6 +79,7 @@ namespace BioCrowds
                 int endZ = MyCell[index].Value.z + 2;
 
                 float3 agentPos = Position[index].Value;
+                //Debug.Log(agent + " " + agentPos);
                 AgentIDToPos.TryAdd(agent, agentPos);
                 float distCell = math.distance((float3)MyCell[index].Value, agentPos);
 
@@ -90,12 +91,13 @@ namespace BioCrowds
                         int3 key = new int3(i, 0, j);
                         
                         CellToAgent.Add(key, agent);
+                        //Debug.Log(cell + " " + key);
+
                         float distNewCell = math.distance((float3)key, agentPos);
                         if (distNewCell < distCell)
                         {
                             distCell = distNewCell;
                             MyCell[index] = new CellName { Value = key };
-                            //Debug.Log(cell + " " + key);
                         }
                     }
                 }
@@ -366,7 +368,7 @@ namespace BioCrowds
             public void Execute(int index)
             {
                 float3 old = Positions[index].Value;
-                //Debug.Log(Deltas[index].Delta);
+                //Debug.Log("MOVE:" + Positions[index].Value);
 
                 Positions[index] = new Position { Value = old + Deltas[index].delta };
             }
