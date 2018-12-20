@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -27,7 +26,7 @@ namespace BioCrowds
     }
 
 
-   
+
 
 
     public class BioCrowdsBootStrap
@@ -46,7 +45,7 @@ namespace BioCrowds
         {
             //UnityEditor.AI.NavMeshBuilder.BuildNavMesh();
 
-            
+
 
             //Get the simulation settings from the settings script
             var gSettings = GameObject.Find("BCSettings");
@@ -64,7 +63,7 @@ namespace BioCrowds
 
             bool showMarkers = BioSettings.showMarkers;
 
-            
+
 
             //FUTURE: BioCrowds in complex 3d models of scenarios
             //TODO: Truncate the Terrain size if the cells don't fit
@@ -80,7 +79,7 @@ namespace BioCrowds
             //Here we define the agent archetype by adding all the Components, that is, all the Agent's data. The respective Systems will act upon the Components added, if such Systems exist.
             //REVIEW: See if those are all the necessary Components
             AgentArchetype = entityManager.CreateArchetype(
-                ComponentType.Create<Position>(), 
+                ComponentType.Create<Position>(),
                 ComponentType.Create<Rotation>(),
                 ComponentType.Create<CellName>(),
                 ComponentType.Create<AgentData>(),
@@ -94,7 +93,7 @@ namespace BioCrowds
                 ComponentType.Create<Position>());
 
 
-  
+
 
 
             int qtdX = (int)(ground.terrainData.size.x / (agentRadius * 2));
@@ -126,16 +125,16 @@ namespace BioCrowds
                 {
 
                     float x = i * (agentRadius * 2);
-                  
+
                     float y = 0f;
                     float z = j * (agentRadius * 2);
-                    
+
                     int index = i * qtdX + j;
                     //Debug.Log(index + " " + i + " " + x + " " + z);
-                    //entityManager.SetComponentData(cells[index], new Position
-                    //{
-                    //    Value = new float3(x, y, z)
-                    //});
+                    entityManager.SetComponentData(cells[index], new Position
+                    {
+                        Value = new float3(x, y, z)
+                    });
 
 
                     entityManager.SetComponentData(cells[index], new CellName
@@ -143,12 +142,12 @@ namespace BioCrowds
                         Value = new int3(Mathf.FloorToInt(x) + 1, Mathf.FloorToInt(y), Mathf.FloorToInt(z) + 1)
                     });
 
-                    
+
 
 
                     cellsPersistent.Add(cells[index]);
-                    if (showCells)
-                        entityManager.AddSharedComponentData(cells[index], CellRenderer);
+                    if (showCells) entityManager.AddSharedComponentData(cells[index], CellRenderer);
+
                     cellNames.Add(entityManager.GetComponentData<CellName>(cells[index]).Value);
 
                 }
@@ -208,7 +207,7 @@ namespace BioCrowds
         }
 
         //TODO: Parameters according to Group
-        public static void SpawnAgent(int framesPerSecond, EntityManager entityManager, Group group,int startID, out int lastId, MeshInstanceRenderer AgentRenderer)
+        public static void SpawnAgent(int framesPerSecond, EntityManager entityManager, Group group, int startID, out int lastId, MeshInstanceRenderer AgentRenderer)
         {
             int doNotFreeze = 0;
 
@@ -288,7 +287,8 @@ namespace BioCrowds
                     //entityManager.AddComponent(newAgent, ComponentType.FixedArray(typeof(int), qtdMarkers));
                     //TODO:Normal Life stuff change
                     entityManager.SetComponentData(newAgent, new Counter { Value = 0 });
-                    entityManager.SetComponentData(newAgent, new NormalLifeData {
+                    entityManager.SetComponentData(newAgent, new NormalLifeData
+                    {
                         confort = 0,
                         stress = 0,
                         agtStrAcumulator = 0f,
@@ -296,7 +296,7 @@ namespace BioCrowds
                         incStress = 0f
                     });
 
-                     
+
                     entityManager.AddSharedComponentData(newAgent, AgentRenderer);
                 }
 
@@ -328,7 +328,7 @@ namespace BioCrowds
             int i = 1;
             res = new List<GameObject>();
             GameObject g = GameObject.Find("G-" + group + "-" + i);
-            if(!g) return false;
+            if (!g) return false;
             res.Add(g);
             while (g)
             {

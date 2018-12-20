@@ -120,7 +120,12 @@ namespace BioCities
         public int[] Rulers;
         public string LogFile;
 
+
+
         public GameObject heattextquad;
+
+
+        public bool BioCloudsActive = true;
 
     }
 

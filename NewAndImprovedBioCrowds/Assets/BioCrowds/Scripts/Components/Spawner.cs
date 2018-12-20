@@ -53,7 +53,7 @@ namespace BioCrowds
 
                 float3 convertedOrigin = WindowManager.Clouds2Crowds(spawnList[index].spawnOrigin);
                 float2 dim = spawnList[index].spawnDimensions;
-                
+
                 int qtdAgtTotal = spawnList[index].qtdAgents;
                 int maxZ = (int)(convertedOrigin.z + dim.y);
                 int maxX = (int)(convertedOrigin.x + dim.x);
@@ -61,36 +61,42 @@ namespace BioCrowds
                 int minX = (int)convertedOrigin.x;
                 float maxSpeed = spawnList[index].maxSpeed;
 
+                //Debug.Log(" MAX MIN " + new int4(maxZ, minZ, maxX, minX));
+
                 int startID = 0;
 
-                for (int i = index-1; i >= 0; i--)
+                for (int i = index - 1; i >= 0; i--)
                 {
                     startID += spawnList[i].qtdAgents;
                 }
 
                 System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
 
+                int CellX = minX + 1;
+                int CellZ = minZ + 1;
+                int CellY = 0;
+                //Debug.Log("CELL: " + CellX + " " + CellZ);
+
                 //Problema total agents
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
                 {
-                   
+
                     if (doNotFreeze > qtdAgtTotal)
                     {
                         doNotFreeze = 0;
-                        maxZ += 2;
-                        maxX += 2;
+                        //maxZ += 2;
+                        //maxX += 2;
                     }
 
                     float x = (float)r.NextDouble() * (maxX - minX) + minX;
                     float z = (float)r.NextDouble() * (maxZ - minZ) + minZ;
                     float y = 0;
+                    //Debug.Log("AGENT: " + x + " " + z);
 
-                    int CellX = ((int)x)/2 + 1;
-                    int CellZ = ((int)y)/2 + 1;
-                    int CellY = 0;
-                    
-                    //Debug.Log(x + " " + z);
-                    
+
+
+
+
 
 
                     float3 g = spawnList[index].goal;
@@ -101,10 +107,11 @@ namespace BioCrowds
 
 
 
-                    
+
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
                     CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
+                    Debug.Log(maxSpeed / Settings.instance.FramesPerSecond);
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
@@ -135,7 +142,7 @@ namespace BioCrowds
 
 
                     CommandBuffer.AddSharedComponent(index, AgentRenderer);
-                    
+
 
 
                 }
@@ -159,7 +166,14 @@ namespace BioCrowds
 
             spawnList = new NativeList<Parameters>(1, Allocator.Persistent);
             //spawnList[0] = new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 50, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) };
-            spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 50, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) });
+            spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 10, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) });
+
+            spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 10, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(50, 50, 0) });
+
+
+            spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 15, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 50, 0) });
+
+            spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 15, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(50, 52, 0) });
 
         }
 
@@ -181,7 +195,7 @@ namespace BioCrowds
 
             SpawnGroupHandle.Complete();
 
-            for(int i = 0; i < spawnList.Length; i++)
+            for (int i = 0; i < spawnList.Length; i++)
             {
                 lastAgentId += spawnList[i].qtdAgents;
             }

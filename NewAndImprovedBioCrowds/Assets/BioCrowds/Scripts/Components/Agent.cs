@@ -33,7 +33,7 @@ namespace BioCrowds
         public float3 delta;
     }
 
-    public struct Active: IComponentData
+    public struct Active : IComponentData
     {
         public int active;
     }
@@ -43,10 +43,10 @@ namespace BioCrowds
     [UpdateAfter(typeof(EarlyUpdate))]
     public class CellTagSystem : JobComponentSystem
     {
-        
+
         public NativeMultiHashMap<int3, int> CellToMarkedAgents;
         public NativeHashMap<int, float3> AgentIDToPos;
-        
+
         public struct AgentGroup
         {
             public ComponentDataArray<CellName> MyCell;
@@ -71,7 +71,7 @@ namespace BioCrowds
                 //Get the 8 neighbors cells to the agent's cell + it's cell
                 int agent = AgentData[index].ID;
                 int3 cell = MyCell[index].Value;
-                
+
                 CellToAgent.Add(cell, agent);
                 int startX = MyCell[index].Value.x - 2;
                 int startZ = MyCell[index].Value.z - 2;
@@ -79,6 +79,7 @@ namespace BioCrowds
                 int endZ = MyCell[index].Value.z + 2;
 
                 float3 agentPos = Position[index].Value;
+                //Debug.Log(agent + " " + agentPos);
                 AgentIDToPos.TryAdd(agent, agentPos);
                 float distCell = math.distance((float3)MyCell[index].Value, agentPos);
 
@@ -88,14 +89,15 @@ namespace BioCrowds
                     for (int j = startZ; j <= endZ; j = j + 2)
                     {
                         int3 key = new int3(i, 0, j);
-                        
+
                         CellToAgent.Add(key, agent);
+                        //Debug.Log(cell + " " + key);
+
                         float distNewCell = math.distance((float3)key, agentPos);
                         if (distNewCell < distCell)
                         {
                             distCell = distNewCell;
                             MyCell[index] = new CellName { Value = key };
-                            //Debug.Log(cell + " " + key);
                         }
                     }
                 }
@@ -124,7 +126,7 @@ namespace BioCrowds
             mapCellToAgentsJobDep.Complete();
 
             //Debug.Log(AgentIDToPos.Length);
-           
+
             return mapCellToAgentsJobDep;
         }
 
@@ -217,7 +219,7 @@ namespace BioCrowds
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             AgentTotalMarkerWeight.Clear();
-            
+
             ComputeTotalMarkerWeight computeJob = new ComputeTotalMarkerWeight()
             {
                 AgentTotalMarkerWeight = AgentTotalMarkerWeight.ToConcurrent(),
@@ -252,7 +254,7 @@ namespace BioCrowds
 
     public class MovementVectorsSystemGroup { }
 
-    
+
     [UpdateInGroup(typeof(MovementVectorsSystemGroup)), UpdateAfter(typeof(MarkerWeightSystem))]
     public class AgentMovementVectors : JobComponentSystem
     {
@@ -366,7 +368,7 @@ namespace BioCrowds
             public void Execute(int index)
             {
                 float3 old = Positions[index].Value;
-                //Debug.Log(Deltas[index].Delta);
+                //Debug.Log("MOVE:" + Positions[index].Value);
 
                 Positions[index] = new Position { Value = old + Deltas[index].delta };
             }
@@ -394,7 +396,7 @@ namespace BioCrowds
 
 
 
-    
+
 
     public static class AgentCalculations
     {

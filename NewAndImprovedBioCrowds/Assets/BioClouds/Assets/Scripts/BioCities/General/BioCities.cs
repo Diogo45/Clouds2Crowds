@@ -35,6 +35,26 @@ namespace BioCities
 
     public class BioCities : MonoBehaviour
     {
+        public static void DeactivateBioclouds()
+        {
+            World activeWorld = World.Active;
+            activeWorld.GetExistingManager<CloudCellDrawLineSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudCellTagSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CellIDMapSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CellMarkSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudCellTotalWeightSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudHeatMap>().Enabled = false;
+            activeWorld.GetExistingManager<CloudMovementVectorSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudMoveSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudRadiusUpdateMinMax>().Enabled = false;
+            activeWorld.GetExistingManager<CloudRadiusUpdateSpeed>().Enabled = false;
+            activeWorld.GetExistingManager<CloudRadiusUpdateTCC>().Enabled = false;
+            activeWorld.GetExistingManager<CloudSplitSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudTagDesiredQuantitySystem>().Enabled = false;
+            
+            activeWorld.GetExistingManager<ExperimentEndSystem>().Enabled = false;
+        }
+
         //Properties
 
         BioCity city;
@@ -48,6 +68,7 @@ namespace BioCities
         //Methods
         public void Init()
         {
+
             Parameters inst = Parameters.Instance;
             entityManager = World.Active.GetOrCreateManager<EntityManager>();
             city = new BioCity();
@@ -55,6 +76,11 @@ namespace BioCities
             city.AgentMeshes = new List<MeshInstanceRenderer>();
             city.CloudMeshes = new List<MeshInstanceRenderer>();
             city.HeatQuadMeshes = new List<MeshInstanceRenderer>();
+
+            if(!inst.BioCloudsActive){
+                DeactivateBioclouds();
+                return;
+            }
 
 
             city.BioEntityManager = entityManager;
@@ -74,13 +100,6 @@ namespace BioCities
                            city.BioParameters.DomainMaxX,
                            city.BioParameters.DomainMaxY);
 
-            city.AuxinArchetype = city.BioEntityManager.CreateArchetype(typeof(Position),
-                                                              typeof(Rotation), 
-                                                              typeof(Auxin));
-
-            city.AgentArchetype = city.BioEntityManager.CreateArchetype(typeof(Position),
-                                                              typeof(Rotation),
-                                                              typeof(Agent));
 
             city.CloudArchetype = city.BioEntityManager.CreateArchetype(typeof(Position),
                                                               typeof(Rotation),
