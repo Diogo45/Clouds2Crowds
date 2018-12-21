@@ -2,12 +2,19 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using BioCrowds;
 
 public class WindowManager: MonoBehaviour
 {
     public static WindowManager instance;
-    public float2 size;
-    public float3 pivot;
+    public float2 sizeCreate;
+    public float3 originCreate;
+
+    public float2 sizeBase;
+    public float3 originBase;
+
+    public float2 sizeVisualize;
+    public float3 originVisualize;
 
     public void Awake()
     {
@@ -23,18 +30,81 @@ public class WindowManager: MonoBehaviour
         }
     }
 
+    public static void SetWindow(float3 origin, float2 size)
+    {
+        WindowManager window = instance;
+        window.originVisualize = origin;
+        window.sizeVisualize = size;
+
+        float3 aux = new float3(1f, 1f, 0f);
+
+        window.originCreate = origin - (2*aux);
+        window.sizeCreate = size + new float2(4f, 4f);
+
+
+        window.originBase = origin - (4 * aux);
+        window.sizeBase = size + new float2(8f, 8f);
+
+
+    }
+
     public static float3 Clouds2Crowds(float3 pos)
     {
-        float3 auxPos = pos - instance.pivot;
+        float3 auxPos = pos - instance.originBase;
         return new float3(auxPos.x, auxPos.z, auxPos.y);
     }
 
     public static float3 Crowds2Clouds(float3 pos)
     {
         float3 auxPos = new float3(pos.x, pos.z, pos.y);
-        return auxPos + instance.pivot;
+        return auxPos + instance.originBase;
 
     }
+
+    private static bool CheckRectangle(float3 pos, float3 origin, float2 size)
+    {
+
+        return pos.x > origin.x             &&
+               pos.x < origin.x - size.x    &&
+               pos.y > origin.y             && 
+               pos.y < origin.y - size.y;
+    }
+
+    /// <summary>
+    /// Checks if a Cloud-coordinate position is in a destruction zone.
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public static bool CheckDestructZone(float3 pos)
+    {
+        WindowManager window = instance;
+        return CheckRectangle(pos, instance.originBase, instance.sizeBase) &&
+               (!CheckRectangle(pos, instance.originCreate, instance.sizeCreate));
+    }
+
+    /// <summary>
+    /// Checks if a Cloud-coordinate position is in a creation zone.
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public static bool CheckCreateZone(float3 pos)
+    {
+        WindowManager window = instance;
+        return CheckRectangle(pos, instance.originCreate, instance.sizeCreate) &&
+               (!CheckRectangle(pos, instance.originVisualize, instance.sizeVisualize));
+    }
+
+    /// <summary>
+    /// Checks if a Cloud-coordinate position is in a Visualization zone.
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>fa
+    public static bool CheckVisualZone(float3 pos)
+    {
+        WindowManager window = instance;
+        return CheckRectangle(pos, instance.originVisualize, instance.sizeVisualize);
+    }
+
 
 
 }

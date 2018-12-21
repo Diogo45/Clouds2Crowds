@@ -161,6 +161,7 @@ namespace BioCrowds
                ComponentType.Create<AgentStep>(),
                ComponentType.Create<AgentGoal>(),
                ComponentType.Create<NormalLifeData>(),
+               ComponentType.Create<Animator>(),
                ComponentType.Create<Counter>());
 
 

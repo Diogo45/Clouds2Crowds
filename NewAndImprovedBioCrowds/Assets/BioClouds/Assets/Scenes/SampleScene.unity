@@ -157,21 +157,6 @@ Prefab:
       propertyPath: CellRendererData.Array.data[0].mat
       value: 
       objectReference: {fileID: 2100000, guid: 1c1978a20a554d64385fdffb04fc45e1, type: 2}
-    - target: {fileID: 114556887650857184, guid: d6a2ed25cbc4b3c4ba556ee33978d45b,
-        type: 2}
-      propertyPath: heattextquad
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 114556887650857184, guid: d6a2ed25cbc4b3c4ba556ee33978d45b,
-        type: 2}
-      propertyPath: BioCloudsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114556887650857184, guid: d6a2ed25cbc4b3c4ba556ee33978d45b,
-        type: 2}
-      propertyPath: ExperimentPath
-      value: Assets/BioClouds/Assets/Experiments/Experiment3.json
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d6a2ed25cbc4b3c4ba556ee33978d45b, type: 2}
   m_IsPrefabAsset: 0
@@ -290,6 +275,11 @@ Prefab:
     - target: {fileID: 4067054051561080, guid: 1072cbd4c39e4da40acdfbda78b323ba, type: 2}
       propertyPath: m_RootOrder
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114712690167477888, guid: 1072cbd4c39e4da40acdfbda78b323ba,
+        type: 2}
+      propertyPath: NormalLife
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1072cbd4c39e4da40acdfbda78b323ba, type: 2}
