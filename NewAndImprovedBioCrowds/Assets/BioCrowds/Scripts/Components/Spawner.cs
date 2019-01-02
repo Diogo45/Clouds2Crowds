@@ -213,4 +213,61 @@ namespace BioCrowds
 
 
     }
+
+    [UpdateAfter(typeof(AgentDespawner))]
+    public class DespawnAgentBarrier : BarrierSystem { }
+
+    [UpdateAfter(typeof(AgentMovementSystem))]
+    public class AgentDespawner : JobComponentSystem
+    {
+
+        [Inject] DespawnAgentBarrier barrier;
+
+        public struct AgentGroup
+        {
+            [ReadOnly] public ComponentDataArray<Position> AgtPos;
+            [ReadOnly] public ComponentDataArray<AgentData> AgtData;
+            [ReadOnly] public EntityArray entities;
+            [ReadOnly] public readonly int Length;
+
+        }
+        [Inject] AgentGroup agentGroup;
+        
+
+        public struct CheckAreas : IJobParallelFor
+        {
+            [ReadOnly] public ComponentDataArray<Position> AgtPos;
+            [ReadOnly] public EntityArray entities;
+            public EntityCommandBuffer.Concurrent CommandBuffer;
+
+
+            public void Execute(int index)
+            {
+                float3 posCloudCoord = WindowManager.Crowds2Clouds(AgtPos[index].Value);
+                if (WindowManager.CheckDestructZone(posCloudCoord))
+                {
+                    CommandBuffer.DestroyEntity(index, entities[index]);
+                }
+            }
+        }
+
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
+            var CheckArea = new CheckAreas
+            {
+                AgtPos = agentGroup.AgtPos,
+                CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
+                entities = agentGroup.entities
+            };
+
+            var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            CheckAreaHandle.Complete();
+            return CheckAreaHandle;
+            
+        }
+
+    }
+
+
+
 }

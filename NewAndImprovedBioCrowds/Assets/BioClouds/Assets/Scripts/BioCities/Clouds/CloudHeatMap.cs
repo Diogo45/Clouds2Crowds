@@ -33,6 +33,7 @@ namespace BioCities {
         public NativeArray<Color> tex_mat;
         public int tex_mat_row;
         public int tex_mat_col;
+        public NativeHashMap<int, float> cloudDensities;
 
         public struct QuadGroup
         {
@@ -118,6 +119,7 @@ namespace BioCities {
             [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
             [ReadOnly] public float CellArea;
             [WriteOnly] public NativeArray<int> cloudQuadQuantity;
+            [WriteOnly] public NativeHashMap<int, float>.Concurrent cloudDensities;
             [ReadOnly] public int mat_rows;
             [ReadOnly] public int mat_cols;
             [NativeDisableParallelForRestriction] public NativeArray<Color> tex_mat;
@@ -148,12 +150,15 @@ namespace BioCities {
                 int2 grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
                 tex_mat[grid_cell.y * mat_cols + grid_cell.x] = densityColor;
 
+                cloudDensities.TryAdd(CloudData[index].ID, delta);
+
                 while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
                 {
                     grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
                     tex_mat[grid_cell.y * mat_rows + grid_cell.x] = densityColor;
                 }
 
+                
             }
         }
 
@@ -166,6 +171,11 @@ namespace BioCities {
             var clearDep = clearjob.Schedule(lastsize_texmat, 64);
             clearDep.Complete();
 
+            if(cloudDensities.Capacity < m_CloudDataGroup.Length)
+            {
+                cloudDensities.Dispose();
+                cloudDensities = new NativeHashMap<int, float>(m_CloudDataGroup.Length, Allocator.Persistent);
+            }
 
             int aux = (int)(math.ceil(inst.CloudMaxRadius * 2 / inst.CellWidth));
             int size_quads = aux * aux * m_CloudDataGroup.Length;
@@ -200,7 +210,8 @@ namespace BioCities {
                 cloudQuadQuantity = quadQuantities,
                 mat_cols = tex_mat_col,
                 mat_rows = tex_mat_row,
-                tex_mat =  tex_mat
+                tex_mat =  tex_mat,
+                cloudDensities = cloudDensities.ToConcurrent()
             };
 
             //MoveHeatMapQuads MoveQuadsJob = new MoveHeatMapQuads()
@@ -293,6 +304,7 @@ namespace BioCities {
             quadQuantities.Dispose();
             quadIndex.Dispose();
             tex_mat.Dispose();
+            cloudDensities.Dispose();
         }
 
         protected override void OnStartRunning()
@@ -305,6 +317,7 @@ namespace BioCities {
 
             quadQuantities = new NativeArray<int>(0, Allocator.TempJob);
             quadIndex = new NativeArray<int>(0, Allocator.TempJob);
+            cloudDensities = new NativeHashMap<int, float>(0, Allocator.TempJob);
             inst = Parameters.Instance;
             tex_mat_col = inst.Cols;
             tex_mat_row = inst.Rows;

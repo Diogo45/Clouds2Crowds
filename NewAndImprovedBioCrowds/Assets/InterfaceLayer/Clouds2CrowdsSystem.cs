@@ -8,18 +8,13 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
 
-[UpdateAfter(typeof(BioCities.CellMarkSystem))]
+[UpdateAfter(typeof(BioCities.CloudHeatMap))]
 public class Clouds2CrowdsSystem : JobComponentSystem
 {
 
-    public bool CheckPosition(float3 pos)
+    public static bool CheckPosition(float3 pos)
     {
-        WindowManager window = WindowManager.instance;
-
-        return pos.x > window.pivot.x &&
-               pos.x < window.pivot.x + window.size.x &&
-               pos.y > window.pivot.y &&
-               pos.y < window.pivot.y + window.size.y;
+        return WindowManager.CheckVisualZone(pos);
     }
 
     public NativeHashMap<int, int> CloudID2AgentInWindow;
@@ -41,51 +36,61 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     [Inject] CloudDataGroup m_CloudDataGroup;
     [Inject] BioCities.CellMarkSystem m_CellMarkSystem;
     [Inject] BioCities.CellIDMapSystem m_CellID2PosSystem;
+    [Inject] BioCities.CloudHeatMap m_heatmap;
+
 
     struct DesiredCloudAgent2CrowdAgentJob : IJobParallelFor
     {
         [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
-        [ReadOnly] public ComponentDataArray<BioCities.CloudGoal> CloudGoal;
-        [ReadOnly] public ComponentDataArray<Position> Position;
 
         [ReadOnly] public NativeHashMap<int, float3> cellid2pos;
-        [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
+        [ReadOnly] public NativeHashMap<int, float> cloudDensities;
 
-        [WriteOnly] public NativeHashMap<int, int> desiredQauntity;
+        [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
+        
+        [WriteOnly] public NativeHashMap<int, int>.Concurrent desiredQuantity;
 
         public void Execute(int index)
         {
             BioCities.CloudData currentCloudData = CloudData[index];
-            BioCities.CloudGoal currentCloudGoal = CloudGoal[index];
-            Position currentCloudPosition = Position[index];
-            
 
             float3 currentCellPosition;
+            int desiredCellQnt = 0;
             int cellCount = 0;
             NativeMultiHashMapIterator<int> it;
-            float3 posSum = float3.zero;
-
+            
             bool keepgoing = CloudMarkersMap.TryGetFirstValue(currentCloudData.ID, out currentCellPosition, out it);
-
             if (!keepgoing)
                 return;
-
-            cellCount++;            
+            cellCount++;
+            if(CheckPosition(currentCellPosition))
+            {
+                desiredCellQnt++;
+            }
 
             while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
             {
                 cellCount++;
-
+                if (CheckPosition(currentCellPosition))
+                {
+                    desiredCellQnt++;
+                }
             }
-            
+            float cloudDensity;
+
+            if (cloudDensities.TryGetValue(currentCloudData.ID, out cloudDensity))
+            {
+
+                int agentQuantity = (int)(desiredCellQnt * cloudDensity);
+                desiredQuantity.TryAdd(currentCloudData.ID, agentQuantity);
+            }
+
         }
     }
 
     struct CurrentCloudAgent2CrowdAgentJob : IJobParallelFor
     {
         [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
-        [ReadOnly] public ComponentDataArray<BioCities.CloudGoal> CloudGoal;
-        [ReadOnly] public ComponentDataArray<Position> Position;
 
         [ReadOnly] public NativeHashMap<int, float3> cellid2pos;
         [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
@@ -98,8 +103,6 @@ public class Clouds2CrowdsSystem : JobComponentSystem
         public void Execute(int index)
         {
             BioCities.CloudData currentCloudData = CloudData[index];
-            BioCities.CloudGoal currentCloudGoal = CloudGoal[index];
-            Position currentCloudPosition = Position[index];
 
 
             float3 currentCellPosition;
