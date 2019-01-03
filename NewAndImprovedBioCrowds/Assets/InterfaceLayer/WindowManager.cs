@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using BioCrowds;
 
+[ExecuteInEditMode]
 public class WindowManager: MonoBehaviour
 {
     public static WindowManager instance;
@@ -16,12 +17,32 @@ public class WindowManager: MonoBehaviour
     public float2 sizeVisualize;
     public float3 originVisualize;
 
+
+    public float3 currentorigin;
+    public float2 currentsize;
+    
+    public void Update()
+    {
+       if (_DrawRect)
+      {
+            //Debug.Log("???");
+            DrawRect(originCreate, sizeCreate, colorCreate);
+            DrawRect(originBase, sizeBase, colorDestroy);
+            DrawRect(originVisualize, sizeVisualize, colorVisualize);
+       }
+
+        if (!currentorigin.Equals(originVisualize) || !currentsize.Equals(sizeVisualize))
+        {
+            SetWindow(currentorigin, currentsize);
+        }
+    }
+
     public void Awake()
     {
         if(instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
+           // DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -40,7 +61,7 @@ public class WindowManager: MonoBehaviour
 
         window.originCreate = origin - (2*aux);
         window.sizeCreate = size + new float2(4f, 4f);
-
+        //Debug.Log("testeteste");
 
         window.originBase = origin - (4 * aux);
         window.sizeBase = size + new float2(8f, 8f);
@@ -105,6 +126,25 @@ public class WindowManager: MonoBehaviour
         return CheckRectangle(pos, instance.originVisualize, instance.sizeVisualize);
     }
 
+
+
+    #region DebugVisualization
+    public bool _DrawRect = true;
+    public Color colorCreate;
+    public Color colorDestroy;
+    public Color colorVisualize;
+
+    public void DrawRect(float3 origin, float2 size, Color color)
+    {
+        //Debug.Log("LeroLero" + origin + size);
+
+        Debug.DrawLine(origin, new float3(origin.x + size.x, origin.y, origin.z), color);   
+        Debug.DrawLine(new float3(origin.x + size.x, origin.y, origin.z), new float3(origin.x + size.x, origin.y + size.y, origin.z), color);
+        Debug.DrawLine(new float3(origin.x + size.x, origin.y + size.y, origin.z), new float3(origin.x, origin.y + size.y, origin.z), color);
+        Debug.DrawLine(origin, new float3(origin.x, origin.y + size.y, origin.z), color);
+
+    }
+    #endregion
 
 
 }
