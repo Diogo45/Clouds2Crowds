@@ -32,12 +32,20 @@ namespace BioCrowds
     [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystem : JobComponentSystem
     {
+
+        private int qtdMarkers = 0;
+
         [Inject] private MarkerBarrier m_SpawnerBarrier;
 
 
         [Inject] public CellTagSystem CellTagSystem;
 
         public NativeMultiHashMap<int, float3> AgentMarkers;
+
+        public struct AgentGroup
+        {
+            [ReadOnly] public ComponentDataArray<AgentData> Agents;
+        }
 
         public struct MarkerGroup
         {
@@ -49,7 +57,7 @@ namespace BioCrowds
             [ReadOnly] public readonly int Length;
         }
         [Inject] MarkerGroup markerGroup;
-
+        [Inject] AgentGroup agentGroup;
 
         struct TakeMarkers : IJobParallelFor
         {
@@ -134,11 +142,18 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            AgentMarkers.Clear();
 
 
-            int qtdAgents = Settings.agentQuantity;
 
+            if(AgentMarkers.Capacity < agentGroup.Agents.Length * qtdMarkers * 4)
+            {
+                AgentMarkers.Dispose();
+                AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.TempJob);
+            }
+            else
+                AgentMarkers.Clear();
+
+            
             TakeMarkers takeMarkersJob = new TakeMarkers
             {
                 AgentIDToPos = CellTagSystem.AgentIDToPos,
@@ -149,14 +164,15 @@ namespace BioCrowds
                 //Entities = markerGroup.Entities,
                 //CommandBuffer = m_SpawnerBarrier.CreateCommandBuffer().ToConcurrent()
             };
-
-
-            var takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, Settings.BatchSize, inputDeps);
-            takeMakersHandle.Complete();
-
-
-
-            return takeMakersHandle;
+            
+            //if (CellTagSystem.AgentIDToPos.IsCreated)
+           // {
+                JobHandle takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, Settings.BatchSize, inputDeps);
+                takeMakersHandle.Complete();
+                return takeMakersHandle;
+           // }
+            
+           // return inputDeps;
         }
 
 
@@ -165,9 +181,9 @@ namespace BioCrowds
             UpdateInjectedComponentGroups();
             int qtdAgents = Settings.agentQuantity;
             float densityToQtd = Settings.instance.MarkerDensity / Mathf.Pow(Settings.instance.markerRadius, 2f);
-            int qtdMarkers = Mathf.FloorToInt(densityToQtd);
+            qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
-            AgentMarkers = new NativeMultiHashMap<int, float3>(qtdAgents * qtdMarkers * 4, Allocator.TempJob);
+            AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.TempJob);
 
         }
 

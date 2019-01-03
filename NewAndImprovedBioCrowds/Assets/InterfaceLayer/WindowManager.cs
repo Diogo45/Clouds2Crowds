@@ -18,8 +18,6 @@ public class WindowManager: MonoBehaviour
     public float3 originVisualize;
 
 
-    public float3 currentorigin;
-    public float2 currentsize;
     
     public void Update()
     {
@@ -31,9 +29,10 @@ public class WindowManager: MonoBehaviour
             DrawRect(originVisualize, sizeVisualize, colorVisualize);
        }
 
-        if (!currentorigin.Equals(originVisualize) || !currentsize.Equals(sizeVisualize))
+       
+        if (!gameObject.transform.position.Equals(originBase) || !gameObject.transform.localScale.Equals(sizeBase))
         {
-            SetWindow(currentorigin, currentsize);
+            SetWindow(gameObject.transform.position, gameObject.transform.localScale);
         }
     }
 
@@ -51,20 +50,25 @@ public class WindowManager: MonoBehaviour
         }
     }
 
-    public static void SetWindow(float3 origin, float2 size)
+    public static void SetWindow(float3 origin, float3 size)
     {
-        WindowManager window = instance;
-        window.originVisualize = origin;
-        window.sizeVisualize = size;
-
+        float2 f2size = new float2(size.x, size.y);
         float3 aux = new float3(1f, 1f, 0f);
 
-        window.originCreate = origin - (2*aux);
-        window.sizeCreate = size + new float2(4f, 4f);
+        WindowManager window = instance;
+
+        window.originBase = origin;// - (4 * aux);
+        window.sizeBase = f2size;// + new float2(8f, 8f);
+
+        window.originVisualize = origin + (4 * aux);  ;
+        window.sizeVisualize = f2size - new float2(8f, 8f);
+
+
+        window.originCreate = origin + (2*aux);
+        window.sizeCreate = f2size - new float2(4f, 4f);
         //Debug.Log("testeteste");
 
-        window.originBase = origin - (4 * aux);
-        window.sizeBase = size + new float2(8f, 8f);
+
 
 
     }
@@ -86,9 +90,9 @@ public class WindowManager: MonoBehaviour
     {
 
         return pos.x > origin.x             &&
-               pos.x < origin.x - size.x    &&
+               pos.x < origin.x + size.x    &&
                pos.y > origin.y             && 
-               pos.y < origin.y - size.y;
+               pos.y < origin.y + size.y;
     }
 
     /// <summary>
@@ -101,6 +105,7 @@ public class WindowManager: MonoBehaviour
         WindowManager window = instance;
         return CheckRectangle(pos, instance.originBase, instance.sizeBase) &&
                (!CheckRectangle(pos, instance.originCreate, instance.sizeCreate));
+        //return !CheckRectangle(pos, instance.originCreate, instance.sizeCreate);
     }
 
     /// <summary>
@@ -114,7 +119,7 @@ public class WindowManager: MonoBehaviour
         return CheckRectangle(pos, instance.originCreate, instance.sizeCreate) &&
                (!CheckRectangle(pos, instance.originVisualize, instance.sizeVisualize));
     }
-
+    
     /// <summary>
     /// Checks if a Cloud-coordinate position is in a Visualization zone.
     /// </summary>

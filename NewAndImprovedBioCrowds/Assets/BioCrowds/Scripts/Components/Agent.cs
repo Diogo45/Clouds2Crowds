@@ -108,8 +108,16 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            //int qtdAgts = Settings.agentQuantity;
+            if (AgentIDToPos.Capacity < agentGroup.Length)
+            {
+                AgentIDToPos.Dispose();
+                AgentIDToPos = new NativeHashMap<int, float3>(agentGroup.Length * 2, Allocator.Persistent);
+            }
+            else
+                AgentIDToPos.Clear();
+
             CellToMarkedAgents.Clear();
-            AgentIDToPos.Clear();
 
 
             MapCellToAgents mapCellToAgentsJob = new MapCellToAgents
@@ -133,12 +141,13 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
             int qtdAgts = Settings.agentQuantity;
+            //TODO dynamize
             CellToMarkedAgents = new NativeMultiHashMap<int3, int>(160000, Allocator.Persistent);
 
             AgentIDToPos = new NativeHashMap<int, float3>(qtdAgts * 2, Allocator.Persistent);
         }
 
-        protected override void OnDestroyManager()
+        protected override void OnStopRunning()
         {
             CellToMarkedAgents.Dispose();
             AgentIDToPos.Dispose();
@@ -148,6 +157,7 @@ namespace BioCrowds
 
     public class MarkerSystemGroup { }
 
+    [UpdateAfter(typeof(MarkerSystemGroup))]
     public class MarkerSystemView : ComponentSystem
     {
 
@@ -218,7 +228,16 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            AgentTotalMarkerWeight.Clear();
+
+            if(AgentTotalMarkerWeight.Capacity < agentGroup.Length * 2)
+            {
+                AgentTotalMarkerWeight.Dispose();
+                AgentTotalMarkerWeight = new NativeHashMap<int, float>(agentGroup.Length * 2, Allocator.Persistent);
+            }
+            else
+                AgentTotalMarkerWeight.Clear();
+
+            if (!MarkerSystem.AgentMarkers.IsCreated) return inputDeps;
 
             ComputeTotalMarkerWeight computeJob = new ComputeTotalMarkerWeight()
             {
@@ -394,7 +413,114 @@ namespace BioCrowds
 
     }
 
+    [UpdateAfter(typeof(AgentMovementSystem)), UpdateBefore(typeof(EndFrameBarrier))]
+    public class VisualizeAgents: ComponentSystem {
 
+        public int times = 0;
+
+        public struct AgentGroup
+        {
+            public ComponentDataArray<Position> Position;
+            [ReadOnly] public ComponentDataArray<AgentData> Data;
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] public AgentGroup agentGroup;
+        [Inject] public MoveBackSystem m_move_back;
+
+        public struct MoveAgentsToWindow : IJobParallelFor
+        {
+            public ComponentDataArray<Position> Position;
+
+
+            public void Execute(int index)
+            {
+                float3 crowdPos = Position[index].Value;
+                float3 cloudPos = WindowManager.Crowds2Clouds(crowdPos);
+                Position[index] = new Position { Value = cloudPos };
+
+                //Debug.Log("Pos1: " + crowdPos + cloudPos);
+
+            }
+        }
+
+
+        protected override void OnUpdate()
+        {
+            if (!(m_move_back.times == times)) return;
+            for(int i = 0; i < agentGroup.Length; i++)
+            {
+                float3 crowdPos = agentGroup.Position[i].Value;
+                float3 cloudPos = WindowManager.Crowds2Clouds(crowdPos);
+                //agentGroup.Position[i] = new Position { Value = cloudPos };
+                //Debug.Log(crowdPos +" " +  cloudPos);
+            }
+            Debug.Log("blah");
+            times ++;
+
+            //var MoveAgentsHandle = MoveAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            //MoveAgentsHandle.Complete();
+            //return MoveAgentsHandle;
+
+        }
+
+    }
+
+    [UpdateBefore(typeof(CellTagSystem))]
+    public class MoveBackSystem : ComponentSystem
+    {
+        public int times = 0;
+        public struct AgentGroup
+        {
+            public ComponentDataArray<Position> Position;
+            [ReadOnly] public ComponentDataArray<AgentData> Data;
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] public AgentGroup agentGroup;
+        [Inject] public VisualizeAgents m_visu_system;
+        public struct MoveBack : IJobParallelFor
+        {
+            public ComponentDataArray<Position> Position;
+
+
+            public void Execute(int index)
+            {
+                float3 crowdPos = Position[index].Value;
+                float3 cloudPos = WindowManager.Clouds2Crowds(crowdPos);
+                
+                Position[index] = new Position { Value = cloudPos };
+                //Debug.Log("Pos2: " + crowdPos + cloudPos);
+
+            }
+        }
+
+
+        protected override void OnUpdate()
+        {
+            if (!(m_visu_system.times - 1 == times)) return;
+
+            times++;
+
+            //var MoveAgentsJob = new MoveBack
+            //{
+            //    Position = agentGroup.Position
+            //};
+
+            //var MoveAgentsHandle = MoveAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            // MoveAgentsHandle.Complete();
+
+            //return MoveAgentsHandle;
+
+            for (int i = 0; i < agentGroup.Length; i++)
+            {
+                float3 crowdPos = agentGroup.Position[i].Value;
+                float3 cloudPos = WindowManager.Clouds2Crowds(crowdPos);
+                //agentGroup.Position[i] = new Position { Value = cloudPos };
+                //Debug.Log("2" + crowdPos + " " + cloudPos);
+            }
+            Debug.Log("bleh");
+
+        }
+    }
 
 
 

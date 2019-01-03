@@ -17,20 +17,14 @@ public struct AgentCloudID : ISharedComponentData
 [UpdateAfter(typeof(BioCities.CloudHeatMap))]
 public class Clouds2CrowdsSystem : JobComponentSystem
 {
-
-   
-
-    //public static bool CheckPosition(float3 pos)
-    //{
-    //    return WindowManager.CheckCreateZone(pos) || WindowManager.CheckVisualZone(pos);
-    //}
-
-    public static bool CheckPosition(float3 pos)
+    public static bool CheckCreatePosition(float3 pos)
     {
-        return pos.x >= WindowManager.instance.originCreate.x &&
-            pos.y >= WindowManager.instance.originCreate.y &&
-            pos.x < (WindowManager.instance.originCreate.x + WindowManager.instance.sizeCreate.x) 
-            && pos.y < (WindowManager.instance.originCreate.y + WindowManager.instance.sizeCreate.y);
+        return WindowManager.CheckCreateZone(pos);
+    }
+
+    public static bool CheckDesiredPosition(float3 pos)
+    {
+        return WindowManager.CheckVisualZone(pos);
     }
 
     public NativeHashMap<int, int> CloudID2AgentInWindow;
@@ -88,7 +82,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
 
             cellCount++;
-            if(CheckPosition(currentCellPosition))
+            if(CheckDesiredPosition(currentCellPosition))
             {
                 desiredCellQnt++;
             }
@@ -96,7 +90,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
             {
                 cellCount++;
-                if (CheckPosition(currentCellPosition))
+                if (CheckDesiredPosition(currentCellPosition))
                 {
                     desiredCellQnt++;
                 }
@@ -200,7 +194,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
             //Debug.Log("PASSTOT");
 
-            if (CheckPosition(currentCellPosition))
+            if (CheckCreatePosition(currentCellPosition))
             {
                 //Debug.Log(currentCellPosition);
                 positionList.Add(currentCellPosition);
@@ -210,7 +204,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
             {
                 
-                if (CheckPosition(currentCellPosition))
+                if (CheckCreatePosition(currentCellPosition))
                 {
                     positionList.Add(currentCellPosition);
                     //Debug.Log(currentCellPosition);

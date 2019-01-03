@@ -42,33 +42,39 @@ namespace BioCrowds
         public static MeshInstanceRenderer AgentRenderer;
 
 
-        public struct CloudGroup
+        public struct CellGroup
         {
-            [ReadOnly] public ComponentDataArray<BioCities.CellData> CellData;
+            [ReadOnly] public ComponentDataArray<BioCrowds.CellName> CellName;
+            [ReadOnly] public SubtractiveComponent<BioCrowds.AgentData> Agent;
+            [ReadOnly] public SubtractiveComponent<BioCrowds.MarkerData> Marker;
+
             [ReadOnly] public readonly int Length;
         }
-        [Inject] public CloudGroup m_CloudGroup;
+        [Inject] public CellGroup m_CellGroup;
 
         public struct SpawnGroup : IJobParallelFor
         {
 
             [ReadOnly] public NativeHashMap<int, Parameters> parBuffer;
-            [ReadOnly] public ComponentDataArray<BioCities.CellData> CellData;
+            [ReadOnly] public ComponentDataArray<BioCrowds.CellName> CellName;
 
             public EntityCommandBuffer.Concurrent CommandBuffer;
 
             public void Execute(int index)
             {
                 int doNotFreeze = 0;
-                int ind = CellData[index].ID;
+
+                float3 cellPos = WindowManager.Crowds2Clouds(CellName[index].Value);
+                int ind = GridConverter.Position2CellID(cellPos);
+
                 Parameters spawnList;
                 bool keepgoing = parBuffer.TryGetValue(ind, out spawnList);
                 if(!keepgoing)
                 {
-                    Debug.Log("AAAAAAA");
+                    //Debug.Log("AAAAAAA");
                     return;
                 }
-                Debug.Log("PASSO");
+                //Debug.Log("PASSO");
                 float3 convertedOrigin = WindowManager.Clouds2Crowds(spawnList.spawnOrigin);
                 float2 dim = spawnList.spawnDimensions;
 
@@ -93,7 +99,7 @@ namespace BioCrowds
                 int CellX = minX + 1;
                 int CellZ = minZ + 1;
                 int CellY = 0;
-                //Debug.Log("CELL: " + CellX + " " + CellZ);
+                //Debug.Log("ConvertedOrigin:" + convertedOrigin + "CELL: " + CellX + " " + CellZ);
 
                 //Problema total agents
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
@@ -117,7 +123,7 @@ namespace BioCrowds
 
 
 
-                    float3 g = spawnList.goal;
+                    float3 g = WindowManager.Clouds2Crowds(spawnList.goal);
 
                     //x = UnityEngine.Random.Range(x - 0.99f, x + 0.99f);
                     //float y = 0f;
@@ -129,11 +135,11 @@ namespace BioCrowds
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
                     CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
-                    Debug.Log(maxSpeed / Settings.instance.FramesPerSecond);
+                    //Debug.Log(maxSpeed / Settings.instance.FramesPerSecond);
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed / Settings.instance.FramesPerSecond,
+                        MaxSpeed = maxSpeed,// / Settings.instance.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -210,23 +216,22 @@ namespace BioCrowds
             {
                 parBuffer = clouds2Crowds.parameterBuffer,
                 CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                CellData = m_CloudGroup.CellData
+                CellName = m_CellGroup.CellName
             };
 
 
-            var SpawnGroupHandle = SpawnGroupJob.Schedule(m_CloudGroup.Length, Settings.BatchSize, inputDeps);
+            var SpawnGroupHandle = SpawnGroupJob.Schedule(m_CellGroup.Length, Settings.BatchSize, inputDeps);
 
             SpawnGroupHandle.Complete();
 
-            for (int i = 0; i < clouds2Crowds.parameterBuffer.Length; i++)
-            {
-                Parameters par;
-                clouds2Crowds.parameterBuffer.TryGetValue(i, out par);
-                lastAgentId += par.qtdAgents;
-            }
-            Settings.agentQuantity = lastAgentId;
+            //for (int i = 0; i < clouds2Crowds.parameterBuffer.Length; i++)
+            //{
+            //    Parameters par;
+            //    clouds2Crowds.parameterBuffer.TryGetValue(i, out par);
+            //}
 
             //spawnList.Clear();
+
             return SpawnGroupHandle;
         }
 
@@ -278,10 +283,10 @@ namespace BioCrowds
                 entities = agentGroup.entities
             };
 
-            //var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-            //CheckAreaHandle.Complete();
-            //return CheckAreaHandle;
-            return inputDeps;
+            var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            CheckAreaHandle.Complete();
+            return CheckAreaHandle;
+            //return inputDeps;
             
         }
 
