@@ -142,9 +142,7 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-
-
-
+            
             if(AgentMarkers.Capacity < agentGroup.Agents.Length * qtdMarkers * 4)
             {
                 AgentMarkers.Dispose();

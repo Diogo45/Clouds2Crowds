@@ -413,114 +413,114 @@ namespace BioCrowds
 
     }
 
-    [UpdateAfter(typeof(AgentMovementSystem)), UpdateBefore(typeof(EndFrameBarrier))]
-    public class VisualizeAgents: ComponentSystem {
+    //[UpdateAfter(typeof(AgentMovementSystem)), UpdateBefore(typeof(EndFrameBarrier))]
+    //public class VisualizeAgents: ComponentSystem {
 
-        public int times = 0;
+    //    public int times = 0;
 
-        public struct AgentGroup
-        {
-            public ComponentDataArray<Position> Position;
-            [ReadOnly] public ComponentDataArray<AgentData> Data;
-            [ReadOnly] public readonly int Length;
-        }
-        [Inject] public AgentGroup agentGroup;
-        [Inject] public MoveBackSystem m_move_back;
+    //    public struct AgentGroup
+    //    {
+    //        public ComponentDataArray<Position> Position;
+    //        [ReadOnly] public ComponentDataArray<AgentData> Data;
+    //        [ReadOnly] public readonly int Length;
+    //    }
+    //    [Inject] public AgentGroup agentGroup;
+    //    [Inject] public MoveBackSystem m_move_back;
 
-        public struct MoveAgentsToWindow : IJobParallelFor
-        {
-            public ComponentDataArray<Position> Position;
-
-
-            public void Execute(int index)
-            {
-                float3 crowdPos = Position[index].Value;
-                float3 cloudPos = WindowManager.Crowds2Clouds(crowdPos);
-                Position[index] = new Position { Value = cloudPos };
-
-                //Debug.Log("Pos1: " + crowdPos + cloudPos);
-
-            }
-        }
+    //    public struct MoveAgentsToWindow : IJobParallelFor
+    //    {
+    //        public ComponentDataArray<Position> Position;
 
 
-        protected override void OnUpdate()
-        {
-            if (!(m_move_back.times == times)) return;
-            for(int i = 0; i < agentGroup.Length; i++)
-            {
-                float3 crowdPos = agentGroup.Position[i].Value;
-                float3 cloudPos = WindowManager.Crowds2Clouds(crowdPos);
-                //agentGroup.Position[i] = new Position { Value = cloudPos };
-                //Debug.Log(crowdPos +" " +  cloudPos);
-            }
-            Debug.Log("blah");
-            times ++;
+    //        public void Execute(int index)
+    //        {
+    //            float3 crowdPos = Position[index].Value;
+    //            float3 cloudPos = WindowManager.Crowds2Clouds(crowdPos);
+    //            Position[index] = new Position { Value = cloudPos };
 
-            //var MoveAgentsHandle = MoveAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-            //MoveAgentsHandle.Complete();
-            //return MoveAgentsHandle;
+    //            //Debug.Log("Pos1: " + crowdPos + cloudPos);
 
-        }
-
-    }
-
-    [UpdateBefore(typeof(CellTagSystem))]
-    public class MoveBackSystem : ComponentSystem
-    {
-        public int times = 0;
-        public struct AgentGroup
-        {
-            public ComponentDataArray<Position> Position;
-            [ReadOnly] public ComponentDataArray<AgentData> Data;
-            [ReadOnly] public readonly int Length;
-        }
-        [Inject] public AgentGroup agentGroup;
-        [Inject] public VisualizeAgents m_visu_system;
-        public struct MoveBack : IJobParallelFor
-        {
-            public ComponentDataArray<Position> Position;
+    //        }
+    //    }
 
 
-            public void Execute(int index)
-            {
-                float3 crowdPos = Position[index].Value;
-                float3 cloudPos = WindowManager.Clouds2Crowds(crowdPos);
+    //    protected override void OnUpdate()
+    //    {
+    //        if (!(m_move_back.times == times)) return;
+    //        for(int i = 0; i < agentGroup.Length; i++)
+    //        {
+    //            float3 crowdPos = agentGroup.Position[i].Value;
+    //            float3 cloudPos = WindowManager.Crowds2Clouds(crowdPos);
+    //            //agentGroup.Position[i] = new Position { Value = cloudPos };
+    //            //Debug.Log(crowdPos +" " +  cloudPos);
+    //        }
+    //        Debug.Log("blah");
+    //        times ++;
+
+    //        //var MoveAgentsHandle = MoveAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+    //        //MoveAgentsHandle.Complete();
+    //        //return MoveAgentsHandle;
+
+    //    }
+
+    //}
+
+    //[UpdateBefore(typeof(CellTagSystem))]
+    //public class MoveBackSystem : ComponentSystem
+    //{
+    //    public int times = 0;
+    //    public struct AgentGroup
+    //    {
+    //        public ComponentDataArray<Position> Position;
+    //        [ReadOnly] public ComponentDataArray<AgentData> Data;
+    //        [ReadOnly] public readonly int Length;
+    //    }
+    //    [Inject] public AgentGroup agentGroup;
+    //    [Inject] public VisualizeAgents m_visu_system;
+    //    public struct MoveBack : IJobParallelFor
+    //    {
+    //        public ComponentDataArray<Position> Position;
+
+
+    //        public void Execute(int index)
+    //        {
+    //            float3 crowdPos = Position[index].Value;
+    //            float3 cloudPos = WindowManager.Clouds2Crowds(crowdPos);
                 
-                Position[index] = new Position { Value = cloudPos };
-                //Debug.Log("Pos2: " + crowdPos + cloudPos);
+    //            Position[index] = new Position { Value = cloudPos };
+    //            //Debug.Log("Pos2: " + crowdPos + cloudPos);
 
-            }
-        }
+    //        }
+    //    }
 
 
-        protected override void OnUpdate()
-        {
-            if (!(m_visu_system.times - 1 == times)) return;
+    //    protected override void OnUpdate()
+    //    {
+    //        if (!(m_visu_system.times - 1 == times)) return;
 
-            times++;
+    //        times++;
 
-            //var MoveAgentsJob = new MoveBack
-            //{
-            //    Position = agentGroup.Position
-            //};
+    //        //var MoveAgentsJob = new MoveBack
+    //        //{
+    //        //    Position = agentGroup.Position
+    //        //};
 
-            //var MoveAgentsHandle = MoveAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-            // MoveAgentsHandle.Complete();
+    //        //var MoveAgentsHandle = MoveAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+    //        // MoveAgentsHandle.Complete();
 
-            //return MoveAgentsHandle;
+    //        //return MoveAgentsHandle;
 
-            for (int i = 0; i < agentGroup.Length; i++)
-            {
-                float3 crowdPos = agentGroup.Position[i].Value;
-                float3 cloudPos = WindowManager.Clouds2Crowds(crowdPos);
-                //agentGroup.Position[i] = new Position { Value = cloudPos };
-                //Debug.Log("2" + crowdPos + " " + cloudPos);
-            }
-            Debug.Log("bleh");
+    //        for (int i = 0; i < agentGroup.Length; i++)
+    //        {
+    //            float3 crowdPos = agentGroup.Position[i].Value;
+    //            float3 cloudPos = WindowManager.Clouds2Crowds(crowdPos);
+    //            //agentGroup.Position[i] = new Position { Value = cloudPos };
+    //            //Debug.Log("2" + crowdPos + " " + cloudPos);
+    //        }
+    //        Debug.Log("bleh");
 
-        }
-    }
+    //    }
+    //}
 
 
 

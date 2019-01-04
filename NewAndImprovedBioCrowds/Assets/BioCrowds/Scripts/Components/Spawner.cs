@@ -13,12 +13,14 @@ using System;
 
 namespace BioCrowds
 {
+    [UpdateBefore(typeof(CellTagSystem))]
+    public class SpawnerGroup { }
 
-    [UpdateAfter(typeof(AgentSpawner))]
+    [UpdateAfter(typeof(AgentSpawner)), UpdateInGroup(typeof(SpawnerGroup))]
     public class SpawnAgentBarrier : BarrierSystem { }
 
 
-    [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateBefore(typeof(CellTagSystem))]
+    [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup))]
     public class AgentSpawner : JobComponentSystem
     {
         [Inject] public SpawnAgentBarrier barrier;
@@ -186,7 +188,8 @@ namespace BioCrowds
                ComponentType.Create<AgentGoal>(),
                ComponentType.Create<NormalLifeData>(),
                ComponentType.Create<Animator>(),
-               ComponentType.Create<Counter>());
+               ComponentType.Create<Counter>());//,
+               //ComponentType.Create<Attach>());
 
 
             //spawnList[0] = new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 50, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) };
@@ -203,8 +206,6 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
-            
-
             AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
         }
 
@@ -237,6 +238,64 @@ namespace BioCrowds
 
     }
 
+    //[UpdateAfter(typeof(SpawnAgentBarrier)), UpdateInGroup(typeof(SpawnerGroup))]
+    //public class SpawnAttacherSystem : ComponentSystem
+    //{
+    //    public struct AgentGroup
+    //    {
+    //        [ReadOnly] public ComponentDataArray<Position> AgtPos;
+    //        [ReadOnly] public ComponentDataArray<AgentData> AgtData;
+    //        [ReadOnly] public SubtractiveComponent<Attached> Attached;
+    //        [ReadOnly] public EntityArray entities;
+    //        [ReadOnly] public readonly int Length;
+    //    }
+    //    [Inject] AgentGroup m_agentGroup;
+
+    //    //public Entity Window;
+
+    //    protected override void OnUpdate()
+    //    {
+    //        EntityManager entityManager =  World.Active.GetOrCreateManager<EntityManager>();
+
+    //        for(int i = 0; i < m_agentGroup.Length; i++)
+    //        {
+    //            entityManager.SetComponentData(m_agentGroup.entities[i], new Attach
+    //            {
+    //                Child = m_agentGroup.entities[i],
+    //                Parent = WindowManager.Window
+    //            });
+    //            Debug.Log("Attached");
+    //        }
+    //    }
+    //}
+
+    [UpdateAfter(typeof(SpawnAgentBarrier)), UpdateInGroup(typeof(SpawnerGroup))]
+    public class SpawnAttacherSystem : ComponentSystem
+    {
+        public struct AgentGroup
+        {
+            [ReadOnly] public ComponentDataArray<Position> AgtPos;
+            [ReadOnly] public ComponentDataArray<AgentData> AgtData;
+            [ReadOnly] public ComponentDataArray<LocalToWorld> WindowTransform;
+            [ReadOnly] public EntityArray entities;
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] AgentGroup m_agentGroup;
+
+        //public Entity Window;
+
+        protected override void OnUpdate()
+        {
+            EntityManager entityManager = World.Active.GetOrCreateManager<EntityManager>();
+
+            for (int i = 0; i < m_agentGroup.Length; i++)
+            {
+
+                //Debug.Log(m_agentGroup.WindowTransform[i].Value);
+            }
+        }
+    }
+
     [UpdateAfter(typeof(AgentDespawner))]
     public class DespawnAgentBarrier : BarrierSystem { }
 
@@ -267,8 +326,10 @@ namespace BioCrowds
             public void Execute(int index)
             {
                 float3 posCloudCoord = WindowManager.Crowds2Clouds(AgtPos[index].Value);
+                
                 if (WindowManager.CheckDestructZone(posCloudCoord))
                 {
+                    //Debug.Log(posCloudCoord);
                     CommandBuffer.DestroyEntity(index, entities[index]);
                 }
             }

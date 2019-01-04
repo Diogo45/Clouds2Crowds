@@ -35,10 +35,13 @@ namespace BioCrowds
         public static EntityArchetype CellArchetype;
         public static EntityArchetype MakerArchetype;
 
+        
         public static MeshInstanceRenderer AgentRenderer;
         public static MeshInstanceRenderer CellRenderer;
         public static MeshInstanceRenderer MarkerRenderer;
         public static Settings BioSettings;
+
+
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void Intialize()
@@ -91,10 +94,6 @@ namespace BioCrowds
             CellArchetype = entityManager.CreateArchetype(
                 ComponentType.Create<CellName>(),
                 ComponentType.Create<Position>());
-
-
-
-
 
             int qtdX = (int)(ground.terrainData.size.x / (agentRadius * 2));
             int qtdZ = (int)(ground.terrainData.size.z / (agentRadius * 2));

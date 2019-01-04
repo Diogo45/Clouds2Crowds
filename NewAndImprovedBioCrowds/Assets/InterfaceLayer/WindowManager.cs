@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using BioCrowds;
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Rendering;
+using Unity.Transforms;
+using UnityEngine;
+using Unity.Jobs;
 
 [ExecuteInEditMode]
 public class WindowManager: MonoBehaviour
@@ -17,8 +23,12 @@ public class WindowManager: MonoBehaviour
     public float2 sizeVisualize;
     public float3 originVisualize;
 
+    private EntityManager entityManager;
+    public static EntityArchetype WindowArchetype;
+    public static Entity Window;
+    private bool WindowCreated;
 
-    
+
     public void Update()
     {
        if (_DrawRect)
@@ -32,13 +42,41 @@ public class WindowManager: MonoBehaviour
        
         if (!gameObject.transform.position.Equals(originBase) || !gameObject.transform.localScale.Equals(sizeBase))
         {
+            if (!WindowCreated)
+            {
+                entityManager = World.Active.GetOrCreateManager<EntityManager>();
+
+                WindowArchetype = entityManager.CreateArchetype(
+                    ComponentType.Create<Position>(),
+                    ComponentType.Create<Rotation>());
+
+                Window = entityManager.CreateEntity(WindowArchetype);
+                Transform t = GameObject.Find("WindowManager").transform;
+                entityManager.SetComponentData(Window, new Position { Value = new float3(t.position.x, t.position.y, t.position.z) });
+                entityManager.SetComponentData(Window, new Rotation { Value = t.transform.rotation });
+                WindowCreated = true;
+            }
             SetWindow(gameObject.transform.position, gameObject.transform.localScale);
         }
     }
 
     public void Awake()
     {
-        if(instance == null)
+        if (!WindowCreated)
+        {
+            entityManager = World.Active.GetOrCreateManager<EntityManager>();
+
+            WindowArchetype = entityManager.CreateArchetype(
+                ComponentType.Create<Position>(),
+                ComponentType.Create<Rotation>());
+
+            Window = entityManager.CreateEntity(WindowArchetype);
+            Transform t = GameObject.Find("WindowManager").transform;
+            entityManager.SetComponentData(Window, new Position { Value = new float3(t.position.x, t.position.y, t.position.z) });
+            entityManager.SetComponentData(Window, new Rotation { Value = t.transform.rotation });
+            WindowCreated = true;
+        }
+        if (instance == null)
         {
             instance = this;
            // DontDestroyOnLoad(gameObject);
@@ -68,6 +106,9 @@ public class WindowManager: MonoBehaviour
         window.sizeCreate = f2size - new float2(4f, 4f);
         //Debug.Log("testeteste");
 
+        Transform t = GameObject.Find("WindowManager").transform;
+        window.entityManager.SetComponentData(Window, new Position { Value = new float3(t.position.x, t.position.y, t.position.z) });
+        window.entityManager.SetComponentData(Window, new Rotation { Value = t.transform.rotation });
 
 
 
