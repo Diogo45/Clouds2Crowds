@@ -179,7 +179,11 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             //Debug.Log("PASS2");
 
             //create um menos o outro
+            
             int agentsToCreate = desiredAgentsInWindow - agentsInWindow;
+
+            if (agentsToCreate < 0)
+                Debug.Log("DEU MEME GURIZADA");
 
             List<float3> positionList = new List<float3>();
 
@@ -219,7 +223,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                     cloud = currentCloudID,
                     goal = CloudGoal[index].SubGoal,
                     maxSpeed = CloudData[index].MaxSpeed,
-                    qtdAgents = agentsToCreate / positionList.Count,
+                    qtdAgents = (int)math.max(agentsToCreate / positionList.Count, 0f),
                     spawnDimensions = new float2 { x = 2f, y = 2f },
                     spawnOrigin = position
                 };
@@ -230,7 +234,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
         }
     }
-
+    
     protected override void OnCreateManager()
     {
         base.OnCreateManager();

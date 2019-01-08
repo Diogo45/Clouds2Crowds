@@ -23,11 +23,16 @@ namespace BioCrowds
     [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup))]
     public class AgentSpawner : JobComponentSystem
     {
+        // Holds how many agents have been spawned up to the i-th cell.
+        public NativeArray<int> AgentAtCellQuantity;
+
+
         [Inject] public SpawnAgentBarrier barrier;
         [Inject] public Clouds2CrowdsSystem clouds2Crowds;
 
 
         public int lastAgentId;
+
         public struct Parameters
         {
             public int cloud;
@@ -56,10 +61,10 @@ namespace BioCrowds
 
         public struct SpawnGroup : IJobParallelFor
         {
-
+            [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
             [ReadOnly] public NativeHashMap<int, Parameters> parBuffer;
             [ReadOnly] public ComponentDataArray<BioCrowds.CellName> CellName;
-
+            [ReadOnly] public int LastIDUsed;
             public EntityCommandBuffer.Concurrent CommandBuffer;
 
             public void Execute(int index)
@@ -89,12 +94,8 @@ namespace BioCrowds
 
                 //Debug.Log(" MAX MIN " + new int4(maxZ, minZ, maxX, minX));
 
-                int startID = 0;
-
-                for (int i = index - 1; i >= 0; i--)
-                {
-                    startID += spawnList.qtdAgents;
-                }
+                int startID = AgentAtCellQuantity[index] + LastIDUsed;
+                
 
                 System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
 
@@ -106,6 +107,8 @@ namespace BioCrowds
                 //Problema total agents
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
                 {
+
+                    //Debug.Log("Agent id : " + i);
 
                     if (doNotFreeze > qtdAgtTotal)
                     {
@@ -119,10 +122,7 @@ namespace BioCrowds
                     float y = 0;
                     //Debug.Log("AGENT: " + x + " " + z);
 
-
-
-
-
+                    
 
 
                     float3 g = WindowManager.Clouds2Crowds(spawnList.goal);
@@ -207,21 +207,49 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
             AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
+            UpdateInjectedComponentGroups();
+            AgentAtCellQuantity = new NativeArray<int>(m_CellGroup.Length, Allocator.Persistent);
+            lastAgentId = 0;
+
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+
+            //Debug.Log("agents spawned " + lastAgentId);
+            lastAgentId = AgentAtCellQuantity[AgentAtCellQuantity.Length - 1] + lastAgentId;
+
             //Debug.Log("L2 " + clouds2Crowds.parameterBuffer.Length);
+            int lastValue = 0;
+
+            //TODO make parallel
+            for (int i = 1; i < m_CellGroup.Length; i++)
+            {
+                float3 cellPos = WindowManager.Crowds2Clouds(m_CellGroup.CellName[i].Value);
+                int ind = GridConverter.Position2CellID(cellPos);
+                
+                AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
+                if (clouds2Crowds.parameterBuffer.TryGetValue(ind, out Parameters spawnList))
+                {
+                    lastValue = spawnList.qtdAgents;
+                }
+            }
+
 
             var SpawnGroupJob = new SpawnGroup
             {
                 parBuffer = clouds2Crowds.parameterBuffer,
                 CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                CellName = m_CellGroup.CellName
+                CellName = m_CellGroup.CellName,
+                AgentAtCellQuantity = AgentAtCellQuantity,
+                LastIDUsed = lastAgentId
             };
 
+            
 
             var SpawnGroupHandle = SpawnGroupJob.Schedule(m_CellGroup.Length, Settings.BatchSize, inputDeps);
+
+            
 
             SpawnGroupHandle.Complete();
 
@@ -269,32 +297,32 @@ namespace BioCrowds
     //    }
     //}
 
-    [UpdateAfter(typeof(SpawnAgentBarrier)), UpdateInGroup(typeof(SpawnerGroup))]
-    public class SpawnAttacherSystem : ComponentSystem
-    {
-        public struct AgentGroup
-        {
-            [ReadOnly] public ComponentDataArray<Position> AgtPos;
-            [ReadOnly] public ComponentDataArray<AgentData> AgtData;
-            [ReadOnly] public ComponentDataArray<LocalToWorld> WindowTransform;
-            [ReadOnly] public EntityArray entities;
-            [ReadOnly] public readonly int Length;
-        }
-        [Inject] AgentGroup m_agentGroup;
+    //[UpdateAfter(typeof(SpawnAgentBarrier)), UpdateInGroup(typeof(SpawnerGroup))]
+    //public class SpawnAttacherSystem : ComponentSystem
+    //{
+    //    public struct AgentGroup
+    //    {
+    //        [ReadOnly] public ComponentDataArray<Position> AgtPos;
+    //        [ReadOnly] public ComponentDataArray<AgentData> AgtData;
+    //        [ReadOnly] public ComponentDataArray<LocalToWorld> WindowTransform;
+    //        [ReadOnly] public EntityArray entities;
+    //        [ReadOnly] public readonly int Length;
+    //    }
+    //    [Inject] AgentGroup m_agentGroup;
 
-        //public Entity Window;
+    //    //public Entity Window;
 
-        protected override void OnUpdate()
-        {
-            EntityManager entityManager = World.Active.GetOrCreateManager<EntityManager>();
+    //    protected override void OnUpdate()
+    //    {
+    //        EntityManager entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
-            for (int i = 0; i < m_agentGroup.Length; i++)
-            {
+    //        for (int i = 0; i < m_agentGroup.Length; i++)
+    //        {
 
-                //Debug.Log(m_agentGroup.WindowTransform[i].Value);
-            }
-        }
-    }
+    //            //Debug.Log(m_agentGroup.WindowTransform[i].Value);
+    //        }
+    //    }
+    //}
 
     [UpdateAfter(typeof(AgentDespawner))]
     public class DespawnAgentBarrier : BarrierSystem { }
