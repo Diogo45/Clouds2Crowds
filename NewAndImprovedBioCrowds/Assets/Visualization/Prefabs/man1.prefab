@@ -1153,7 +1153,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4315803914999166}
   - component: {fileID: 95902618379032814}
-  - component: {fileID: 114620017136126570}
+  - component: {fileID: 114136610049229278}
   m_Layer: 0
   m_Name: man1
   m_TagString: Untagged
@@ -2242,7 +2242,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &114620017136126570
+--- !u!114 &114136610049229278
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2250,10 +2250,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1970514163579124}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4fee1a11ba2d718418e0be3339cf36af, type: 3}
+  m_Script: {fileID: 11500000, guid: 6fbce5155dd823c488376c9ae3007fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  index: -1
+  qview: []
 --- !u!137 &137041846778307106
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

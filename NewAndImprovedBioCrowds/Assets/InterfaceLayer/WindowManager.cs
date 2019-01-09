@@ -13,6 +13,8 @@ using Unity.Jobs;
 [ExecuteInEditMode]
 public class WindowManager: MonoBehaviour
 {
+    
+
     public static WindowManager instance;
     public float2 sizeCreate;
     public float3 originCreate;
@@ -34,9 +36,9 @@ public class WindowManager: MonoBehaviour
        if (_DrawRect)
       {
             //Debug.Log("???");
-            DrawRect(originCreate, sizeCreate, colorCreate);
-            DrawRect(originBase, sizeBase, colorDestroy);
-            DrawRect(originVisualize, sizeVisualize, colorVisualize);
+            DrawRect(originCreate + new float3(1.0f, 1.0f, 0.0f), sizeCreate, colorCreate);
+            DrawRect(originBase + new float3(1.0f, 1.0f, 0.0f), sizeBase, colorDestroy);
+            DrawRect(originVisualize + new float3(1.0f, 1.0f, 0.0f), sizeVisualize, colorVisualize);
        }
 
        
@@ -98,12 +100,12 @@ public class WindowManager: MonoBehaviour
         window.originBase = origin;// - (4 * aux);
         window.sizeBase = f2size;// + new float2(8f, 8f);
 
-        window.originVisualize = origin + (4 * aux);  ;
-        window.sizeVisualize = f2size - new float2(8f, 8f);
+        window.originVisualize = origin + (8 * aux);  ;
+        window.sizeVisualize = f2size - new float2(16f, 16f);
 
 
-        window.originCreate = origin + (2*aux);
-        window.sizeCreate = f2size - new float2(4f, 4f);
+        window.originCreate = origin + (4*aux);
+        window.sizeCreate = f2size - new float2(8f, 8f);
         //Debug.Log("testeteste");
 
         Transform t = GameObject.Find("WindowManager").transform;

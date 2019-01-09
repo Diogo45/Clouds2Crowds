@@ -30,6 +30,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     public NativeHashMap<int, int> CloudID2AgentInWindow;
     public NativeHashMap<int, int> DesiredCloudID2AgentInWindow;
     public NativeHashMap<int, BioCrowds.AgentSpawner.Parameters> parameterBuffer;
+    public NativeHashMap<int, int> SpawnedAgentsInFrame;
+    public NativeHashMap<int, int> TotalSpawnedAgentsPerCloud;
 
     public struct CloudDataGroup 
     {
@@ -101,7 +103,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             {
                 //Debug.Log("DESIRED2");
 
-                int agentQuantity = (int)(desiredCellQnt * cloudDensity);
+                int agentQuantity = (int)(desiredCellQnt * cloudDensity * BioCities.Parameters.Instance.CellArea);
                 desiredQuantity.TryAdd(currentCloudData.ID, agentQuantity);
             }
 
@@ -180,7 +182,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
             //create um menos o outro
             
-            int agentsToCreate = desiredAgentsInWindow - agentsInWindow;
+            int agentsToCreate = (int)math.max(desiredAgentsInWindow - agentsInWindow, 0f);
 
             if (agentsToCreate < 0)
                 Debug.Log("DEU MEME GURIZADA");
@@ -234,8 +236,23 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
         }
     }
-    
-    protected override void OnCreateManager()
+
+    struct CloudAgentAccumulator : IJobParallelFor
+    {
+
+        [ReadOnly] public NativeHashMap<int, int> AddedAgentsInFrame;
+        [NativeDisableParallelForRestriction]
+        public NativeHashMap<int, int> TotalAgents;
+        
+
+        public void Execute(int index)
+        {
+            
+        }
+
+    }
+
+        protected override void OnCreateManager()
     {
         base.OnCreateManager();
 

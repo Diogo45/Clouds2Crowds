@@ -20,7 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4813918819965812}
   - component: {fileID: 95218978055184978}
-  - component: {fileID: 114234565086623994}
+  - component: {fileID: 114836800181562252}
   m_Layer: 0
   m_Name: woman1
   m_TagString: Untagged
@@ -2212,7 +2212,7 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &114234565086623994
+--- !u!114 &114836800181562252
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2220,10 +2220,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1029930110499214}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4fee1a11ba2d718418e0be3339cf36af, type: 3}
+  m_Script: {fileID: 11500000, guid: 6fbce5155dd823c488376c9ae3007fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  index: -1
+  qview: []
 --- !u!137 &137146154990974034
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
