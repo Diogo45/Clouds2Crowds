@@ -45,6 +45,8 @@ namespace BioCrowds
         public struct AgentGroup
         {
             [ReadOnly] public ComponentDataArray<AgentData> Agents;
+            [ReadOnly] public readonly int Length;
+
         }
 
         public struct MarkerGroup
@@ -66,7 +68,6 @@ namespace BioCrowds
             [ReadOnly] public NativeMultiHashMap<int3, int> cellToAgent;
             //public EntityCommandBuffer.Concurrent CommandBuffer;
             //[ReadOnly] public EntityArray Entities;
-
             [ReadOnly] public ComponentDataArray<CellName> MarkerCell;
             [ReadOnly] public ComponentDataArray<Position> MarkerPos;
 
@@ -159,6 +160,7 @@ namespace BioCrowds
                 cellToAgent = CellTagSystem.CellToMarkedAgents,
                 MarkerCell = markerGroup.MarkerCell,
                 MarkerPos = markerGroup.Position
+                
                 //Entities = markerGroup.Entities,
                 //CommandBuffer = m_SpawnerBarrier.CreateCommandBuffer().ToConcurrent()
             };

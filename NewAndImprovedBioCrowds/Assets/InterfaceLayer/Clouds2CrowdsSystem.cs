@@ -252,7 +252,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
     }
 
-        protected override void OnCreateManager()
+    protected override void OnCreateManager()
     {
         base.OnCreateManager();
 

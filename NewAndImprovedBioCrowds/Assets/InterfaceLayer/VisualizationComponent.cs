@@ -21,7 +21,7 @@ public class VisualizationComponent : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        Debug.Log(VisualizationSystem.CurrentAgentPositions);
+        //Debug.Log(VisualizationSystem.CurrentAgentPositions);
 
         foreach(VisualizationSystem.AgentRecord ar in VisualizationSystem.CurrentAgentPositions)
         {
