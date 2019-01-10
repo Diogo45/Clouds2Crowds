@@ -9,8 +9,65 @@ using Unity.Jobs;
 using Unity.Burst;
 using BioCrowds;
 
-[UpdateAfter(typeof(AgentMovementSystem))]
+public struct BioCrowdsAnchor : IComponentData
+{
+    public float3 Pivot;
+}
 
+public class BioCrowdsPivotCorrectonatorSystemDeluxe : JobComponentSystem
+{
+    private float3 currentPivot;
+    private bool dirtyFlag;
+
+    public void PivotChange(float3 newPivot)
+    {
+        currentPivot = newPivot;
+        dirtyFlag = true;
+    }
+    public struct AnchorCorrectGroup
+    {
+        public ComponentDataArray<Position> Position;
+        public ComponentDataArray<BioCrowdsAnchor> Pivot;
+        [ReadOnly] public readonly int Length;
+    };
+
+    [Inject]public AnchorCorrectGroup m_AnchorGroup;
+    
+    public struct PositionCorrectonatorJob : IJobParallelFor
+    {
+        public ComponentDataArray<Position> Position;
+        public ComponentDataArray<BioCrowdsAnchor> Pivot;
+        [ReadOnly] public float3 newPivot;
+
+        public void Execute(int index)
+        {
+            float3 oldPos = Position[index].Value;
+            float3 oldPivot = Pivot[index].Pivot;
+
+            Position[index] = new Position { Value = WindowManager.ChangePivot(oldPos, oldPivot, newPivot) };
+            Pivot[index] = new BioCrowdsAnchor { Pivot = newPivot };
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        if (!dirtyFlag)
+            return inputDeps;
+
+        var job = new PositionCorrectonatorJob
+        {
+            Position = m_AnchorGroup.Position,
+            Pivot = m_AnchorGroup.Pivot,
+            newPivot = currentPivot
+        };
+
+        var jobHandle = job.Schedule(m_AnchorGroup.Length, 1, inputDeps);
+        dirtyFlag = false;
+        return jobHandle;
+    }
+}
+
+[UpdateAfter(typeof(AgentMovementSystem))]
 public class VisualizationSystem : ComponentSystem
 {
     [System.Serializable]

@@ -10,6 +10,8 @@ public class VisualizationComponent : MonoBehaviour {
     VisualizationSystem VisualizationSystem;
     public Dictionary<int,VisualAgent> agentList;
     public List<GameObject> agentPrefabs;
+    
+
 
 	// Use this for initialization
 	void Start ()

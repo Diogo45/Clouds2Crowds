@@ -105,7 +105,8 @@ namespace BioCities
                                                               typeof(Rotation),
                                                               typeof(CloudData),
                                                               typeof(CloudGoal),
-                                                              typeof(CloudMoveStep));
+                                                              typeof(CloudMoveStep),
+                                                              typeof(SpawnedAgentsCounter));
 
             city.CellArchetype = city.BioEntityManager.CreateArchetype(typeof(Position),
                                                   typeof(Rotation),
@@ -251,6 +252,7 @@ namespace BioCities
             entityManager.SetComponentData<CloudGoal>(newCloud, new CloudGoal { SubGoal = goal, EndGoal = goal });
             entityManager.SetComponentData<CloudMoveStep>(newCloud, new CloudMoveStep { Delta = float3.zero});
             entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType]);
+            entityManager.SetComponentData<SpawnedAgentsCounter>(newCloud, new SpawnedAgentsCounter { Quantity = 0 });
 
         }
 

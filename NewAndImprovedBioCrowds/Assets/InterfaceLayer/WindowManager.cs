@@ -13,7 +13,7 @@ using Unity.Jobs;
 [ExecuteInEditMode]
 public class WindowManager: MonoBehaviour
 {
-    
+    public static Transform transform;
 
     public static WindowManager instance;
     public float2 sizeCreate;
@@ -30,19 +30,42 @@ public class WindowManager: MonoBehaviour
     public static Entity Window;
     private bool WindowCreated;
 
+    [SerializeField]
+    private float2 testSize;
+    [SerializeField]
+    private float3 testPos;
 
-    public void Update()
+
+
+    BioCrowdsPivotCorrectonatorSystemDeluxe PivotSystem;
+
+    public void ChangeVisualizationPivot(Vector3 newPivot)
     {
-       if (_DrawRect)
-      {
-            //Debug.Log("???");
-            DrawRect(originCreate + new float3(1.0f, 1.0f, 0.0f), sizeCreate, colorCreate);
-            DrawRect(originBase + new float3(1.0f, 1.0f, 0.0f), sizeBase, colorDestroy);
-            DrawRect(originVisualize + new float3(1.0f, 1.0f, 0.0f), sizeVisualize, colorVisualize);
-       }
+        PivotSystem.PivotChange(newPivot);
+    }
 
-       
-        if (!gameObject.transform.position.Equals(originBase) || !gameObject.transform.localScale.Equals(sizeBase))
+    private float3 SnapPos2Grid(float3 pos)
+    {
+        pos = math.floor(pos);
+        pos.x = pos.x - pos.x % 2;
+        pos.y = pos.y - pos.y % 2;
+        return pos;
+    }
+
+    private float2 SnapSize2Grid(float3 size)
+    {
+        size = math.floor(size);
+        size.x = size.x - size.x % 2 + 1;
+        size.y = size.y - size.y % 2 + 1;
+        return new float2(size.x, size.y);
+    }
+
+    public void LateUpdate()
+    {
+        testSize = SnapSize2Grid(gameObject.transform.localScale);
+        testPos = SnapPos2Grid(gameObject.transform.position);
+
+        if (!SnapPos2Grid(gameObject.transform.position).Equals(originBase) || !SnapSize2Grid(gameObject.transform.localScale).Equals(sizeBase))
         {
             if (!WindowCreated)
             {
@@ -58,12 +81,27 @@ public class WindowManager: MonoBehaviour
                 entityManager.SetComponentData(Window, new Rotation { Value = t.transform.rotation });
                 WindowCreated = true;
             }
-            SetWindow(gameObject.transform.position, gameObject.transform.localScale);
+            SetWindow(SnapPos2Grid(gameObject.transform.position), SnapSize2Grid(gameObject.transform.localScale));
         }
+    }
+
+    public void Update()
+    {
+       if (_DrawRect)
+      {
+            //Debug.Log("???");
+            DrawRect(originCreate + new float3(1.0f, 1.0f, 0.0f), sizeCreate, colorCreate);
+            DrawRect(originBase + new float3(1.0f, 1.0f, 0.0f), sizeBase, colorDestroy);
+            DrawRect(originVisualize + new float3(1.0f, 1.0f, 0.0f), sizeVisualize, colorVisualize);
+       }
+       
     }
 
     public void Awake()
     {
+        World activeWorld = World.Active;
+        PivotSystem = activeWorld.GetExistingManager<BioCrowdsPivotCorrectonatorSystemDeluxe>();
+
         if (!WindowCreated)
         {
             entityManager = World.Active.GetOrCreateManager<EntityManager>();
@@ -90,7 +128,7 @@ public class WindowManager: MonoBehaviour
         }
     }
 
-    public static void SetWindow(float3 origin, float3 size)
+    public static void SetWindow(float3 origin, float2 size)
     {
         float2 f2size = new float2(size.x, size.y);
         float3 aux = new float3(1f, 1f, 0f);
@@ -108,25 +146,46 @@ public class WindowManager: MonoBehaviour
         window.sizeCreate = f2size - new float2(8f, 8f);
         //Debug.Log("testeteste");
 
-        Transform t = GameObject.Find("WindowManager").transform;
-        window.entityManager.SetComponentData(Window, new Position { Value = new float3(t.position.x, t.position.y, t.position.z) });
-        window.entityManager.SetComponentData(Window, new Rotation { Value = t.transform.rotation });
+        if(transform == null)
+            transform = GameObject.Find("WindowManager").transform;
 
+        window.entityManager.SetComponentData(Window, new Position { Value = new float3(transform.position.x, transform.position.y, transform.position.z) });
+        window.entityManager.SetComponentData(Window, new Rotation { Value = transform.transform.rotation });
 
+        instance.ChangeVisualizationPivot(window.originBase);
 
+    }
+
+    public static float3 SubtractPivot(float3 pos, float3 pivot)
+    {
+        float3 auxPos = pos - pivot;
+        return new float3(auxPos.x, auxPos.z, auxPos.y);
+    }
+
+    public static float3 AddPivot(float3 pos, float3 pivot)
+    {
+        float3 auxPos = new float3(pos.x, pos.z, pos.y);
+        return auxPos + pivot;
+    }
+
+    public static float3 ChangePivot(float3 pos, float3 oldPivot, float3 newPivot)
+    {
+        SubtractPivot(pos, oldPivot);
+        return AddPivot(pos, newPivot);
     }
 
     public static float3 Clouds2Crowds(float3 pos)
     {
-        float3 auxPos = pos - instance.originBase;
-        return new float3(auxPos.x, auxPos.z, auxPos.y);
+        return (SubtractPivot(pos, instance.originBase));
+        //float3 auxPos = pos - instance.originBase;
+        //return new float3(auxPos.x, auxPos.z, auxPos.y);
     }
 
     public static float3 Crowds2Clouds(float3 pos)
     {
-        float3 auxPos = new float3(pos.x, pos.z, pos.y);
-        return auxPos + instance.originBase;
-
+        return AddPivot(pos, instance.originBase);
+        //float3 auxPos = new float3(pos.x, pos.z, pos.y);
+        //return auxPos + instance.originBase;
     }
 
     private static bool CheckRectangle(float3 pos, float3 origin, float2 size)

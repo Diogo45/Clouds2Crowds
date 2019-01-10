@@ -75,6 +75,7 @@ public class VisualAgent : MonoBehaviour {
 
     }
 
+    //podia ser um setter né
     public void SetCurrPosition(float3 pos)
     {
         currPosition = new Vector3(pos.x, pos.y, pos.z);

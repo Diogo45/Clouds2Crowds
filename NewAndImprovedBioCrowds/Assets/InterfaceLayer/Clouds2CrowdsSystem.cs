@@ -9,6 +9,12 @@ using Unity.Jobs;
 using Unity.Burst;
 
 
+public struct SpawnedAgentsCounter : IComponentData
+{
+    public int Quantity;
+}
+
+
 public struct AgentCloudID : ISharedComponentData
 {
     public int CloudID;
@@ -30,11 +36,12 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     public NativeHashMap<int, int> CloudID2AgentInWindow;
     public NativeHashMap<int, int> DesiredCloudID2AgentInWindow;
     public NativeHashMap<int, BioCrowds.AgentSpawner.Parameters> parameterBuffer;
-    public NativeHashMap<int, int> SpawnedAgentsInFrame;
-    public NativeHashMap<int, int> TotalSpawnedAgentsPerCloud;
+
+    public NativeMultiHashMap<int, int> SpawnedAgentsInFrame;
 
     public struct CloudDataGroup 
     {
+        public ComponentDataArray<SpawnedAgentsCounter> SpawnedAgents;
         [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
         [ReadOnly] public ComponentDataArray<BioCities.CloudGoal> CloudGoal;
         [ReadOnly] public ComponentDataArray<Position> Position;
@@ -153,9 +160,12 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     {
         [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
         [ReadOnly] public ComponentDataArray<BioCities.CloudGoal> CloudGoal;
+        [ReadOnly] public ComponentDataArray<SpawnedAgentsCounter> Counter;
 
         [ReadOnly] public NativeHashMap<int, int> CloudID2AgentInWindow;
         [ReadOnly] public NativeHashMap<int, int> DesiredCloudID2AgentInWindow;
+        [WriteOnly] public NativeMultiHashMap<int, int>.Concurrent AddedAgentsPerCloud;
+
         [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
 
         [WriteOnly] public NativeHashMap<int, BioCrowds.AgentSpawner.Parameters>.Concurrent buffer;
@@ -184,8 +194,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             
             int agentsToCreate = (int)math.max(desiredAgentsInWindow - agentsInWindow, 0f);
 
-            if (agentsToCreate < 0)
-                Debug.Log("DEU MEME GURIZADA");
+            //if (agentsToCreate < 0)
+            //    Debug.Log("DEU MEME GURIZADA");
 
             List<float3> positionList = new List<float3>();
 
@@ -217,6 +227,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                 }
             }
 
+            agentsToCreate = math.min(CloudData[index].AgentQuantity - Counter[index].Quantity, agentsToCreate);
+
             foreach(float3 position in positionList)
             {
                 //create agent
@@ -232,6 +244,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                 //Debug.Log("CREATE AGENT " + currentCloudID);
 
                 buffer.TryAdd(GridConverter.Position2CellID(position), par);
+                AddedAgentsPerCloud.Add(currentCloudID, par.qtdAgents);
             }
 
         }
@@ -240,14 +253,27 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     struct CloudAgentAccumulator : IJobParallelFor
     {
 
-        [ReadOnly] public NativeHashMap<int, int> AddedAgentsInFrame;
-        [NativeDisableParallelForRestriction]
-        public NativeHashMap<int, int> TotalAgents;
-        
+        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
+        [ReadOnly] public NativeMultiHashMap<int, int> AddedAgentsInFramePerCloud;
+        public ComponentDataArray<SpawnedAgentsCounter> Counter;
 
         public void Execute(int index)
         {
-            
+            int count = Counter[index].Quantity;
+
+            NativeMultiHashMapIterator<int> it;
+
+            int quantity;
+            if (AddedAgentsInFramePerCloud.TryGetFirstValue(CloudData[index].ID, out quantity, out it))
+            {
+                count += quantity;
+
+                while (AddedAgentsInFramePerCloud.TryGetNextValue(out quantity, ref it))
+                {
+                    count += quantity;
+                }
+            }
+            Counter[index] = new SpawnedAgentsCounter { Quantity = count };
         }
 
     }
@@ -260,6 +286,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
         DesiredCloudID2AgentInWindow = new NativeHashMap<int, int>(m_CloudDataGroup.Length * 2, Allocator.Persistent);
         parameterBuffer = new NativeHashMap<int, BioCrowds.AgentSpawner.Parameters>(80000, Allocator.Persistent); //TODO make dynamic
 
+        SpawnedAgentsInFrame =new NativeMultiHashMap<int, int>(80000, Allocator.Persistent);
+
     }
 
     protected override void OnDestroyManager()
@@ -268,6 +296,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
         CloudID2AgentInWindow.Dispose();
         DesiredCloudID2AgentInWindow.Dispose();
         parameterBuffer.Dispose();
+        SpawnedAgentsInFrame.Dispose();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -287,6 +316,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
         }
 
         parameterBuffer.Clear();
+        SpawnedAgentsInFrame.Clear();
 
         var cg = ComponentGroups[m_AgentDataGroup.GroupIndex];
 
@@ -336,17 +366,29 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             CloudGoal = m_CloudDataGroup.CloudGoal,
             CloudID2AgentInWindow = CloudID2AgentInWindow,
             CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
-            DesiredCloudID2AgentInWindow = DesiredCloudID2AgentInWindow
+            DesiredCloudID2AgentInWindow = DesiredCloudID2AgentInWindow,
+            AddedAgentsPerCloud = SpawnedAgentsInFrame.ToConcurrent(),
+            Counter = m_CloudDataGroup.SpawnedAgents
         };
 
         var diffJobHandle = differenceJob.Schedule(m_CloudDataGroup.Length, 1, inputDeps);
 
         diffJobHandle.Complete();
 
+
+        CloudAgentAccumulator accumulatorJob = new CloudAgentAccumulator
+        {
+            AddedAgentsInFramePerCloud = SpawnedAgentsInFrame,
+            Counter = m_CloudDataGroup.SpawnedAgents,
+            CloudData = m_CloudDataGroup.CloudData
+        };
+
+        var accumJobHandle = accumulatorJob.Schedule(m_CloudDataGroup.Length, 1, diffJobHandle);
+
         //Debug.Log("L1 " + parameterBuffer.Length);
 
 
-        return diffJobHandle;
+        return accumJobHandle;
     }
 
 }
