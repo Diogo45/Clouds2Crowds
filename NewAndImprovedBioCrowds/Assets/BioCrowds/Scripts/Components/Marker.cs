@@ -152,7 +152,13 @@ namespace BioCrowds
             else
                 AgentMarkers.Clear();
 
-            
+
+            if (!CellTagSystem.AgentIDToPos.IsCreated)
+            {
+                return inputDeps;
+            }
+
+
             TakeMarkers takeMarkersJob = new TakeMarkers
             {
                 AgentIDToPos = CellTagSystem.AgentIDToPos,
