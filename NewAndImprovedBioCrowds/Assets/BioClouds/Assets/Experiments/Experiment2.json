@@ -14,7 +14,7 @@
     "Region": [ 0.0, 150.0, 50.0, 150.0 ],
     "Quantity": 1,
     "CloudSize": 200,
-    "PreferredDensity": 2,
+    "PreferredDensity": 0.5,
     "RadiusChangeSpeed": 0.2
   },
   {
@@ -23,7 +23,7 @@
     "Region": [ 250.0, 150.0, 300.0, 150.0 ],
     "Quantity": 1,
     "CloudSize": 200,
-    "PreferredDensity": 2,
+    "PreferredDensity": 0.5,
     "RadiusChangeSpeed": 0.2
   }
 ]

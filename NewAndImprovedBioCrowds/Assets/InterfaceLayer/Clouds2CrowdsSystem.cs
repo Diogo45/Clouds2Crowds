@@ -229,7 +229,15 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
             agentsToCreate = math.min(CloudData[index].AgentQuantity - Counter[index].Quantity, agentsToCreate);
 
-            foreach(float3 position in positionList)
+            
+
+            int spawnPerCell = (int)math.max(math.ceil((float)agentsToCreate / positionList.Count), 0f);
+
+            int spawned = 0;
+
+
+
+            foreach (float3 position in positionList)
             {
                 //create agent
                 BioCrowds.AgentSpawner.Parameters par = new BioCrowds.AgentSpawner.Parameters
@@ -237,7 +245,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                     cloud = currentCloudID,
                     goal = CloudGoal[index].SubGoal,
                     maxSpeed = CloudData[index].MaxSpeed,
-                    qtdAgents = (int)math.max(agentsToCreate / positionList.Count, 0f),
+                    qtdAgents = math.min(agentsToCreate-spawned, spawnPerCell),
                     spawnDimensions = new float2 { x = 2f, y = 2f },
                     spawnOrigin = position
                 };
@@ -245,7 +253,9 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
                 buffer.TryAdd(GridConverter.Position2CellID(position), par);
                 AddedAgentsPerCloud.Add(currentCloudID, par.qtdAgents);
+                spawned += par.qtdAgents;
             }
+            Debug.Log("Agents to create: " + agentsToCreate + " , spawnPerCell: " + spawnPerCell + " , positions: " + positionList.Count + " , spawned: " + spawned);
 
         }
     }

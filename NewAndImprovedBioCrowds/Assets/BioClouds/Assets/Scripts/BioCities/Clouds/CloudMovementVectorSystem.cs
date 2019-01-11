@@ -66,7 +66,8 @@ namespace BioCities
                 if (useSplit)
                     if(ExtraWeightCell.TryGetValue(CloudData[index].ID, out int extraweightcell))
                         if (GridConverter.Position2CellID(currentCellPosition) == extraweightcell)
-                            direction += auxinWeight;
+                            //TODO dynamic extra weight
+                            direction += 5 * auxinWeight;
 
 
 

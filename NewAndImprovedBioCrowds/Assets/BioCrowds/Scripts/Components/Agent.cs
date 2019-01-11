@@ -357,6 +357,8 @@ namespace BioCrowds
                 AgentMarkersMap = markerSystem.AgentMarkers
             };
 
+            Debug.Log("AgentCount: " + agentGroup.Length);
+
             var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
 
             calculateMoveStepDeps.Complete();

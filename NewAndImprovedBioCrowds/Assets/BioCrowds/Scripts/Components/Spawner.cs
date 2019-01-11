@@ -16,11 +16,11 @@ namespace BioCrowds
     [UpdateBefore(typeof(CellTagSystem))]
     public class SpawnerGroup { }
 
-    [UpdateAfter(typeof(AgentSpawner)), UpdateInGroup(typeof(SpawnerGroup))]
+    [UpdateAfter(typeof(AgentSpawner)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class SpawnAgentBarrier : BarrierSystem { }
 
 
-    [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup))]
+    [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class AgentSpawner : JobComponentSystem
     {
         // Holds how many agents have been spawned up to the i-th cell.
@@ -141,7 +141,7 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed + (maxSpeed * (float)(r.NextDouble() * 0.2f)-0.1f),// / Settings.instance.FramesPerSecond,
+                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.3f),// / Settings.instance.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
