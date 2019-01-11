@@ -141,7 +141,7 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed + (float)(r.NextDouble() * 0.2f - 0.1f),// / Settings.instance.FramesPerSecond,
+                        MaxSpeed = maxSpeed + (maxSpeed * (float)(r.NextDouble() * 0.2f)-0.1f),// / Settings.instance.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep

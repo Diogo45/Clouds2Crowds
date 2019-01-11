@@ -30,7 +30,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
     public static bool CheckDesiredPosition(float3 pos)
     {
-        return WindowManager.CheckVisualZone(pos);
+        return WindowManager.CheckCreateZone(pos) || WindowManager.CheckVisualZone(pos);
     }
 
     public NativeHashMap<int, int> CloudID2AgentInWindow;

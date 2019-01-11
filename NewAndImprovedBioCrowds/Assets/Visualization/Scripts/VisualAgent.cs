@@ -76,11 +76,14 @@ public class VisualAgent : MonoBehaviour {
     }
 
     //podia ser um setter né
-    public void SetCurrPosition(float3 pos)
+    public float3 CurrPosition
     {
-        currPosition = new Vector3(pos.x, pos.y, pos.z);
-        updated = true;
+        get { return currPosition; }
+        set { updated = true;
+            currPosition = new Vector3(value.x, value.y, value.z); }
     }
+
+
     public void Initialize(float3 pos)
     {
         transform.Rotate(Vector3.right,-90) ;

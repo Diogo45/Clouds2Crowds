@@ -13,7 +13,7 @@ public struct BioCrowdsAnchor : IComponentData
 {
     public float3 Pivot;
 }
-
+[UpdateAfter(typeof(BioCrowds.AgentMovementSystem))]
 public class BioCrowdsPivotCorrectonatorSystemDeluxe : JobComponentSystem
 {
     private float3 currentPivot;
@@ -44,7 +44,11 @@ public class BioCrowdsPivotCorrectonatorSystemDeluxe : JobComponentSystem
             float3 oldPos = Position[index].Value;
             float3 oldPivot = Pivot[index].Pivot;
 
-            Position[index] = new Position { Value = WindowManager.ChangePivot(oldPos, oldPivot, newPivot) };
+            float3 newPos = WindowManager.ChangePivot(oldPos, oldPivot, newPivot);
+
+            //Debug.Log("Pivots : " + newPivot + oldPivot + " Positions: " + oldPos + newPos);
+
+            Position[index] = new Position { Value = newPos };
             Pivot[index] = new BioCrowdsAnchor { Pivot = newPivot };
         }
     }

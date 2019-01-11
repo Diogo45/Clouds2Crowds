@@ -170,8 +170,8 @@ public class WindowManager: MonoBehaviour
 
     public static float3 ChangePivot(float3 pos, float3 oldPivot, float3 newPivot)
     {
-        SubtractPivot(pos, oldPivot);
-        return AddPivot(pos, newPivot);
+        float3 auxPos = AddPivot(pos, oldPivot);
+        return SubtractPivot(auxPos, newPivot);
     }
 
     public static float3 Clouds2Crowds(float3 pos)
@@ -205,8 +205,9 @@ public class WindowManager: MonoBehaviour
     public static bool CheckDestructZone(float3 pos)
     {
         WindowManager window = instance;
-        return CheckRectangle(pos, instance.originBase, instance.sizeBase) &&
-               (!CheckRectangle(pos, instance.originCreate, instance.sizeCreate));
+        return !CheckCreateZone(pos) && !CheckVisualZone(pos);
+        //return CheckRectangle(pos, instance.originBase, instance.sizeBase) &&
+        //       (!CheckRectangle(pos, instance.originCreate, instance.sizeCreate));
         //return !CheckRectangle(pos, instance.originCreate, instance.sizeCreate);
     }
 

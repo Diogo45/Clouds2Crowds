@@ -10,7 +10,7 @@ public class VisualizationComponent : MonoBehaviour {
     VisualizationSystem VisualizationSystem;
     public Dictionary<int,VisualAgent> agentList;
     public List<GameObject> agentPrefabs;
-    
+    int previousFrame = -1;
 
 
 	// Use this for initialization
@@ -25,11 +25,16 @@ public class VisualizationComponent : MonoBehaviour {
 	void Update () {
         //Debug.Log(VisualizationSystem.CurrentAgentPositions);
 
-        foreach(VisualizationSystem.AgentRecord ar in VisualizationSystem.CurrentAgentPositions)
+        int currentFrame = VisualizationSystem.CurrentFrame;
+
+        if (currentFrame == previousFrame) return;
+
+        foreach (VisualizationSystem.AgentRecord ar in VisualizationSystem.CurrentAgentPositions)
         {
             if (agentList.ContainsKey(ar.AgentID))
             {
-                agentList[ar.AgentID].SetCurrPosition(ar.Position);
+                
+                agentList[ar.AgentID].CurrPosition = (ar.Position);
             }
             else
             {
@@ -37,10 +42,12 @@ public class VisualizationComponent : MonoBehaviour {
                 var va = agnt.GetComponent<VisualAgent>();
                 agentList.Add(ar.AgentID, va);
                 va.Initialize(ar.Position);
-                va.SetCurrPosition(ar.Position);
+                va.CurrPosition = (ar.Position);
             }
 
         }
+
+        previousFrame = currentFrame;
 
 	}
 }
