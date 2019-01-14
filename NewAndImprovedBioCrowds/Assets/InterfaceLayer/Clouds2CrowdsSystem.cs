@@ -255,7 +255,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                 AddedAgentsPerCloud.Add(currentCloudID, par.qtdAgents);
                 spawned += par.qtdAgents;
             }
-            Debug.Log("Agents to create: " + agentsToCreate + " , spawnPerCell: " + spawnPerCell + " , positions: " + positionList.Count + " , spawned: " + spawned);
+            //Debug.Log("Agents to create: " + agentsToCreate + " , spawnPerCell: " + spawnPerCell + " , positions: " + positionList.Count + " , spawned: " + spawned);
 
         }
     }

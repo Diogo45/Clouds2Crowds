@@ -16,23 +16,23 @@ namespace BioCities
     [UpdateAfter(typeof(CloudCellTagSystem))]
     public class CellMarkSystem : JobComponentSystem
     {
-
         
-
         struct DoublePosition
         {
             public float3 pos1;
             public float3 pos2;
         }
 
-        //Data structure sizes
-        int lastsize_cloudID2MarkedCellsMap;
-
-
 
         //Holds the positions of eac tagged cell. Paired with the indexed cloud vector.
         //public NativeArray<float3> taggedCellPositions;
         public NativeMultiHashMap<int, float3> cloudID2MarkedCellsMap;
+        //Data structure sizes
+        int lastsize_cloudID2MarkedCellsMap;
+
+
+        public NativeHashMap<int, int> Cell2OwningCloud;
+        int lastsize_cell2owningcloud;
 
         //Debug
         //private NativeQueue<DoublePosition> auxDraw;
@@ -71,6 +71,9 @@ namespace BioCities
             [ReadOnly] public Parameters.DistanceFunction DistanceFunction;
             //[WriteOnly] public NativeQueue<DoublePosition>.Concurrent aux_draw;
 
+
+            //Cell 2 Cloud Map
+            [WriteOnly] public NativeHashMap<int, int>.Concurrent Cell2OwnCloud;
 
 
 
@@ -170,6 +173,7 @@ namespace BioCities
                 if (closestId == -1)
                     return;
 
+                Cell2OwnCloud.TryAdd(cellId, closestId);
                 cloudID2MarkedCellsMap.Add(closestId, Position[cellGroupIndex].Value);
             }
         }
@@ -179,6 +183,8 @@ namespace BioCities
         {
             cloudID2MarkedCellsMap.Dispose();
 
+            Cell2OwningCloud.Dispose();
+
             //auxDraw.Dispose();
         }
         protected override void OnStartRunning()
@@ -186,7 +192,9 @@ namespace BioCities
 
             cloudID2MarkedCellsMap = new NativeMultiHashMap<int, float3>(0, Allocator.Persistent);
             lastsize_cloudID2MarkedCellsMap = 0;
-            
+
+            Cell2OwningCloud = new NativeHashMap<int, int>(0, Allocator.Persistent);
+            lastsize_cell2owningcloud = 0;
 
             //Debug
             //auxDraw = new NativeQueue<DoublePosition>(Allocator.TempJob);
@@ -212,6 +220,16 @@ namespace BioCities
 
             lastsize_cloudID2MarkedCellsMap = mapsizeupd;
 
+            if(lastsize_cell2owningcloud != m_MarkedCellsgGroup.Length)
+            {
+                Cell2OwningCloud = new NativeHashMap<int, int>(m_MarkedCellsgGroup.Length, Allocator.Persistent);
+                lastsize_cell2owningcloud = m_MarkedCellsgGroup.Length;
+            }
+            else
+            {
+                Cell2OwningCloud.Clear();
+            }
+
             //auxDraw = new NativeQueue<DoublePosition>(Allocator.TempJob);
 
             MarkCellsNotifyAgentsJob markCellsJob = new MarkCellsNotifyAgentsJob()
@@ -221,7 +239,8 @@ namespace BioCities
                 cloudIDPositions = m_cloudCellTagsSystem.cloudIDPositions,
                 cellTagMap = m_cloudCellTagsSystem.cellTagMap,
                 CellData = m_MarkedCellsgGroup.Cell,
-                DistanceFunction = Parameters.Instance.DistanceFunctionToUse
+                DistanceFunction = Parameters.Instance.DistanceFunctionToUse,
+                Cell2OwnCloud = Cell2OwningCloud.ToConcurrent()
 
             };
 
