@@ -35,7 +35,10 @@ public class WindowManager: MonoBehaviour
     [SerializeField]
     private float3 testPos;
 
+    public bool FollowMouse;
+    public Camera cam;
 
+    public GameObject[] quads;
 
     BioCrowdsPivotCorrectonatorSystemDeluxe PivotSystem;
 
@@ -82,6 +85,14 @@ public class WindowManager: MonoBehaviour
                 WindowCreated = true;
             }
             SetWindow(SnapPos2Grid(gameObject.transform.position), SnapSize2Grid(gameObject.transform.localScale));
+
+            quads[0].transform.localScale = new Vector3(sizeVisualize.x , sizeVisualize.y , 1f);
+            quads[1].transform.localScale = new Vector3(sizeCreate.x, sizeCreate.y , 1f);
+            quads[2].transform.localScale = new Vector3(sizeBase.x , sizeBase.y , 1f);
+
+            quads[0].transform.localPosition = new Vector3(originVisualize.x + quads[0].transform.localScale.x/ 2f + 1f, originVisualize.y + quads[0].transform.localScale.y / 2f + 1f,  quads[0].transform.localPosition.z);
+            quads[1].transform.localPosition = new Vector3(originCreate.x + quads[1].transform.localScale.x / 2f + 1f, originCreate.y + quads[1].transform.localScale.y / 2f + 1f, quads[1].transform.localPosition.z);
+            quads[2].transform.localPosition = new Vector3(originBase.x + quads[2].transform.localScale.x / 2f + 1f, originBase.y + quads[2].transform.localScale.y / 2f + 1f, quads[2].transform.localPosition.z);
         }
     }
 
@@ -94,14 +105,25 @@ public class WindowManager: MonoBehaviour
             DrawRect(originBase + new float3(1.0f, 1.0f, 0.0f), sizeBase, colorDestroy);
             DrawRect(originVisualize + new float3(1.0f, 1.0f, 0.0f), sizeVisualize, colorVisualize);
        }
-       
+
+        if (Application.isPlaying)
+        {
+            if (Input.GetMouseButton(0))
+            {
+                RaycastHit hit;
+                Ray r = cam.ScreenPointToRay(Input.mousePosition);
+                Physics.Raycast(r, out hit);
+                Vector3 newPos = new Vector3(hit.point.x, hit.point.y, 0f);
+                transform.position = newPos;
+            }
+        }
     }
 
     public void Awake()
     {
         World activeWorld = World.Active;
         PivotSystem = activeWorld.GetExistingManager<BioCrowdsPivotCorrectonatorSystemDeluxe>();
-
+        transform = gameObject.transform;
         if (!WindowCreated)
         {
             entityManager = World.Active.GetOrCreateManager<EntityManager>();
@@ -154,6 +176,7 @@ public class WindowManager: MonoBehaviour
 
         instance.ChangeVisualizationPivot(window.originBase);
 
+        dirtyMesh = true;
     }
 
     public static float3 SubtractPivot(float3 pos, float3 pivot)
@@ -241,15 +264,60 @@ public class WindowManager: MonoBehaviour
     public Color colorCreate;
     public Color colorDestroy;
     public Color colorVisualize;
+    public Material LineMaterial;
+
+    private Mesh cachedMesh;
+    private static bool dirtyMesh = true;
+
+    public void DrawLine(float3 origin, float3 dest, float width, Color color)
+    {
+        float3 widthVec = Vector3.Cross(Vector3.forward, dest - origin).normalized;
+        float3 parallel = math.normalize(dest - origin);
+
+        if (dirtyMesh)
+        {
+            Mesh m = new Mesh();
+            m.vertices = new Vector3[]
+            {
+            (origin - parallel * width *0.5f) - 0.5f * widthVec * width,
+            (origin - parallel * width *0.5f) + 0.5f * width * widthVec,
+            (dest + parallel * width *0.5f) + 0.5f * width * widthVec,
+            (dest + parallel * width *0.5f) - 0.5f * widthVec * width
+            };
+
+            m.colors = new Color[m.vertices.Length];
+            for (int i = 0; i < m.vertices.Length; i++)
+            {
+                m.colors[i] = color;
+            }
+
+            m.triangles = new int[6] { 0, 1, 2, 2, 3, 0 };
+            cachedMesh = m;
+            //Debug.Log(m);
+        }
+
+        Graphics.DrawMesh(cachedMesh, Vector3.zero, quaternion.identity, LineMaterial, 0);
+    }
 
     public void DrawRect(float3 origin, float2 size, Color color)
     {
         //Debug.Log("LeroLero" + origin + size);
 
-        Debug.DrawLine(origin, new float3(origin.x + size.x, origin.y, origin.z), color);   
-        Debug.DrawLine(new float3(origin.x + size.x, origin.y, origin.z), new float3(origin.x + size.x, origin.y + size.y, origin.z), color);
-        Debug.DrawLine(new float3(origin.x + size.x, origin.y + size.y, origin.z), new float3(origin.x, origin.y + size.y, origin.z), color);
-        Debug.DrawLine(origin, new float3(origin.x, origin.y + size.y, origin.z), color);
+        //if (Application.isPlaying)
+        //{
+        //    DrawLine(origin, new float3(origin.x + size.x, origin.y, origin.z), 0.5f, color);
+        //    DrawLine(new float3(origin.x + size.x, origin.y, origin.z), new float3(origin.x + size.x, origin.y + size.y, origin.z), 0.5f, color);
+        //    DrawLine(new float3(origin.x + size.x, origin.y + size.y, origin.z), new float3(origin.x, origin.y + size.y, origin.z), 0.5f, color);
+        //    DrawLine(origin, new float3(origin.x, origin.y + size.y, origin.z), 0.5f, color);
+        //}
+        //else
+        //{
+            Debug.DrawLine(origin, new float3(origin.x + size.x, origin.y, origin.z), color);
+            Debug.DrawLine(new float3(origin.x + size.x, origin.y, origin.z), new float3(origin.x + size.x, origin.y + size.y, origin.z), color);
+            Debug.DrawLine(new float3(origin.x + size.x, origin.y + size.y, origin.z), new float3(origin.x, origin.y + size.y, origin.z), color);
+            Debug.DrawLine(origin, new float3(origin.x, origin.y + size.y, origin.z), color);
+        //}
+
 
     }
     #endregion

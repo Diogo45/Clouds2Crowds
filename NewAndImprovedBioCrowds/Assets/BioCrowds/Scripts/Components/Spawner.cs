@@ -131,8 +131,7 @@ namespace BioCrowds
                     //float y = 0f;
                     //z = UnityEngine.Random.Range(z - 0.99f, z + 0.99f);
 
-
-
+                    
 
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
