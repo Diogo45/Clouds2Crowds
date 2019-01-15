@@ -109,7 +109,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             if (cloudDensities.TryGetValue(currentCloudData.ID, out cloudDensity))
             {
                 //Debug.Log("DESIRED2");
-
+                //Debug.Log(cloudDensity);
                 int agentQuantity = (int)(desiredCellQnt * cloudDensity * BioCities.Parameters.Instance.CellArea);
                 desiredQuantity.TryAdd(currentCloudData.ID, agentQuantity);
             }
@@ -193,7 +193,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             //create um menos o outro
             
             int agentsToCreate = (int)math.max(desiredAgentsInWindow - agentsInWindow, 0f);
-
+            //Debug.Log(agentsToCreate);
             //if (agentsToCreate < 0)
             //    Debug.Log("DEU MEME GURIZADA");
 
@@ -236,16 +236,18 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             int spawned = 0;
 
 
-
-            foreach (float3 position in positionList)
+            //Random Distribution
+            System.Random r = new System.Random(System.DateTime.UtcNow.Millisecond);
+            while (agentsToCreate - spawned > 0)
             {
+                float3 position = positionList[r.Next(positionList.Count - 1)];
                 //create agent
                 BioCrowds.AgentSpawner.Parameters par = new BioCrowds.AgentSpawner.Parameters
                 {
                     cloud = currentCloudID,
                     goal = CloudGoal[index].SubGoal,
                     maxSpeed = CloudData[index].MaxSpeed,
-                    qtdAgents = math.min(agentsToCreate-spawned, spawnPerCell),
+                    qtdAgents = math.min(agentsToCreate - spawned, spawnPerCell),
                     spawnDimensions = new float2 { x = 2f, y = 2f },
                     spawnOrigin = position
                 };
@@ -255,6 +257,26 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                 AddedAgentsPerCloud.Add(currentCloudID, par.qtdAgents);
                 spawned += par.qtdAgents;
             }
+
+            //Uniform distribution
+            //foreach (float3 position in positionList)
+            //{
+            //    //create agent
+            //    BioCrowds.AgentSpawner.Parameters par = new BioCrowds.AgentSpawner.Parameters
+            //    {
+            //        cloud = currentCloudID,
+            //        goal = CloudGoal[index].SubGoal,
+            //        maxSpeed = CloudData[index].MaxSpeed,
+            //        qtdAgents = math.min(agentsToCreate-spawned, spawnPerCell),
+            //        spawnDimensions = new float2 { x = 2f, y = 2f },
+            //        spawnOrigin = position
+            //    };
+            //    //Debug.Log("CREATE AGENT " + currentCloudID);
+
+            //    buffer.TryAdd(GridConverter.Position2CellID(position), par);
+            //    AddedAgentsPerCloud.Add(currentCloudID, par.qtdAgents);
+            //    spawned += par.qtdAgents;
+            //}
             //Debug.Log("Agents to create: " + agentsToCreate + " , spawnPerCell: " + spawnPerCell + " , positions: " + positionList.Count + " , spawned: " + spawned);
 
         }
@@ -394,10 +416,13 @@ public class Clouds2CrowdsSystem : JobComponentSystem
         };
 
         var accumJobHandle = accumulatorJob.Schedule(m_CloudDataGroup.Length, 1, diffJobHandle);
-
+        accumJobHandle.Complete();
         //Debug.Log("L1 " + parameterBuffer.Length);
 
-
+        //for(int i = 0; i < m_CloudDataGroup.Length; i++)
+        //{
+        //    Debug.Log("Spawned Agents in Cloud" + m_CloudDataGroup.CloudData[i].ID + " : " + m_CloudDataGroup.SpawnedAgents[i].Quantity);
+        //}
         return accumJobHandle;
     }
 

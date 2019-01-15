@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311992, g: 0.38074034, b: 0.35872713, a: 1}
+  m_IndirectSpecularColor: {r: 0.3731194, g: 0.38074005, b: 0.3587271, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -160,12 +160,12 @@ Prefab:
     - target: {fileID: 114556887650857184, guid: d6a2ed25cbc4b3c4ba556ee33978d45b,
         type: 2}
       propertyPath: ExperimentPath
-      value: Assets/BioClouds/Assets/Experiments/Experiment2.json
+      value: BioClouds/Assets/Experiments/Experiment2-2.json
       objectReference: {fileID: 0}
     - target: {fileID: 114556887650857184, guid: d6a2ed25cbc4b3c4ba556ee33978d45b,
         type: 2}
       propertyPath: enableCloudSplitSystem
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4389777017469948, guid: d6a2ed25cbc4b3c4ba556ee33978d45b, type: 2}
       propertyPath: m_LocalPosition.x
@@ -333,7 +333,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4143314520976698, guid: 1072cbd4c39e4da40acdfbda78b323ba, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 132
+      value: 117
       objectReference: {fileID: 0}
     - target: {fileID: 4143314520976698, guid: 1072cbd4c39e4da40acdfbda78b323ba, type: 2}
       propertyPath: m_LocalPosition.z
@@ -481,11 +481,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4143314520976698, guid: 1072cbd4c39e4da40acdfbda78b323ba, type: 2}
       propertyPath: m_LocalScale.x
-      value: 33.8
+      value: 40.1
       objectReference: {fileID: 0}
     - target: {fileID: 4143314520976698, guid: 1072cbd4c39e4da40acdfbda78b323ba, type: 2}
       propertyPath: m_LocalScale.y
-      value: 33.4
+      value: 68.25
       objectReference: {fileID: 0}
     - target: {fileID: 114480936154713886, guid: 1072cbd4c39e4da40acdfbda78b323ba,
         type: 2}

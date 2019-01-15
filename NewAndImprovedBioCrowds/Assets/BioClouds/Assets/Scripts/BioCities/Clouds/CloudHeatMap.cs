@@ -176,6 +176,10 @@ namespace BioCities {
                 cloudDensities.Dispose();
                 cloudDensities = new NativeHashMap<int, float>(m_CloudDataGroup.Length, Allocator.Persistent);
             }
+            else
+            {
+                cloudDensities.Clear();
+            }
 
             int aux = (int)(math.ceil(inst.CloudMaxRadius * 2 / inst.CellWidth));
             int size_quads = aux * aux * m_CloudDataGroup.Length;

@@ -141,7 +141,7 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.3f),// / Settings.instance.FramesPerSecond,
+                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.2f),// / Settings.instance.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -351,7 +351,7 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<Position> AgtPos;
             [ReadOnly] public EntityArray entities;
             public EntityCommandBuffer.Concurrent CommandBuffer;
-
+            //[WriteOnly] public NativeQueue<int>.Concurrent destroyedAgents;
 
             public void Execute(int index)
             {
@@ -361,21 +361,28 @@ namespace BioCrowds
                 {
                     //Debug.Log(posCloudCoord);
                     CommandBuffer.DestroyEntity(index, entities[index]);
+                    //destroyedAgents.Enqueue(entities[index].Index);
                 }
             }
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            //NativeQueue<int> q = new NativeQueue<int>(Allocator.TempJob);
+
             var CheckArea = new CheckAreas
             {
                 AgtPos = agentGroup.AgtPos,
                 CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                entities = agentGroup.entities
+                entities = agentGroup.entities//,
+                //destroyedAgents = q.ToConcurrent()
             };
 
             var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
             CheckAreaHandle.Complete();
+
+            //Debug.Log("DestroyedAgents : " + q.Count);
+            //q.Dispose();
             return CheckAreaHandle;
             //return inputDeps;
             
