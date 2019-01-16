@@ -23,9 +23,20 @@ public struct AgentCloudID : ISharedComponentData
 [UpdateAfter(typeof(BioCities.CloudHeatMap))]
 public class Clouds2CrowdsSystem : JobComponentSystem
 {
+    private static bool _ChangedWindow;
+    private static void ChangedWindow(float3 newPosition, float2 newSize)
+    {
+        _ChangedWindow = true;
+    }
+
+
+
     public static bool CheckCreatePosition(float3 pos)
     {
-        return WindowManager.CheckCreateZone(pos);
+        if(_ChangedWindow)
+            return CheckDesiredPosition(pos);
+        else
+            return WindowManager.CheckCreateZone(pos);
     }
 
     public static bool CheckDesiredPosition(float3 pos)
@@ -310,6 +321,32 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
     }
 
+    struct ResetCloudAccumulator : IJobParallelFor
+    {
+
+        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
+        [ReadOnly] public NativeHashMap<int, int> AgentsPerCloud;
+        public ComponentDataArray<SpawnedAgentsCounter> Counter;
+
+        public void Execute(int index)
+        {
+            int count = Counter[index].Quantity;
+            
+
+            int quantity;
+            if (AgentsPerCloud.TryGetValue(CloudData[index].ID, out quantity))
+            {
+                count = quantity;
+            }
+            else
+            {
+                count = 0;
+            }
+            Counter[index] = new SpawnedAgentsCounter { Quantity = count };
+        }
+
+    }
+
     protected override void OnCreateManager()
     {
         base.OnCreateManager();
@@ -319,6 +356,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
         parameterBuffer = new NativeHashMap<int, BioCrowds.AgentSpawner.Parameters>(80000, Allocator.Persistent); //TODO make dynamic
 
         SpawnedAgentsInFrame =new NativeMultiHashMap<int, int>(80000, Allocator.Persistent);
+        WindowManager.MovedWindow += ChangedWindow;
 
     }
 
@@ -368,14 +406,28 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             //};
 
             //jobs[i] = newAreajob.Schedule(m_CloudDataGroup.Length, 1, inputDeps);
-
-            CloudID2AgentInWindow.TryAdd(i, cg.CalculateLength());
+            int quantity = cg.CalculateLength();
+            //Debug.Log("Cloud " + i + " has " + quantity + " agents");
+            CloudID2AgentInWindow.TryAdd(i, quantity);
         }
 
         //for (int i = 0; i < m_CloudDataGroup.Length; i++)
         //{
         //    jobs[i].Complete();
         //}
+
+        if (_ChangedWindow)
+        {
+            var resetAcummulators = new ResetCloudAccumulator
+            {
+                AgentsPerCloud = CloudID2AgentInWindow,
+                CloudData = m_CloudDataGroup.CloudData,
+                Counter = m_CloudDataGroup.SpawnedAgents
+            };
+
+            var resetJob = resetAcummulators.Schedule(m_CloudDataGroup.Length, 1, inputDeps);
+            resetJob.Complete();
+        }
 
 
         var desiredJob = new DesiredCloudAgent2CrowdAgentJob

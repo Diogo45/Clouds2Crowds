@@ -23,6 +23,11 @@ namespace BioCrowds
     [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class AgentSpawner : JobComponentSystem
     {
+        private bool _ChangedWindow;
+        private void ChangedWindow(float3 newPosition, float2 newSize)
+        {
+            _ChangedWindow = true;
+        }
         // Holds how many agents have been spawned up to the i-th cell.
         public NativeArray<int> AgentAtCellQuantity;
 

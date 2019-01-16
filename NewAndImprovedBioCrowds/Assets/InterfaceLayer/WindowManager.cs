@@ -42,6 +42,9 @@ public class WindowManager: MonoBehaviour
 
     BioCrowdsPivotCorrectonatorSystemDeluxe PivotSystem;
 
+    public delegate void MovedWindowEvent(float3 newPosition, float2 newSize);
+    public static event MovedWindowEvent MovedWindow;
+
     public void ChangeVisualizationPivot(Vector3 newPivot)
     {
         PivotSystem.PivotChange(newPivot);
@@ -93,6 +96,9 @@ public class WindowManager: MonoBehaviour
             quads[0].transform.localPosition = new Vector3(originVisualize.x + quads[0].transform.localScale.x/ 2f + 1f, originVisualize.y + quads[0].transform.localScale.y / 2f + 1f,  quads[0].transform.localPosition.z);
             quads[1].transform.localPosition = new Vector3(originCreate.x + quads[1].transform.localScale.x / 2f + 1f, originCreate.y + quads[1].transform.localScale.y / 2f + 1f, quads[1].transform.localPosition.z);
             quads[2].transform.localPosition = new Vector3(originBase.x + quads[2].transform.localScale.x / 2f + 1f, originBase.y + quads[2].transform.localScale.y / 2f + 1f, quads[2].transform.localPosition.z);
+
+
+
         }
     }
 
@@ -176,7 +182,9 @@ public class WindowManager: MonoBehaviour
 
         instance.ChangeVisualizationPivot(window.originBase);
 
-        dirtyMesh = true;
+
+        MovedWindow.Invoke(window.originBase, window.sizeBase);
+
     }
 
     public static float3 SubtractPivot(float3 pos, float3 pivot)
