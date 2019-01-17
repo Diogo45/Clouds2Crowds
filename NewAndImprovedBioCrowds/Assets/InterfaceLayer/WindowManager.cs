@@ -111,9 +111,17 @@ public class WindowManager: MonoBehaviour
             DrawRect(originBase + new float3(1.0f, 1.0f, 0.0f), sizeBase, colorDestroy);
             DrawRect(originVisualize + new float3(1.0f, 1.0f, 0.0f), sizeVisualize, colorVisualize);
        }
-
+        float wheelSpeed = 10f;
         if (Application.isPlaying)
         {
+            if(Input.GetAxis("Mouse ScrollWheel")!= 0f)
+            {
+                if(!cam.orthographic)
+                    cam.transform.position += (Vector3.forward * (Input.GetAxis("Mouse ScrollWheel") * wheelSpeed));
+                else
+                    cam.orthographicSize += (Input.GetAxis("Mouse ScrollWheel") * wheelSpeed);
+            }
+
             if (Input.GetMouseButton(0))
             {
                 RaycastHit hit;
