@@ -59,18 +59,18 @@ namespace BioCities {
         int lastQuantity;
         Parameters inst;
 
-        struct DeBufferQuads : IJobParallelFor
-        {
-            [WriteOnly] public ComponentDataArray<Position> QuadPositions;
-            public NativeQueue<int> quadQueue;
+        //struct DeBufferQuads : IJobParallelFor
+        //{
+        //    [WriteOnly] public ComponentDataArray<Position> QuadPositions;
+        //    public NativeQueue<int> quadQueue;
 
-            public void Execute(int index)
-            {
-                int ind = quadQueue.Dequeue();
+        //    public void Execute(int index)
+        //    {
+        //        int ind = quadQueue.Dequeue();
 
-                QuadPositions[ind] = new Position { Value = new float3(-10.0f, -10.0f, 0.0f) };
-            }
-        }
+        //        QuadPositions[ind] = new Position { Value = new float3(-10.0f, -10.0f, 0.0f) };
+        //    }
+        //}
 
         struct ClearMat : IJobParallelFor
         {
@@ -82,35 +82,35 @@ namespace BioCities {
             }
         }
         
-        struct MoveHeatMapQuads : IJobParallelFor
-        {
-            [NativeDisableParallelForRestriction] public ComponentDataArray<Position> QuadPositions;
-            [ReadOnly] public ComponentDataArray<CloudData> CloudData;
-            [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
+        //struct MoveHeatMapQuads : IJobParallelFor
+        //{
+        //    [NativeDisableParallelForRestriction] public ComponentDataArray<Position> QuadPositions;
+        //    [ReadOnly] public ComponentDataArray<CloudData> CloudData;
+        //    [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
             
 
-            public NativeArray<int> quadQuantities;
-            public NativeArray<int> quadIndexes;
+        //    public NativeArray<int> quadQuantities;
+        //    public NativeArray<int> quadIndexes;
 
 
-            public void Execute(int index)
-            {
-                float3 currentCellPosition;
+        //    public void Execute(int index)
+        //    {
+        //        float3 currentCellPosition;
 
-                NativeMultiHashMapIterator<int> it;
-                int idx = quadIndexes[index];
+        //        NativeMultiHashMapIterator<int> it;
+        //        int idx = quadIndexes[index];
 
-                if (!CloudMarkersMap.TryGetFirstValue(CloudData[index].ID, out currentCellPosition, out it))
-                    return;
+        //        if (!CloudMarkersMap.TryGetFirstValue(CloudData[index].ID, out currentCellPosition, out it))
+        //            return;
                 
-                QuadPositions[idx++] = new Position { Value = currentCellPosition };
+        //        QuadPositions[idx++] = new Position { Value = currentCellPosition };
                 
-                while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
-                //Do stuff 2
-                    QuadPositions[idx++] = new Position { Value = currentCellPosition };
+        //        while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
+        //        //Do stuff 2
+        //            QuadPositions[idx++] = new Position { Value = currentCellPosition };
 
-            }
-        }
+        //    }
+        //}
 
 
         struct FillDensityTex : IJobParallelFor
@@ -236,62 +236,7 @@ namespace BioCities {
 
             //var MoveQuadsDeps = MoveQuadsJob.Schedule(m_CloudDataGroup.Length, 64, calculateMatDeps);
 
-
-
-            //Data recording
-            #region datarecording
-            NativeMultiHashMap<int, float3> cellmap = m_CellMarkSystem.cloudID2MarkedCellsMap;
-            float3 currentCellPosition;
-            NativeMultiHashMapIterator<int> it;
-
-            if ((inst.SaveDenstiies || inst.SavePositions))
-            {
-                if (inst.MaxSimulationFrames > CurrentFrame && CurrentFrame % inst.FramesForDataSave == 0)
-                {
-                    for (int i = 0; i < m_CloudDataGroup.Length; i++)
-                    {
-                        List<int> cellIDs = new List<int>();
-
-                        if (!cellmap.TryGetFirstValue(m_CloudDataGroup.CloudData[i].ID, out currentCellPosition, out it))
-                            continue;
-                        int2 grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
-                        cellIDs.Add(GridConverter.GridCell2CellID(grid_cell));
-
-                        while (cellmap.TryGetNextValue(out currentCellPosition, ref it))
-                        {
-                            grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
-                            cellIDs.Add(GridConverter.GridCell2CellID(grid_cell));
-                        }
-
-
-                        Record record = new Record(CurrentFrame,
-                                                   m_CloudDataGroup.CloudData[i].ID,
-                                                   m_CloudDataGroup.CloudData[i].AgentQuantity,
-                                                   quadQuantities[i],
-                                                   cellIDs,
-                                                   m_CloudDataGroup.Position[i].Value
-                            );
-
-                        records.Add(record);
-                    }
-                }
-
-                if (inst.MaxSimulationFrames == CurrentFrame - 1)
-                {
-                    using (System.IO.StreamWriter file =
-                    new System.IO.StreamWriter(inst.LogFile + "Clouds.txt"))
-                    {
-                        foreach (Record record in records)
-                            file.Write(record.ToString() + '\n');
-                    }
-                }
-
-
-                CurrentFrame++;
-            }
-            #endregion
-
-
+  
             tex.SetPixels(tex_mat.ToArray());
             tex.Apply(false);
 
