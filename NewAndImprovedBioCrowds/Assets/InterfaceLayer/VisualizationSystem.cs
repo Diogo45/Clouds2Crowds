@@ -71,7 +71,7 @@ public class BioCrowdsPivotCorrectonatorSystemDeluxe : JobComponentSystem
     }
 }
 
-[UpdateAfter(typeof(AgentMovementSystem))]
+[UpdateAfter(typeof(AgentMovementSystem)), UpdateAfter(typeof(EndFrameCounter))]
 public class VisualizationSystem : ComponentSystem
 {
     [System.Serializable]
@@ -79,11 +79,13 @@ public class VisualizationSystem : ComponentSystem
     {
         public int AgentID;
         public float3 Position;
+        public int CloudID;
 
         public override string ToString()
         {
-            string head = string.Format("{0:D0};{1:F3};{2:F3};",
+            string head = string.Format("{0:D0};{1:D0};{2:F3};{3:F3};",
                 AgentID,
+                CloudID,
                 Position.x,
                 Position.y
             );
@@ -104,7 +106,7 @@ public class VisualizationSystem : ComponentSystem
                 records.Count
             );
 
-            string tail = string.Join(";", records);
+            string tail = string.Join("", records);
             return head + tail;
         }
     }
@@ -160,13 +162,17 @@ public class VisualizationSystem : ComponentSystem
         processing = aux;
 
 
+        var inst = BioCities.Parameters.Instance;
+
+        if (!inst.SavePositions)
+            return;
 
         //Data recording
         #region BioClouds Datarecording
         NativeMultiHashMap<int, float3> cellmap = m_CellMarkSystem.cloudID2MarkedCellsMap;
         float3 currentCellPosition;
         NativeMultiHashMapIterator<int> it;
-        var inst = BioCities.Parameters.Instance;
+        
         //if ((inst.SaveDenstiies || inst.SavePositions))
         //{
             if (inst.MaxSimulationFrames > CurrentFrame && CurrentFrame % inst.FramesForDataSave == 0)
@@ -238,7 +244,7 @@ public class VisualizationSystem : ComponentSystem
         new System.IO.StreamWriter(inst.LogFile + "Agents.txt", false))
         {
             file.Write("#This file stores the Agent Data for each Agent." + '\n' +
-            "#CurrentFrame;AgentsInFrame;AgentID1;AgentPosition1;AgentID2;AgentPosition2;...;" + '\n');
+            "#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;" + '\n');
         }
 
         using (System.IO.StreamWriter file =
