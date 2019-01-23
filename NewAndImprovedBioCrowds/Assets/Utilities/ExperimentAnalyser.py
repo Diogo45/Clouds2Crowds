@@ -195,7 +195,7 @@ for k in cloudDict.keys():
         dist = euclid(sortedPositions[i-1][1], sortedPositions[i][1])
 
         #print(str(sortedPositions[i][0]) + ";" + str(dist) )
-        cloudSpeedsOutput.write(str(sortedPositions[i][0]) + ";" + str(dist) )
+        cloudSpeedsOutput.write(str(sortedPositions[i][0]) + ";" + str(dist) +'\n')
 
 cloudSpeedsOutput.close()
 
@@ -224,11 +224,13 @@ for k in cloudDict.keys():
             #if agent already existed 
             if j in sortedAgentsInFrame[i-1][1]:
                 oldPos = agentDict[j].positions[previousFrame]
-                pos = agentDict[j].positions[frame] 
+                pos = agentDict[j].positions[frame]
                 dist = euclid(pos, oldPos)
                 aggregateDeltas += dist
                 counter += 1
-        
+
+        print(counter)
+
         averageSpeepdsPerCloudPerFrame[k][frame] = float(aggregateDeltas) / float(counter)
         agentSpeedOutput.write(str(frame)+';'+str(averageSpeepdsPerCloudPerFrame[k][frame])+'\n')
 
