@@ -170,7 +170,7 @@ for k in cloudDict.keys():
                     #for each cloud agent in that frame
                     for y in k2Agents:
                         #if that agent is in the cloud convex hull
-                        if cv2.pointPolygonTest(hull, (agentDict[y].positions[f])):
+                        if cv2.pointPolygonTest(hull, (agentDict[y].positions[f]), measureDist=False) >= 0:
 
                             #count it for density
                             agentPositions.append(agentDict[y].positions[f])
@@ -229,7 +229,7 @@ for k in cloudDict.keys():
                 aggregateDeltas += dist
                 counter += 1
 
-        print(counter)
+        #print(counter)
 
         averageSpeepdsPerCloudPerFrame[k][frame] = float(aggregateDeltas) / float(counter)
         agentSpeedOutput.write(str(frame)+';'+str(averageSpeepdsPerCloudPerFrame[k][frame])+'\n')

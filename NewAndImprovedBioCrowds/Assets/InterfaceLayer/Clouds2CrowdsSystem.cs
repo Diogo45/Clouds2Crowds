@@ -475,6 +475,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
         //{
         //    Debug.Log("Spawned Agents in Cloud" + m_CloudDataGroup.CloudData[i].ID + " : " + m_CloudDataGroup.SpawnedAgents[i].Quantity);
         //}
+
+        _ChangedWindow = false;
         return accumJobHandle;
     }
 

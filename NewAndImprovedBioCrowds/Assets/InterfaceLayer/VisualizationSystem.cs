@@ -126,6 +126,7 @@ public class VisualizationSystem : ComponentSystem
     {
         public ComponentDataArray<Position> Position;
         [ReadOnly] public ComponentDataArray<AgentData> Data;
+        [ReadOnly] public SharedComponentDataArray<AgentCloudID> OwnerCloud;
         [ReadOnly] public readonly int Length;
     }
     [Inject] public AgentGroup agentGroup;
@@ -152,7 +153,8 @@ public class VisualizationSystem : ComponentSystem
             processing.records.Add(new AgentRecord
             {
                 AgentID = agentGroup.Data[i].ID,
-                Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value)
+                Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
+                CloudID = agentGroup.OwnerCloud[i].CloudID
             });
             
         }
