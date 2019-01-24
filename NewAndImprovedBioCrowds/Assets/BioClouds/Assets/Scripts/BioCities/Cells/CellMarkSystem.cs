@@ -222,6 +222,7 @@ namespace BioCities
 
             if(lastsize_cell2owningcloud != m_MarkedCellsgGroup.Length)
             {
+                Cell2OwningCloud.Dispose();
                 Cell2OwningCloud = new NativeHashMap<int, int>(m_MarkedCellsgGroup.Length, Allocator.Persistent);
                 lastsize_cell2owningcloud = m_MarkedCellsgGroup.Length;
             }

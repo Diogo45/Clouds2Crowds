@@ -210,6 +210,11 @@ namespace BioCrowds
 
         }
 
+        protected override void OnStopRunning()
+        {
+            AgentAtCellQuantity.Dispose();
+        }
+
         protected override void OnStartRunning()
         {
             AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");

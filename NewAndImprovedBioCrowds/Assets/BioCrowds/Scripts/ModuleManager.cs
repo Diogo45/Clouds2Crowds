@@ -13,7 +13,7 @@ using UnityEditor;
 
 namespace BioCrowds
 {
-    
+    [UpdateBefore(typeof(CellTagSystem))]
     public class ModuleManager : ComponentSystem
     {
         
