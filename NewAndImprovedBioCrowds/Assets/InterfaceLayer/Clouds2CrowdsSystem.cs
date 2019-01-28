@@ -246,6 +246,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
             int spawned = 0;
 
+            //TODO: Fix postionList count == 0
+            if (positionList.Count <= 0) return;
 
             //Random Distribution
             System.Random r = new System.Random(System.DateTime.UtcNow.Millisecond);
