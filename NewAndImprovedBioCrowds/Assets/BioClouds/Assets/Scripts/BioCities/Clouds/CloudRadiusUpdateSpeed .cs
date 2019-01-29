@@ -13,20 +13,23 @@ namespace BioCities {
 
     [UpdateAfter(typeof(CellMarkSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
+    [UpdateAfter(typeof(CloudMovementVectorSystem))]
     public class CloudRadiusUpdateSpeed : JobComponentSystem
     {
         public struct CloudDataGroup
         {
             public ComponentDataArray<CloudData> CloudData;
+            public ComponentDataArray<CloudMoveStep> CloudStep;
             [ReadOnly] public ComponentDataArray<Position> Position;
             [ReadOnly] public readonly int Length;
         }
         [Inject] CloudDataGroup m_CloudDataGroup;
         [Inject] CellMarkSystem m_CellMarkSystem;
-        
+     
         struct CorrectRadiusJob : IJobParallelFor
         {
             public ComponentDataArray<CloudData> CloudData;
+            public ComponentDataArray<CloudMoveStep> CloudStep;
             [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
             [ReadOnly] public float CellArea;
             [ReadOnly] public float MaxRadius;
@@ -53,10 +56,18 @@ namespace BioCities {
                 float delta = cData.AgentQuantity / totalArea;
 
                 float beta = math.min((math.pow(delta,2f) / math.pow(cData.PreferredDensity,2f)), 2f);
+                //float beta = math.min(delta / cData.PreferredDensity, 2f);
                 beta = beta - 1.0f;
                 //float beta = (math.sqrt(delta) / math.sqrt(cData.PreferredDensity));
 
-                cData.Radius *= 1f + (cData.RadiusChangeSpeed * (beta));
+                //float maxChange = math.length(CloudStep[index].Delta);
+                float maxChange = cData.MaxSpeed;
+                float radiusChange = math.max(-maxChange, (math.min(maxChange, cData.RadiusChangeSpeed * (beta) * cData.Radius)));
+
+                //float radiusChange = cData.RadiusChangeSpeed * (beta);// * cData.Radius;
+
+                //cData.Radius *= 1f + cData.RadiusChangeSpeed * (beta);
+                cData.Radius += radiusChange;
 
                 CloudData[index] = cData;
 
@@ -71,6 +82,7 @@ namespace BioCities {
             {
                 CloudData = m_CloudDataGroup.CloudData,
                 CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
+                CloudStep = m_CloudDataGroup.CloudStep,
                 CellArea = Parameters.Instance.CellArea,
                 MinRadius = Parameters.Instance.CloudMinRadius,
                 MaxRadius = Parameters.Instance.CloudMaxRadius

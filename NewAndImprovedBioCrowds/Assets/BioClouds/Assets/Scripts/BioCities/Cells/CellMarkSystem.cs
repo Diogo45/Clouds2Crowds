@@ -208,9 +208,10 @@ namespace BioCities
                 total += m_cloudCellTagsSystem.tagQuantityByCloud[i];
             }
 
-            int mapsize = (int)(total + m_CloudGroup.Length);
+            int mapsize = (int)(total);//+ m_CloudGroup.Length);
             int mapsizeupd = (int)(mapsize * 1.1f);
-            if (lastsize_cloudID2MarkedCellsMap < mapsize || lastsize_cloudID2MarkedCellsMap > mapsize * 1.3f)
+            //Debug.Log("mapsizedup " + mapsizeupd + " " +  cloudID2MarkedCellsMap.Length);
+            if (cloudID2MarkedCellsMap.Length < mapsize )//|| lastsize_cloudID2MarkedCellsMap > mapsize * 1.3f)
             {
                 cloudID2MarkedCellsMap.Dispose();
                 cloudID2MarkedCellsMap = new NativeMultiHashMap<int, float3>(mapsizeupd, Allocator.Persistent);

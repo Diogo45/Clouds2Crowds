@@ -147,7 +147,7 @@ namespace BioCrowds
             if(AgentMarkers.Capacity < agentGroup.Agents.Length * qtdMarkers * 4)
             {
                 AgentMarkers.Dispose();
-                AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.TempJob);
+                AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
             }
             else
                 AgentMarkers.Clear();
@@ -189,7 +189,7 @@ namespace BioCrowds
             float densityToQtd = Settings.instance.MarkerDensity / Mathf.Pow(Settings.instance.markerRadius, 2f);
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
-            AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.TempJob);
+            AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
 
         }
 

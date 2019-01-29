@@ -29,6 +29,7 @@ public class Experiment{
     public int SeedState;
     public string RadiusUpdateType;
     public float[] Domain;
+    public int FramesToRecord;
     [SerializeField]
     public Region[] CellRegions;
     public AgentRegions[] AgentTypes;

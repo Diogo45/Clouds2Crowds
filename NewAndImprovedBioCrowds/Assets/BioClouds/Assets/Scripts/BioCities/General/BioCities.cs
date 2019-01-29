@@ -65,6 +65,11 @@ namespace BioCities
         [SerializeField]
         Experiment exp;
 
+
+        public GameObject background;
+        public GameObject densityQuad;
+        public GameObject mainCamera;
+
         //Methods
         public void Init()
         {
@@ -93,6 +98,14 @@ namespace BioCities
             city.BioParameters.DomainMinY = exp.Domain[1];
             city.BioParameters.DomainMaxX = exp.Domain[2];
             city.BioParameters.DomainMaxY = exp.Domain[3];
+
+            densityQuad.transform.position = new Vector3((exp.Domain[0] + exp.Domain[2]) / 2, (exp.Domain[1] + exp.Domain[3]) / 2, 5);
+            densityQuad.transform.localScale = new Vector3(exp.Domain[2] - exp.Domain[0], exp.Domain[3] - exp.Domain[1], 1);
+            background.transform.position = new Vector3((exp.Domain[0] + exp.Domain[2]) / 2, (exp.Domain[1] + exp.Domain[3]) / 2, 10);
+            background.transform.localScale = new Vector3(exp.Domain[2] - exp.Domain[0], exp.Domain[3] - exp.Domain[1], 1);
+            mainCamera.transform.localPosition  = new Vector3((exp.Domain[0] + exp.Domain[2]) / 2, (exp.Domain[1] + exp.Domain[3]) / 2, -15);
+
+            Parameters.Instance.MaxSimulationFrames = exp.FramesToRecord;
 
             GridConverter.Width = city.BioParameters.CellWidth;
             GridConverter.SetDomain(city.BioParameters.DomainMinX,

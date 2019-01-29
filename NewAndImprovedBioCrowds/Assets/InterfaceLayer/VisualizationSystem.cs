@@ -240,7 +240,6 @@ public class VisualizationSystem : ComponentSystem
     protected override void OnCreateManager()
     {
 
-        Debug.Log("Diabo!");
 
         base.OnCreateManager();
         var inst = BioCities.Parameters.Instance;

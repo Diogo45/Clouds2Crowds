@@ -107,14 +107,16 @@ namespace BioCities
             if (lastsize_tagQuantityByCloud != m_tagCloudGroup.Length)
             {
                 tagQuantityByCloud.Dispose();
-                tagQuantityByCloud = new NativeArray<int>(m_tagCloudGroup.Length, Allocator.Temp);
+                //tagQuantityByCloud = new NativeArray<int>(m_tagCloudGroup.Length, Allocator.Temp);
+                tagQuantityByCloud = new NativeArray<int>(m_tagCloudGroup.Length, Allocator.Persistent);
             }
             lastsize_tagQuantityByCloud = m_tagCloudGroup.Length;
 
             if (lastsize_cloudIDPositions != m_tagCloudGroup.Length)
             {
                 cloudIDPositions.Dispose();
-                cloudIDPositions = new NativeHashMap<int, CloudIDPosRadius>(m_tagCloudGroup.Length, Allocator.Temp);
+                //cloudIDPositions = new NativeHashMap<int, CloudIDPosRadius>(m_tagCloudGroup.Length, Allocator.Temp);
+                cloudIDPositions = new NativeHashMap<int, CloudIDPosRadius>(m_tagCloudGroup.Length, Allocator.Persistent);
             }
             else
                 cloudIDPositions.Clear();
@@ -156,8 +158,10 @@ namespace BioCities
             lastsize_cloudIDPositions = 0;
 
             cellTagMap = new NativeMultiHashMap<int, int>(0, Allocator.Persistent);
-            tagQuantityByCloud = new NativeArray<int>(0, Allocator.Temp);
-            cloudIDPositions = new NativeHashMap<int, CloudIDPosRadius>(0, Allocator.Temp);
+            //tagQuantityByCloud = new NativeArray<int>(0, Allocator.Temp);
+            //cloudIDPositions = new NativeHashMap<int, CloudIDPosRadius>(0, Allocator.Temp);
+            tagQuantityByCloud = new NativeArray<int>(0, Allocator.Persistent);
+            cloudIDPositions = new NativeHashMap<int, CloudIDPosRadius>(0, Allocator.Persistent);
             
 
             //Debug

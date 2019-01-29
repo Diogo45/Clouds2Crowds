@@ -118,7 +118,7 @@ namespace BioCities {
             [ReadOnly] public ComponentDataArray<CloudData> CloudData;
             [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
             [ReadOnly] public float CellArea;
-            [WriteOnly] public NativeArray<int> cloudQuadQuantity;
+            //[WriteOnly] public NativeArray<int> cloudQuadQuantity;
             [WriteOnly] public NativeHashMap<int, float>.Concurrent cloudDensities;
             [ReadOnly] public int mat_rows;
             [ReadOnly] public int mat_cols;
@@ -138,7 +138,7 @@ namespace BioCities {
                 while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
                     cellCount++;
 
-                cloudQuadQuantity[index] = cellCount;
+                //cloudQuadQuantity[index] = cellCount;
                 float totalArea = cellCount * CellArea;
                 CloudData cData = CloudData[index];
                 float delta = cData.AgentQuantity / totalArea;
@@ -184,11 +184,11 @@ namespace BioCities {
             int aux = (int)(math.ceil(inst.CloudMaxRadius * 2 / inst.CellWidth));
             int size_quads = aux * aux * m_CloudDataGroup.Length;
 
-            if (lastsize_quadQuantities != size_quads)
-            {
-                quadQuantities.Dispose();
-                quadQuantities = new NativeArray<int>(size_quads, Allocator.Persistent);
-            }
+            //if (lastsize_quadQuantities != size_quads)
+            //{
+            //    quadQuantities.Dispose();
+            //    quadQuantities = new NativeArray<int>(size_quads, Allocator.Persistent);
+            //}
             
             if(lastsize_texmat != tex_mat_row * tex_mat_col)
             {
@@ -211,7 +211,7 @@ namespace BioCities {
                 CloudData = m_CloudDataGroup.CloudData,
                 CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
                 CellArea = inst.CellArea,
-                cloudQuadQuantity = quadQuantities,
+                //cloudQuadQuantity = quadQuantities,
                 mat_cols = tex_mat_col,
                 mat_rows = tex_mat_row,
                 tex_mat =  tex_mat,
@@ -239,7 +239,8 @@ namespace BioCities {
   
             tex.SetPixels(tex_mat.ToArray());
             tex.Apply(false);
-
+            tex.filterMode = FilterMode.Point;
+            tex.wrapMode = TextureWrapMode.Clamp;
             m_QuadGroup.Renderer[0].material.SetTexture("_DensityTex", tex);    
             //m_QuadGroup.Renderer[1].material.SetTexture("_DensityTex", tex);
             //
@@ -250,7 +251,7 @@ namespace BioCities {
 
         protected override void OnDestroyManager()
         {
-            quadQuantities.Dispose();
+            //quadQuantities.Dispose();
             quadIndex.Dispose();
             tex_mat.Dispose();
             cloudDensities.Dispose();
@@ -264,15 +265,15 @@ namespace BioCities {
             lastsize_quadIndex = 0;
             lastsize_texmat = 0;
 
-            quadQuantities = new NativeArray<int>(0, Allocator.TempJob);
-            quadIndex = new NativeArray<int>(0, Allocator.TempJob);
-            cloudDensities = new NativeHashMap<int, float>(0, Allocator.TempJob);
+            //quadQuantities = new NativeArray<int>(0, Allocator.TempJob);
+            quadIndex = new NativeArray<int>(0, Allocator.Persistent);
+            cloudDensities = new NativeHashMap<int, float>(0, Allocator.Persistent);
             inst = Parameters.Instance;
             tex_mat_col = inst.Cols;
             tex_mat_row = inst.Rows;
 
             tex = new Texture2D(tex_mat_row, tex_mat_col);
-            tex_mat = new NativeArray<Color>(tex_mat_row * tex_mat_col, Allocator.TempJob);
+            tex_mat = new NativeArray<Color>(tex_mat_row * tex_mat_col, Allocator.Persistent);
             lastsize_texmat = tex_mat_row * tex_mat_col;
         }
 
