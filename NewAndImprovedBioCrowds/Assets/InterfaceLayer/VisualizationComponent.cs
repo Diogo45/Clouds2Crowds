@@ -38,7 +38,8 @@ public class VisualizationComponent : MonoBehaviour {
             }
             else
             {
-                var agnt = Instantiate(agentPrefabs[(int)Random.Range(0, agentPrefabs.Count)]);
+                //var agnt = Instantiate(agentPrefabs[(int)Random.Range(0, agentPrefabs.Count)]);
+                var agnt = Instantiate(agentPrefabs[ar.CloudID % agentPrefabs.Count]);
                 var va = agnt.GetComponent<VisualAgent>();
                 agentList.Add(ar.AgentID, va);
                 va.Initialize(ar.Position);

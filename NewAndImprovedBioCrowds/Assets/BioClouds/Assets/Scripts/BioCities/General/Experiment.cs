@@ -30,6 +30,7 @@ public class Experiment{
     public string RadiusUpdateType;
     public float[] Domain;
     public int FramesToRecord;
+    public int IDToRecord;
     [SerializeField]
     public Region[] CellRegions;
     public AgentRegions[] AgentTypes;

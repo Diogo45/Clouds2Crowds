@@ -20,7 +20,7 @@ namespace BioCrowds
         [Inject] NormalLifeMarkerSystem normalLifeMarkerSystem;
         [Inject] MarkerSystem markerSystem;
         [Inject] ContadorDeMerda ContadorDeMerda;
-        [Inject] CellTagSystem cellTagSystem;
+        //[Inject] CellTagSystem cellTagSystem;
         [Inject] StressSystem stressSystem;
         [Inject] NormaLifeAgentMovementVectors normaLifeAgentMovementVectors;
         [Inject] AgentMovementVectors agentMovementVectors;

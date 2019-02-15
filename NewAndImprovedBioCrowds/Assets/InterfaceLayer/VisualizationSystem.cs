@@ -194,16 +194,20 @@ public class VisualizationSystem : ComponentSystem
                         cellIDs.Add(GridConverter.GridCell2CellID(grid_cell));
                     }
 
+                    if(inst.IDToRecord == -1 || m_CloudDataGroup.CloudData[i].ID == inst.IDToRecord)
+                    {
+                        BioCities.Record record = new BioCities.Record(frames,
+                                                                       m_CloudDataGroup.CloudData[i].ID,
+                                                                       m_CloudDataGroup.CloudData[i].AgentQuantity,
+                                                                       cellIDs.Count,
+                                                                       cellIDs,
+                                                                       m_CloudDataGroup.Position[i].Value,
+                                                                       m_CloudDataGroup.CloudData[i].Radius
+                                                );
 
-                    BioCities.Record record = new BioCities.Record(frames,
-                                               m_CloudDataGroup.CloudData[i].ID,
-                                               m_CloudDataGroup.CloudData[i].AgentQuantity,
-                                               cellIDs.Count,
-                                               cellIDs,
-                                               m_CloudDataGroup.Position[i].Value
-                        );
-
-                    bioCloudsRecords.Add(record);
+                        bioCloudsRecords.Add(record);
+                    }
+                    
                 }
             }
 
@@ -255,7 +259,7 @@ public class VisualizationSystem : ComponentSystem
         new System.IO.StreamWriter(inst.LogFile + "Clouds.txt", false))
         {
             file.Write("#This file stores the Cloud Data for each cloud." + '\n' + 
-                       "#CurrentFrame;CloudID;AgentsInCloud;CloudPositionX;CloudPositionY;CapturedCellsQuantity;CellIDs;" + '\n');
+                       "#CurrentFrame;CloudID;RadiusSize;AgentsInCloud;CloudPositionX;CloudPositionY;CapturedCellsQuantity;CellIDs;" + '\n');
         }
 
         using (System.IO.StreamWriter file =

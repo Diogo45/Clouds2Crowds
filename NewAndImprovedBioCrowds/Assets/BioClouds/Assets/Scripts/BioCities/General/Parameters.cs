@@ -69,6 +69,8 @@ namespace BioCities
         public float CloudGoalThreshold;                 //Cloud goal-checking distance
         public float CellWidth;                          //Cell width
 
+        public float IDToRecord = -1;
+
         public float CloudMaxRadius;
         public float CloudMinRadius;
 

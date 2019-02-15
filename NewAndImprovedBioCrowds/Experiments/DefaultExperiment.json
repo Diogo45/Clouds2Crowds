@@ -1,20 +1,31 @@
 {
-  "SeedState": 1000,
-  "RadiusUpdateType" : "Speed",
-
-  "Domain": [0.0, 0.0, 150.0, 150.0],
-
-  "CellRegions": [{"minX":0.0, "maxX":0.0, "minY":150.0, "maxY":150.0}],
-
-"AgentTypes": [
-  {
-    "Goal": [ 150.0, 74.0, 0.0 ],
-    "Type": 0,
-
-    "Region": [ 0.0, 74.0, 0.1, 74.0 ],
-    "Quantity": 1,
-    "CloudSize": 2000000,
-    "PreferredDensity": 2,
-    "RadiusChangeSpeed": 0.1
-  }]
-}
+    "SeedState": 1000,
+    "RadiusUpdateType" : "Speed",
+    "FramesToRecord" : 1500,
+    "IDToRecord" : -1,
+    "Domain": [0.0, 0.0, 1000.0, 1000.0],
+  
+    "CellRegions": [{"minX":0.0, "maxX":0.0, "minY":1000.0, "maxY":1000.0}],
+  
+  "AgentTypes": [
+    {
+      "Goal": [ 1000.0, 500.0, 0.0 ],
+      "Type": 0,
+  
+      "Region": [ 0.0, 150.0, 400.0, 850.0 ],
+      "Quantity": 250,
+      "CloudSize": 2000,
+      "PreferredDensity": 3,
+      "RadiusChangeSpeed": 0.01
+    },
+      {
+        "Goal": [ 0.0, 500.0, 0.0 ],
+        "Type": 1,
+    
+        "Region": [ 600.0, 150.0, 1000.0, 850.0 ],
+        "Quantity": 250,
+        "CloudSize": 2000,
+        "PreferredDensity": 3,
+        "RadiusChangeSpeed": 0.01
+      }]
+  }

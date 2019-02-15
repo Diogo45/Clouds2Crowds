@@ -103,7 +103,20 @@ namespace BioCities
             densityQuad.transform.localScale = new Vector3(exp.Domain[2] - exp.Domain[0], exp.Domain[3] - exp.Domain[1], 1);
             background.transform.position = new Vector3((exp.Domain[0] + exp.Domain[2]) / 2, (exp.Domain[1] + exp.Domain[3]) / 2, 10);
             background.transform.localScale = new Vector3(exp.Domain[2] - exp.Domain[0], exp.Domain[3] - exp.Domain[1], 1);
-            mainCamera.transform.localPosition  = new Vector3((exp.Domain[0] + exp.Domain[2]) / 2, (exp.Domain[1] + exp.Domain[3]) / 2, -15);
+
+            inst.IDToRecord = exp.IDToRecord;
+
+            float z = 0;
+            Camera cam = mainCamera.GetComponent<Camera>();
+            if (cam.orthographic)
+            {
+                z = -15;
+            }
+            else
+            {
+               z = -((exp.Domain[2] - exp.Domain[0]) / 2) / math.tan(math.radians(cam.fieldOfView / 2));
+            }
+            mainCamera.transform.localPosition  = new Vector3((exp.Domain[0] + exp.Domain[2]) / 2, (exp.Domain[1] + exp.Domain[3]) / 2, z);
 
             Parameters.Instance.MaxSimulationFrames = exp.FramesToRecord;
 
@@ -264,7 +277,7 @@ namespace BioCities
                MinRadius = CloudMinRadius(quantity), RadiusChangeSpeed = radiusChangeSpeed});
             entityManager.SetComponentData<CloudGoal>(newCloud, new CloudGoal { SubGoal = goal, EndGoal = goal });
             entityManager.SetComponentData<CloudMoveStep>(newCloud, new CloudMoveStep { Delta = float3.zero});
-            entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType]);
+            //entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType]);
             entityManager.SetComponentData<SpawnedAgentsCounter>(newCloud, new SpawnedAgentsCounter { Quantity = 0 });
 
         }

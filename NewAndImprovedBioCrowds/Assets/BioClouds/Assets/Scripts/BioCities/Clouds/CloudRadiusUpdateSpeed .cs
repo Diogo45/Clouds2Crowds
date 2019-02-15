@@ -63,11 +63,23 @@ namespace BioCities {
                 //float maxChange = math.length(CloudStep[index].Delta);
                 float maxChange = cData.MaxSpeed;
                 float radiusChange = math.max(-maxChange, (math.min(maxChange, cData.RadiusChangeSpeed * (beta) * cData.Radius)));
-
                 //float radiusChange = cData.RadiusChangeSpeed * (beta);// * cData.Radius;
 
                 //cData.Radius *= 1f + cData.RadiusChangeSpeed * (beta);
-                cData.Radius += radiusChange;
+                //cData.Radius += radiusChange;
+
+                //float maxRadius = Parameters.Instance.CloudMaxRadius;
+                //float maxRadius = (float)math.ceil(math.sqrt((cData.AgentQuantity/(cData.PreferredDensity * math.PI))));
+                //Debug.Log(maxRadius);
+                //float minRadius = Parameters.Instance.CloudMinRadius;
+
+                //if (cData.Radius + radiusChange > maxRadius)
+                //    cData.Radius = maxRadius;
+                //else if (cData.Radius + radiusChange < minRadius)
+                //    cData.Radius = minRadius;
+                //else
+                    cData.Radius += radiusChange;
+
 
                 CloudData[index] = cData;
 
