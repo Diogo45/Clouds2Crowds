@@ -141,11 +141,11 @@ namespace BioCrowds
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
                     CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
-                    //Debug.Log(maxSpeed / Settings.instance.FramesPerSecond);
+                    //Debug.Log(maxSpeed / Settings.experiment.FramesPerSecond);
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.2f),// / Settings.instance.FramesPerSecond,
+                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.2f),// / Settings.experiment.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep

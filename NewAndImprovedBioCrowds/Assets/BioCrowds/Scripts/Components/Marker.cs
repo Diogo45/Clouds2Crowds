@@ -186,7 +186,7 @@ namespace BioCrowds
         {
             UpdateInjectedComponentGroups();
             int qtdAgents = Settings.agentQuantity;
-            float densityToQtd = Settings.instance.MarkerDensity / Mathf.Pow(Settings.instance.markerRadius, 2f);
+            float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
             AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);

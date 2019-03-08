@@ -1,0 +1,1 @@
+{"NormalLife":false,"BioCloudsEnabled":false,"FramesPerSecond":30,"showMarkers":false,"showCells":false,"SpawnAreas":[{"qtd":50,"max":{"x":15,"y":0,"z":50},"min":{"x":0,"y":0,"z":0},"goal":{"x":50.0,"y":0.0,"z":25.0}}],"agentRadius":1.0,"markerRadius":0.10000000149011612,"MarkerDensity":0.6499999761581421}

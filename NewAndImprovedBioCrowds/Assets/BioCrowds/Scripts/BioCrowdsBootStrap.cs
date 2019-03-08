@@ -54,17 +54,17 @@ namespace BioCrowds
             var gSettings = GameObject.Find("BCSettings");
             BioSettings = gSettings?.GetComponent<Settings>();
             //Getting data from settings
-            float agentRadius = BioSettings.agentRadius;
+            float agentRadius = Settings.experiment.agentRadius;
 
-            int framesPerSecond = BioSettings.FramesPerSecond;
+            int framesPerSecond = Settings.experiment.FramesPerSecond;
 
-            float markerRadius = BioSettings.markerRadius;
+            float markerRadius = Settings.experiment.markerRadius;
 
-            float MarkerDensity = BioSettings.MarkerDensity;
+            float MarkerDensity = Settings.experiment.MarkerDensity;
 
-            bool showCells = BioSettings.showCells;
+            bool showCells = Settings.experiment.showCells;
 
-            bool showMarkers = BioSettings.showMarkers;
+            bool showMarkers = Settings.experiment.showMarkers;
 
 
 
@@ -98,8 +98,8 @@ namespace BioCrowds
             int qtdX = (int)(ground.terrainData.size.x / (agentRadius * 2));
             int qtdZ = (int)(ground.terrainData.size.z / (agentRadius * 2));
             Debug.Log(qtdX + "X" + qtdZ);
-            Settings.TerrainX = (int)ground.terrainData.size.x;
-            Settings.TerrainZ = (int)ground.terrainData.size.z;
+            //Settings.TerrainX = (int)ground.terrainData.size.x;
+            //Settings.TerrainZ = (int)ground.terrainData.size.z;
             //For instantiating Entities we first need to create a buffer for all the Enities of the same archetype.
             NativeArray<Entity> cells = new NativeArray<Entity>(qtdX * qtdZ, Allocator.Persistent);
             NativeList<Entity> cellsPersistent = new NativeList<Entity>(qtdX * qtdZ, Allocator.Persistent);
@@ -164,7 +164,7 @@ namespace BioCrowds
 
             //List<Group> groups = new List<Group>();
             //int group = 1;
-            //foreach(SpawnArea area in Settings.instance.SpawnAreas)
+            //foreach(SpawnArea area in Settings.experiment.SpawnAreas)
             //{
             //    List<GameObject> res;
             //    FindGoals(group, out res);
@@ -188,8 +188,8 @@ namespace BioCrowds
             //int startID = 0;
             //foreach (Group g in groups)
             //{
-            //    int frameRate = Settings.instance.FramesPerSecond;
-            //    var renderer = Settings.instance.Renderers[group];
+            //    int frameRate = Settings.experiment.FramesPerSecond;
+            //    var renderer = Settings.experiment.Renderers[group];
             //    int lastID;
             //    SpawnAgent(frameRate, entityManager, g, startID, out lastID, renderer);
             //    startID = lastID;

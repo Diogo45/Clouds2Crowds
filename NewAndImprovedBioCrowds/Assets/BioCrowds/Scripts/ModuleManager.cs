@@ -28,7 +28,7 @@ namespace BioCrowds
         protected override void OnUpdate()
         {
             
-            var modules = Settings.instance;
+            var modules = Settings.experiment;
             if (!modules.NormalLife)
             {
                 stressSystem.Enabled = false;
