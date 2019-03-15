@@ -32,8 +32,6 @@ namespace BioCities {
             public ComponentDataArray<CloudMoveStep> CloudStep;
             [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
             [ReadOnly] public float CellArea;
-            [ReadOnly] public float MaxRadius;
-            [ReadOnly] public float MinRadius;
             public void Execute(int index)
             {
                 float3 currentCellPosition;
@@ -95,9 +93,7 @@ namespace BioCities {
                 CloudData = m_CloudDataGroup.CloudData,
                 CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
                 CloudStep = m_CloudDataGroup.CloudStep,
-                CellArea = Parameters.Instance.CellArea,
-                MinRadius = Parameters.Instance.CloudMinRadius,
-                MaxRadius = Parameters.Instance.CloudMaxRadius
+                CellArea = Parameters.Instance.CellArea
             };
 
 

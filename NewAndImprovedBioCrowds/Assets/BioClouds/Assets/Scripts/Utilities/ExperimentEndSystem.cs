@@ -13,6 +13,7 @@ namespace BioCities
 
     [UpdateAfter(typeof(CloudMovementVectorSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
+    [DisableAutoCreation]
     public class ExperimentEndSystem : ComponentSystem
     {
         //Moves based on marked cell list
@@ -28,6 +29,7 @@ namespace BioCities
         int frames = 0;
         Parameters instance;
         float startingTime;
+        public int[] Rulers;
 
         protected override void OnUpdate()
         {
@@ -39,20 +41,20 @@ namespace BioCities
                 switch (m_CellGroup.Cloud[i].Type)
                 {
                     case 0:
-                        if (m_CellGroup.Position[i].Value.x - m_CellGroup.Cloud[i].Radius > instance.Rulers[0])
+                        if (m_CellGroup.Position[i].Value.x - m_CellGroup.Cloud[i].Radius > Rulers[0])
                             finished++;
                         break;
                     case 1:
-                        if (m_CellGroup.Position[i].Value.x + m_CellGroup.Cloud[i].Radius < instance.Rulers[1])
+                        if (m_CellGroup.Position[i].Value.x + m_CellGroup.Cloud[i].Radius < Rulers[1])
                             finished++;
                         break;
 
                     case 2:
-                        if (m_CellGroup.Position[i].Value.y - m_CellGroup.Cloud[i].Radius > instance.Rulers[3])
+                        if (m_CellGroup.Position[i].Value.y - m_CellGroup.Cloud[i].Radius > Rulers[3])
                             finished++;
                         break;
                     case 3:
-                        if (m_CellGroup.Position[i].Value.y + m_CellGroup.Cloud[i].Radius < instance.Rulers[2])
+                        if (m_CellGroup.Position[i].Value.y + m_CellGroup.Cloud[i].Radius < Rulers[2])
                             finished++;
                         break;
 

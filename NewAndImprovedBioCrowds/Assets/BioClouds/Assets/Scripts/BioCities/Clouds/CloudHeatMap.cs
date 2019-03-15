@@ -18,8 +18,6 @@ namespace BioCities {
     public class CloudHeatMap : JobComponentSystem
     {
         //Data structure size data.
-        int lastsize_quadQuantities;
-        int lastsize_quadIndex;
         int lastsize_texmat;
 
         #region Data Recording
@@ -35,13 +33,6 @@ namespace BioCities {
         public int tex_mat_col;
         public NativeHashMap<int, float> cloudDensities;
 
-        public struct QuadGroup
-        {
-            [WriteOnly] public ComponentDataArray<Position> Position;
-            [ReadOnly] public ComponentDataArray<HeatQuad> Quads;
-            [ReadOnly] public SharedComponentDataArray<MeshInstanceRenderer> Renderer;
-            [ReadOnly] public readonly int Length;
-        }
 
         public struct CloudDataGroup
         {
@@ -52,11 +43,7 @@ namespace BioCities {
 
         [Inject] CloudDataGroup m_CloudDataGroup;
         [Inject] CellMarkSystem m_CellMarkSystem;
-        [Inject] QuadGroup m_QuadGroup;
-
-        NativeArray<int> quadQuantities;
-        NativeArray<int> quadIndex;
-        int lastQuantity;
+        
         Parameters inst;
 
         //struct DeBufferQuads : IJobParallelFor
@@ -162,16 +149,13 @@ namespace BioCities {
             }
         }
 
-
-
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        private void CleanUpDataStructures()
         {
-
             var clearjob = new ClearMat() { mat = tex_mat };
             var clearDep = clearjob.Schedule(lastsize_texmat, 64);
             clearDep.Complete();
 
-            if(cloudDensities.Capacity < m_CloudDataGroup.Length)
+            if (cloudDensities.Capacity < m_CloudDataGroup.Length)
             {
                 cloudDensities.Dispose();
                 cloudDensities = new NativeHashMap<int, float>(m_CloudDataGroup.Length, Allocator.Persistent);
@@ -181,70 +165,42 @@ namespace BioCities {
                 cloudDensities.Clear();
             }
 
-            int aux = (int)(math.ceil(inst.CloudMaxRadius * 2 / inst.CellWidth));
-            int size_quads = aux * aux * m_CloudDataGroup.Length;
 
-            //if (lastsize_quadQuantities != size_quads)
-            //{
-            //    quadQuantities.Dispose();
-            //    quadQuantities = new NativeArray<int>(size_quads, Allocator.Persistent);
-            //}
-            
-            if(lastsize_texmat != tex_mat_row * tex_mat_col)
+            if (lastsize_texmat != tex_mat_row * tex_mat_col)
             {
                 tex_mat.Dispose();
                 tex_mat = new NativeArray<Color>(tex_mat_row * tex_mat_col, Allocator.Persistent);
             }
             lastsize_texmat = tex_mat_row * tex_mat_col;
+        }
 
-            if (lastsize_quadIndex != size_quads)
-            {
-                quadIndex.Dispose();
-                quadIndex = new NativeArray<int>(size_quads, Allocator.Persistent);
-            }
-            lastsize_quadIndex = size_quads;
-            lastsize_quadQuantities = size_quads;
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
 
+            CleanUpDataStructures();
 
             FillDensityTex FillDensityJob = new FillDensityTex()
             {
                 CloudData = m_CloudDataGroup.CloudData,
                 CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
                 CellArea = inst.CellArea,
-                //cloudQuadQuantity = quadQuantities,
                 mat_cols = tex_mat_col,
                 mat_rows = tex_mat_row,
                 tex_mat =  tex_mat,
                 cloudDensities = cloudDensities.ToConcurrent()
             };
 
-            //MoveHeatMapQuads MoveQuadsJob = new MoveHeatMapQuads()
-            //{
-            //    CloudData = m_CloudDataGroup.CloudData,
-            //    CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
-            //    QuadPositions = m_QuadGroup.Position,
-            //    quadQuantities = quadQuantities,
-            //    quadIndexes = quadIndex
-            //};
+
 
             var calculateMatDeps = FillDensityJob.Schedule(m_CloudDataGroup.Length, 64, inputDeps);
 
             calculateMatDeps.Complete();
 
-            //for (int i = 1; i < m_CloudDataGroup.Length; i++)
-            //    quadIndex[i] = quadQuantities[i - 1] + quadIndex[i-1];
 
-            //var MoveQuadsDeps = MoveQuadsJob.Schedule(m_CloudDataGroup.Length, 64, calculateMatDeps);
-
-  
             tex.SetPixels(tex_mat.ToArray());
             tex.Apply(false);
             tex.filterMode = FilterMode.Point;
             tex.wrapMode = TextureWrapMode.Clamp;
-            m_QuadGroup.Renderer[0].material.SetTexture("_DensityTex", tex);    
-            //m_QuadGroup.Renderer[1].material.SetTexture("_DensityTex", tex);
-            //
-            //MoveQuadsDeps.Complete();
 
             return calculateMatDeps;
         }
@@ -252,7 +208,6 @@ namespace BioCities {
         protected override void OnDestroyManager()
         {
             //quadQuantities.Dispose();
-            quadIndex.Dispose();
             tex_mat.Dispose();
             cloudDensities.Dispose();
         }
@@ -261,12 +216,8 @@ namespace BioCities {
         {
             CurrentFrame = 0;
             records = new List<Record>();
-            lastsize_quadQuantities = 0 ;
-            lastsize_quadIndex = 0;
             lastsize_texmat = 0;
-
-            //quadQuantities = new NativeArray<int>(0, Allocator.TempJob);
-            quadIndex = new NativeArray<int>(0, Allocator.Persistent);
+            
             cloudDensities = new NativeHashMap<int, float>(0, Allocator.Persistent);
             inst = Parameters.Instance;
             tex_mat_col = inst.Cols;

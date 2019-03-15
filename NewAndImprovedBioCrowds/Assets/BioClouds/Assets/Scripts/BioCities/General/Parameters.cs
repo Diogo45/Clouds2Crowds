@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using Unity.Mathematics;
 
+
 namespace BioCities
 {
     [System.Serializable]
@@ -13,15 +14,40 @@ namespace BioCities
         public Material mat;
     }
 
-
+    
     public class Parameters : MonoBehaviour
     {
-        [System.Serializable]
-        public enum DistanceFunction
+        public void LoadOrGenerateParameters()
         {
-            Euclidian,
-            Power,
-            MinRadiusSubtraction
+            string userFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            string customParametersTotalDirPath = string.Join("\\", userFolder, PartialParametersDirPath);
+
+
+            System.IO.Directory.CreateDirectory(customParametersTotalDirPath);
+            string filePath = string.Join("\\", customParametersTotalDirPath, "Settings.json");
+
+            if (!System.IO.File.Exists(filePath))
+                GenerateDefaultParametersFile(filePath);
+
+            string json = System.IO.File.ReadAllText(filePath);
+            JsonUtility.FromJsonOverwrite(json, this);
+
+            LogFilePath = string.Join("\\", userFolder, PartialParametersDirPath, PartialLogFilePath);
+            ExperimentPath = string.Join("\\", userFolder, PartialParametersDirPath, PartialExperimentPath);
+
+        }
+
+        public void GenerateDefaultParametersFile(string path)
+        {
+
+            string jsonThis = JsonUtility.ToJson(this, true);
+            System.IO.File.WriteAllText(path, jsonThis);
+            //Generates a default parameters file.
+        }
+
+        public static Parameters LoadParameters(string path)
+        {
+            return new Parameters();
         }
 
         public static Color Density2Color(float density, int idowner)
@@ -31,7 +57,6 @@ namespace BioCities
             float sample = capped_density / Parameters.Instance.MaxColorDensity;
             return new Color(sample, sample, sample, 1.0f);
         }
-
         public static Texture2D GetHeatScaleTexture(Color[] colors, int HeatmapSize)
         {
             Texture2D heatmapScale = new Texture2D(HeatmapSize, 1);
@@ -53,78 +78,81 @@ namespace BioCities
             return heatmapScale;
         }
 
+        public void Start()
+        {
+            InitializeParameters();     
+        }
 
+        public void InitializeParameters()
+        {
+
+            LoadOrGenerateParameters();
+
+            //Parameters userParameters = Parameters.LoadParameters(customParametersTotalPath);
+            
+            HeatMapScaleSize = HeatMapColors.Length;
+
+            FixedParameters.HeatMapTexture = Parameters.GetHeatScaleTexture(HeatMapColors, HeatMapScaleSize);
+
+        }
+
+
+
+        public string PartialParametersDirPath =  "VHLAB\\BioClouds\\";
         private static Parameters instance;
-
         public static Parameters Instance { get { if (instance == null) instance = GameObject.FindObjectOfType<Parameters>(); return instance; } }
 
-        public int CloudCount;                         //Agents to randomly spawn
+        private FixedParameters _fixedParameters;
+        public  FixedParameters FixedParameters { get { if (_fixedParameters == null) _fixedParameters = GameObject.FindObjectOfType<FixedParameters>(); return _fixedParameters; } } 
 
-        public float MinAuxinRadius;                     //Minimum Minimum-Auxin-Auxin distance 
-        public float MaxAuxinRadius;                     //Maximum Minmum-Auxin-Auxin distance
-        public float AgentSpeed;                         //Agent Max Speed
-        public float CloudSpeed;                         //CloudMaxSpeed
-        public float AgentCloudAggregationRange;         //Agent to cloud aggregation range
-        public float AgentGoalThreshold;                 //Agent goal-checking distance 
-        public float CloudGoalThreshold;                 //Cloud goal-checking distance
-        public float CellWidth;                          //Cell width
 
-        public float IDToRecord = -1;
+        public float CloudSpeed = 1.3f;                         //CloudMaxSpeed
+        public float CloudGoalThreshold = 0.01f;                 //Cloud goal-checking distance
+        public float CellWidth = 2f;                          //Cell width
 
-        public float CloudMaxRadius;
-        public float CloudMinRadius;
+        
+        
 
-        public float LocalMinimaPedalation;
-
-        public DistanceFunction DistanceFunctionToUse;
-
-        public float MaxColorDensity;
+        public float MaxColorDensity = 10f;
         public Color[] HeatMapColors;
-        public Texture2D HeatMapTexture;
-        public int HeatMapScaleSize;
 
-        public int Rows { get { return (int)((DomainMaxX - DomainMinX) / CellWidth); } }
-        public int Cols { get { return (int)((DomainMaxY - DomainMinY) / CellWidth); } }
+        public int HeatMapScaleSize = 512;
+
+        public int Rows { get { return (int)((DefaultDomainMaxX - DefaultDomainMinX) / CellWidth); } }
+        public int Cols { get { return (int)((DefaultDomainMaxY - DefaultDomainMinY) / CellWidth); } }
 
         private float _cellArea = 0.0f;
         public float CellArea { get { if (_cellArea == 0.0f) _cellArea = CellWidth * CellWidth; return _cellArea; } }
 
-        
-        public MeshMaterial[] CellRendererData;
-
-        public MeshMaterial[] CloudRendererData;
-
-        public MeshMaterial[] HeatQuadRendererData;
 
 
+
+        public string PartialExperimentPath;
         public string ExperimentPath;
 
         [HideInInspector]
-        public float DomainMinX;
+        public float DefaultDomainMinX;
         [HideInInspector]
-        public float DomainMaxX;
+        public float DefaultDomainMaxX;
         [HideInInspector]
-        public float DomainMinY;
+        public float DefaultDomainMinY;
         [HideInInspector]
-        public float DomainMaxY;
+        public float DefaultDomainMaxY;
 
 
-        public bool DrawCloudToMarkerLines;
-        public bool enableCloudSplitSystem;
+        public bool DrawCloudToMarkerLines = true;
+        public bool EnableRightPreference = true;
 
-        public int SimulationFramesPerSecond;
+        public int SimulationFramesPerSecond = 10;
 
-        public int MaxSimulationFrames;
-        public int FramesForDataSave;
+        public int MaxSimulationFrames = 2000;
+        public int FramesForDataSave = 1;
+        public float IDToRecord = -1;
 
-        public bool SaveDenstiies;
-        public bool SavePositions;
-        public int[] Rulers;
-        public string LogFile;
+        public bool SaveSimulationData = false;
 
-
-
-        public GameObject heattextquad;
+        public string PartialLogFilePath = "Experiments\\Logs\\output";
+        public string LogFilePath = "";
 
 
         public bool BioCloudsActive = true;

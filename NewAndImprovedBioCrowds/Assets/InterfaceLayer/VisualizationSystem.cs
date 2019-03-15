@@ -166,7 +166,7 @@ public class VisualizationSystem : ComponentSystem
 
         var inst = BioCities.Parameters.Instance;
 
-        if (!inst.SavePositions)
+        if (!inst.SaveSimulationData)
             return;
 
         //Data recording
@@ -214,7 +214,7 @@ public class VisualizationSystem : ComponentSystem
             //if (inst.MaxSimulationFrames == CurrentFrame - 1)
             //{
             using (System.IO.StreamWriter file =
-            new System.IO.StreamWriter(inst.LogFile + "Clouds.txt", true))
+            new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", true))
             {
                 foreach (BioCities.Record record in bioCloudsRecords)
                     file.Write(record.ToString() + '\n');
@@ -230,7 +230,7 @@ public class VisualizationSystem : ComponentSystem
         //if (inst.MaxSimulationFrames == CurrentFrame - 1)
         //{
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "Agents.txt", true))
+        new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", true))
         {
             file.Write(complete.ToString() + '\n');
         }
@@ -249,21 +249,21 @@ public class VisualizationSystem : ComponentSystem
         var inst = BioCities.Parameters.Instance;
 
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "Agents.txt", false))
+        new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", false))
         {
             file.Write("#This file stores the Agent Data for each Agent." + '\n' +
             "#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;" + '\n');
         }
 
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "Clouds.txt", false))
+        new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", false))
         {
             file.Write("#This file stores the Cloud Data for each cloud." + '\n' + 
                        "#CurrentFrame;CloudID;RadiusSize;AgentsInCloud;CloudPositionX;CloudPositionY;CapturedCellsQuantity;CellIDs;" + '\n');
         }
 
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "FrameTimes.txt", false))
+        new System.IO.StreamWriter(inst.LogFilePath + "FrameTimes.txt", false))
         {
             file.Write("#This file stores the processing time for each frame. Measured in Seconds." + '\n');
         }

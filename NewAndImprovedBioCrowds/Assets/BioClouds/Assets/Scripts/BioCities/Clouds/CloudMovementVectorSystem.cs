@@ -117,7 +117,7 @@ namespace BioCities
                 CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
                 CellMap = m_cellIdMap.cellId2Cellfloat3,
                 ExtraWeightCell = m_CloudSplit.extraWeightCellId,
-                useSplit = Parameters.Instance.enableCloudSplitSystem
+                useSplit = Parameters.Instance.EnableRightPreference
 
             };
 

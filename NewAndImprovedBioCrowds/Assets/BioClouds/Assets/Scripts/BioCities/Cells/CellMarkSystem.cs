@@ -68,7 +68,6 @@ namespace BioCities
 
             [ReadOnly] public NativeMultiHashMap<int, int> cellTagMap;
             [ReadOnly] public ComponentDataArray<CellData> CellData;
-            [ReadOnly] public Parameters.DistanceFunction DistanceFunction;
             //[WriteOnly] public NativeQueue<DoublePosition>.Concurrent aux_draw;
 
 
@@ -82,12 +81,6 @@ namespace BioCities
                 return math.distance(target, pos);
             }
 
-            public float MinRadiusSubMark(float3 target, float3 pos,  float minradius)
-            {
-                var aux_dist = math.distance(target, pos);
-                if ((aux_dist - minradius) < 0) return float.NegativeInfinity;
-                return (aux_dist - minradius);
-            }
 
             public float PowerDistanceMark(float3 target, float3 pos, float radius)
             {
@@ -99,17 +92,7 @@ namespace BioCities
 
             public float CaptureDistanceFunction(float3 target, float3 current, float radius, float minradius)
             {
-                switch (DistanceFunction)
-                {
-                    case Parameters.DistanceFunction.Euclidian:
-                        return EuclidianMark(target, current);
-                    case Parameters.DistanceFunction.Power:
-                        return PowerDistanceMark(target, current, radius);
-                    case Parameters.DistanceFunction.MinRadiusSubtraction:
-                        return MinRadiusSubMark(target, current, minradius);
-                    default:
-                        return EuclidianMark(target, current);
-                }
+                return PowerDistanceMark(target, current, radius);
             }
 
 
@@ -241,7 +224,6 @@ namespace BioCities
                 cloudIDPositions = m_cloudCellTagsSystem.cloudIDPositions,
                 cellTagMap = m_cloudCellTagsSystem.cellTagMap,
                 CellData = m_MarkedCellsgGroup.Cell,
-                DistanceFunction = Parameters.Instance.DistanceFunctionToUse,
                 Cell2OwnCloud = Cell2OwningCloud.ToConcurrent()
 
             };

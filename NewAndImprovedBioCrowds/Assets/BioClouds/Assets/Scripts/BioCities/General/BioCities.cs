@@ -46,9 +46,7 @@ namespace BioCities
             activeWorld.GetExistingManager<CloudHeatMap>().Enabled = false;
             activeWorld.GetExistingManager<CloudMovementVectorSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudMoveSystem>().Enabled = false;
-            activeWorld.GetExistingManager<CloudRadiusUpdateMinMax>().Enabled = false;
             activeWorld.GetExistingManager<CloudRadiusUpdateSpeed>().Enabled = false;
-            activeWorld.GetExistingManager<CloudRadiusUpdateTCC>().Enabled = false;
             activeWorld.GetExistingManager<CloudSplitSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudTagDesiredQuantitySystem>().Enabled = false;
             
@@ -94,10 +92,10 @@ namespace BioCities
             exp = LoadExperiment(city.BioParameters.ExperimentPath);
             r.InitState((uint)exp.SeedState);
 
-            city.BioParameters.DomainMinX = exp.Domain[0];
-            city.BioParameters.DomainMinY = exp.Domain[1];
-            city.BioParameters.DomainMaxX = exp.Domain[2];
-            city.BioParameters.DomainMaxY = exp.Domain[3];
+            city.BioParameters.DefaultDomainMinX = exp.Domain[0];
+            city.BioParameters.DefaultDomainMinY = exp.Domain[1];
+            city.BioParameters.DefaultDomainMaxX = exp.Domain[2];
+            city.BioParameters.DefaultDomainMaxY = exp.Domain[3];
 
             densityQuad.transform.position = new Vector3((exp.Domain[0] + exp.Domain[2]) / 2, (exp.Domain[1] + exp.Domain[3]) / 2, 5);
             densityQuad.transform.localScale = new Vector3(exp.Domain[2] - exp.Domain[0], exp.Domain[3] - exp.Domain[1], 1);
@@ -121,10 +119,10 @@ namespace BioCities
             Parameters.Instance.MaxSimulationFrames = exp.FramesToRecord;
 
             GridConverter.Width = city.BioParameters.CellWidth;
-            GridConverter.SetDomain(city.BioParameters.DomainMinX,
-                           city.BioParameters.DomainMinY,
-                           city.BioParameters.DomainMaxX,
-                           city.BioParameters.DomainMaxY);
+            GridConverter.SetDomain(city.BioParameters.DefaultDomainMinX,
+                           city.BioParameters.DefaultDomainMinY,
+                           city.BioParameters.DefaultDomainMaxX,
+                           city.BioParameters.DefaultDomainMaxY);
 
 
             city.CloudArchetype = city.BioEntityManager.CreateArchetype(typeof(Position),
@@ -141,16 +139,16 @@ namespace BioCities
 
             city.HeatQuadArchetype = city.BioEntityManager.CreateArchetype(typeof(Position), typeof(HeatQuad));
 
-            foreach(MeshMaterial m in city.BioParameters.CellRendererData)
-            {
-                city.CellMeshes.Add(new MeshInstanceRenderer()
-                {
-                    mesh = m.mesh,
-                    material = m.mat
-                });
-            }
+            //foreach(MeshMaterial m in city.BioParameters.FixedParameters.CellRendererData)
+            //{
+            //    city.CellMeshes.Add(new MeshInstanceRenderer()
+            //    {
+            //        mesh = m.mesh,
+            //        material = m.mat
+            //    });
+            //}
             
-            foreach (MeshMaterial m in city.BioParameters.CloudRendererData)
+            foreach (MeshMaterial m in city.BioParameters.FixedParameters.CloudRendererData)
             {
                 city.CloudMeshes.Add(new MeshInstanceRenderer()
                 {
@@ -166,33 +164,34 @@ namespace BioCities
             density.filterMode = FilterMode.Point;
             
 
-            inst.HeatMapTexture = Parameters.GetHeatScaleTexture(inst.HeatMapColors, inst.HeatMapScaleSize);
-            foreach (MeshMaterial m in city.BioParameters.HeatQuadRendererData)
-            {
+            
 
-                m.mat.SetTexture("_DensityTex", density);
-                m.mat.SetTexture("_NoiseTex", noise);
-                m.mat.SetInt("_Rows", inst.Rows);
-                m.mat.SetInt("_Cols", inst.Cols);
-                m.mat.SetFloat("_CellWidth", inst.CellWidth);
-                m.mat.SetTexture("_HeatMapScaleTex", inst.HeatMapTexture);
-                city.HeatQuadMeshes.Add(new MeshInstanceRenderer()
-                {
-                    mesh = m.mesh,
-                    material = m.mat
-                });
-            }
+            //foreach (MeshMaterial m in city.BioParameters.HeatQuadRendererData)
+            //{
+
+            //    m.mat.SetTexture("_DensityTex", density);
+            //    m.mat.SetTexture("_NoiseTex", noise);
+            //    m.mat.SetInt("_Rows", inst.Rows);
+            //    m.mat.SetInt("_Cols", inst.Cols);
+            //    m.mat.SetFloat("_CellWidth", inst.CellWidth);
+            //    m.mat.SetTexture("_HeatMapScaleTex", inst.HeatMapTexture);
+            //    city.HeatQuadMeshes.Add(new MeshInstanceRenderer()
+            //    {
+            //        mesh = m.mesh,
+            //        material = m.mat
+            //    });
+            //}
 
             //Heatmaptexture
-            inst.heattextquad.GetComponent<MeshRenderer>().material.SetTexture("_MainTex",inst.HeatMapTexture);
+            //inst.heattextquad.GetComponent<MeshRenderer>().material.SetTexture("_MainTex",inst.HeatMapTexture);
             //end heatmaptexture
 
 
 
-            Entity newQuad;
-            newQuad = entityManager.CreateEntity(city.HeatQuadArchetype);
-            entityManager.SetComponentData<Position>(newQuad, new Position { Value = new float3(-1f, -1f, 0f) });
-            entityManager.AddSharedComponentData<MeshInstanceRenderer>(newQuad, city.HeatQuadMeshes[0]);
+            //Entity newQuad;
+            //newQuad = entityManager.CreateEntity(city.HeatQuadArchetype);
+            //entityManager.SetComponentData<Position>(newQuad, new Position { Value = new float3(-1f, -1f, 0f) });
+            //entityManager.AddSharedComponentData<MeshInstanceRenderer>(newQuad, city.HeatQuadMeshes[0]);
 
             //newQuad = entityManager.CreateEntity(city.HeatQuadArchetype);
             //entityManager.SetComponentData<Position>(newQuad, new Position { Value = new float3(-1f, -1f, 0f) });
@@ -201,7 +200,7 @@ namespace BioCities
             if (!city.BioParameters.DrawCloudToMarkerLines)
                 World.Active.GetExistingManager<CloudCellDrawLineSystem>().Enabled = false;
 
-            if (!city.BioParameters.enableCloudSplitSystem)
+            if (!city.BioParameters.EnableRightPreference)
                 World.Active.GetExistingManager<CloudSplitSystem>().Enabled = false;
         }
 
@@ -235,7 +234,7 @@ namespace BioCities
             }
 
             using (System.IO.StreamWriter file =
-                new System.IO.StreamWriter(Parameters.Instance.LogFile + "Cells.txt"))
+                new System.IO.StreamWriter(Parameters.Instance.LogFilePath + "Cells.txt"))
             {
                 foreach (float3 cellPos in cells)
                 {
@@ -261,7 +260,7 @@ namespace BioCities
 
         public float CloudMinRadius(int quantity)
         {
-            return math.max(CloudPreferredRadius(quantity, 10), Parameters.Instance.CloudMinRadius);
+            return CloudPreferredRadius(quantity, Parameters.Instance.MaxColorDensity);
         }
 
         public void AddCloud(float3 position, int quantity, float3 goal, int cloudType, float preferredDensity, float radiusChangeSpeed)
@@ -269,7 +268,7 @@ namespace BioCities
 
             Entity newCloud = entityManager.CreateEntity(city.CloudArchetype);
 
-            float radius = CloudMinRadius(quantity);//, preferredDensity);
+            float radius = CloudMinRadius(quantity);
 
             entityManager.SetComponentData<Position>(newCloud, new Position { Value = position });
             entityManager.SetComponentData<Rotation>(newCloud, new Rotation { Value = quaternion.identity });
@@ -312,24 +311,7 @@ namespace BioCities
 
         public void StartExperiment()
         {
-            World.Active.GetExistingManager<CloudRadiusUpdateTCC>().Enabled = false;
-            World.Active.GetExistingManager<CloudRadiusUpdateSpeed>().Enabled = false;
-            World.Active.GetExistingManager<CloudRadiusUpdateMinMax>().Enabled = false;
-            switch (exp.RadiusUpdateType)
-            {
-                case "TCC":
-                    World.Active.GetExistingManager<CloudRadiusUpdateTCC>().Enabled = true;
-                    break;
-                case "Speed":
-                    World.Active.GetExistingManager<CloudRadiusUpdateSpeed>().Enabled = true;
-                    break;
-                case "DynamicMinMax":
 
-                    World.Active.GetExistingManager<CloudRadiusUpdateMinMax>().Enabled = true;
-                    break;
-                default:
-                    break;
-            }
 
             for(int i = 0; i < exp.CellRegions.Length; i++)
             {
