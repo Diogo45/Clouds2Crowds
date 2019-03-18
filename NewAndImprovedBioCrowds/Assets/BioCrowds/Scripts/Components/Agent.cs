@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Jobs;
 using UnityEngine.Experimental.PlayerLoop;
+using UnityEngine;
 
 namespace BioCrowds
 {
@@ -135,12 +136,15 @@ namespace BioCrowds
             return mapCellToAgentsJobDep;
         }
 
+
+        
+
         protected override void OnStartRunning()
         {
             int qtdAgts = Settings.agentQuantity;
             //TODO dynamize
             CellToMarkedAgents = new NativeMultiHashMap<int3, int>(160000, Allocator.Persistent);
-
+            //Debug.Log(CellToMarkedAgents.IsCreated);
             AgentIDToPos = new NativeHashMap<int, float3>(qtdAgts * 2, Allocator.Persistent);
         }
 

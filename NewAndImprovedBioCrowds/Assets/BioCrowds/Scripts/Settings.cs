@@ -17,20 +17,22 @@ namespace BioCrowds
             public int3 max;
             public int3 min;
             public float3 goal;
+            public float maxSpeed;
         }
 
 
         public bool NormalLife = false;
         public bool BioCloudsEnabled = false;
-        public static int TerrainX = 50;
-        public static int TerrainZ = 50;
+        public int TerrainX = 50;
+        public int TerrainZ = 50;
         public int FramesPerSecond = 30;
         public bool showMarkers = false;
-        public bool showCells = false;
+        public bool showCells = true;
         public SpawnArea[] SpawnAreas = { new SpawnArea{qtd = 50,
                                          goal = new float3{x = 50, y = 0, z = 25},
                                          max = new int3 {x = 15, y = 0, z = 50},
-                                         min = new int3 {x = 0, y = 0, z = 0 } } };
+                                         min = new int3 {x = 0, y = 0, z = 0 },
+                                         maxSpeed = 1.3f} };
         public float agentRadius = 1f;
         public float markerRadius = 0.1f;
         public float MarkerDensity = 0.65f;
@@ -50,6 +52,7 @@ namespace BioCrowds
         public static int agentQuantity = 0;
         public static CrowdExperiment experiment;
         
+
 
 
         public void Awake()
@@ -84,13 +87,12 @@ namespace BioCrowds
             var bioCrowdsFolder = System.IO.Directory.CreateDirectory(folder +  "\\VHLAB\\BioCrowds");
 
 
-            string settingsFile = bioCrowdsFolder.FullName + "BaseExperiment.txt";
-            bool basisCase = System.IO.File.Exists(settingsFile) ?  true : false;
-            Debug.Log(basisCase + " " + settingsFile);
+            string settingsFile = bioCrowdsFolder.FullName + "\\BaseExperiment.json";
+            bool basisCase = System.IO.File.Exists(settingsFile);
+            //Debug.Log(basisCase + " " + settingsFile);
 
-
-            string exp = JsonUtility.ToJson(experiment);
-            System.IO.File.WriteAllText(settingsFile, exp);
+            if(!basisCase)
+                System.IO.File.WriteAllText(settingsFile, JsonUtility.ToJson(experiment, true));            
 
        
 

@@ -46,13 +46,9 @@ namespace BioCrowds
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void Intialize()
         {
-            //UnityEditor.AI.NavMeshBuilder.BuildNavMesh();
 
 
 
-            //Get the simulation settings from the settings script
-            var gSettings = GameObject.Find("BCSettings");
-            BioSettings = gSettings?.GetComponent<Settings>();
             //Getting data from settings
             float agentRadius = Settings.experiment.agentRadius;
 
@@ -66,11 +62,21 @@ namespace BioCrowds
 
             bool showMarkers = Settings.experiment.showMarkers;
 
+            int2 size = new int2(Settings.experiment.TerrainX, Settings.experiment.TerrainZ);
 
+            if((size.x % 2 !=0 || size.y % 2 != 0))
+            {
+                Debug.Log("Tamanho do Terreno Invalido");
+                return;
+            }
+
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.localScale = new Vector3(size.x, 1, size.y);
+            ground.transform.position = ground.transform.localScale / 2; 
 
             //FUTURE: BioCrowds in complex 3d models of scenarios
             //TODO: Truncate the Terrain size if the cells don't fit
-            var ground = GameObject.Find("Terrain").GetComponent<Terrain>();
+            //var ground = GameObject.Find("Terrain").GetComponent<Terrain>();
             //The EntityManager is responsible for the creation of all Archetypes, Entities, ... and adding or removing Components from existing Entities 
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
@@ -95,8 +101,8 @@ namespace BioCrowds
                 ComponentType.Create<CellName>(),
                 ComponentType.Create<Position>());
 
-            int qtdX = (int)(ground.terrainData.size.x / (agentRadius * 2));
-            int qtdZ = (int)(ground.terrainData.size.z / (agentRadius * 2));
+            int qtdX = (int)(ground.transform.localScale.x / (agentRadius * 2));
+            int qtdZ = (int)(ground.transform.localScale.z / (agentRadius * 2));
             Debug.Log(qtdX + "X" + qtdZ);
             //Settings.TerrainX = (int)ground.terrainData.size.x;
             //Settings.TerrainZ = (int)ground.terrainData.size.z;
@@ -118,6 +124,9 @@ namespace BioCrowds
 
             //FUTURE: Make the instantiation easily modifiable
             //Now for each Entity of CellArchetype we define the proper data to the Components int the archetype.  
+
+            int qtd = math.max(qtdX, qtdZ);
+
             for (int i = 0; i < qtdX; i++)
             {
                 for (int j = 0; j < qtdZ; j++)
@@ -128,7 +137,7 @@ namespace BioCrowds
                     float y = 0f;
                     float z = j * (agentRadius * 2);
 
-                    int index = i * qtdX + j;
+                    int index = j * qtd + i;
                     //Debug.Log(index + " " + i + " " + x + " " + z);
                     entityManager.SetComponentData(cells[index], new Position
                     {
@@ -160,41 +169,7 @@ namespace BioCrowds
                 qtdPerCell = qtdMarkers
             });
 
-
-
-            //List<Group> groups = new List<Group>();
-            //int group = 1;
-            //foreach(SpawnArea area in Settings.experiment.SpawnAreas)
-            //{
-            //    List<GameObject> res;
-            //    FindGoals(group, out res);
-            //    group++;
-            //    Group i = new Group
-            //    {
-            //        goals = res,
-            //        //TODO:Hardcode MaxSpeed
-            //        maxSpeed = 1.3f,
-            //        qtdAgents = area.Size,
-            //        maxX = area.max.x,
-            //        minX = area.min.x,
-            //        maxZ = area.max.z,
-            //        minZ = area.min.z
-
-            //    };
-            //    Settings.agentQuantity += area.Size;
-            //    groups.Add(i);
-            //}
-            //group = 0;
-            //int startID = 0;
-            //foreach (Group g in groups)
-            //{
-            //    int frameRate = Settings.experiment.FramesPerSecond;
-            //    var renderer = Settings.experiment.Renderers[group];
-            //    int lastID;
-            //    SpawnAgent(frameRate, entityManager, g, startID, out lastID, renderer);
-            //    startID = lastID;
-            //    group++;
-            //}
+        
 
 
             cellMarkersCache.Dispose();
