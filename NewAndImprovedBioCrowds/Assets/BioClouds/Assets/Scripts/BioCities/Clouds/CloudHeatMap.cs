@@ -33,6 +33,7 @@ namespace BioCities {
         public int tex_mat_col;
         public NativeHashMap<int, float> cloudDensities;
 
+        public static Material DisplayMaterial;
 
         public struct CloudDataGroup
         {
@@ -201,6 +202,8 @@ namespace BioCities {
             tex.Apply(false);
             tex.filterMode = FilterMode.Point;
             tex.wrapMode = TextureWrapMode.Clamp;
+
+            DisplayMaterial.SetTexture("_DensityTex", tex);
 
             return calculateMatDeps;
         }

@@ -25,7 +25,6 @@ namespace BioCities
         public List<MeshInstanceRenderer> CellMeshes;
         public List<MeshInstanceRenderer> AgentMeshes;
         public List<MeshInstanceRenderer> CloudMeshes;
-        public List<MeshInstanceRenderer> HeatQuadMeshes;
 
         public Parameters BioParameters;
 
@@ -49,7 +48,6 @@ namespace BioCities
             activeWorld.GetExistingManager<CloudRadiusUpdateSpeed>().Enabled = false;
             activeWorld.GetExistingManager<CloudSplitSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudTagDesiredQuantitySystem>().Enabled = false;
-            
             activeWorld.GetExistingManager<ExperimentEndSystem>().Enabled = false;
         }
 
@@ -78,7 +76,6 @@ namespace BioCities
             city.CellMeshes = new List<MeshInstanceRenderer>();
             city.AgentMeshes = new List<MeshInstanceRenderer>();
             city.CloudMeshes = new List<MeshInstanceRenderer>();
-            city.HeatQuadMeshes = new List<MeshInstanceRenderer>();
 
             if(!inst.BioCloudsActive){
                 DeactivateBioclouds();
@@ -137,16 +134,7 @@ namespace BioCities
                                                   typeof(CellData));
 
 
-            city.HeatQuadArchetype = city.BioEntityManager.CreateArchetype(typeof(Position), typeof(HeatQuad));
 
-            //foreach(MeshMaterial m in city.BioParameters.FixedParameters.CellRendererData)
-            //{
-            //    city.CellMeshes.Add(new MeshInstanceRenderer()
-            //    {
-            //        mesh = m.mesh,
-            //        material = m.mat
-            //    });
-            //}
             
             foreach (MeshMaterial m in city.BioParameters.FixedParameters.CloudRendererData)
             {
@@ -162,41 +150,18 @@ namespace BioCities
             Texture2D density = new Texture2D(inst.Rows, inst.Cols);
             density.wrapMode = TextureWrapMode.Clamp;
             density.filterMode = FilterMode.Point;
-            
+
+
+
+            CloudHeatMap.DisplayMaterial = densityQuad.GetComponent<MeshRenderer>().material;
+            CloudHeatMap.DisplayMaterial.SetTexture("_DensityTex", density);
+            CloudHeatMap.DisplayMaterial.SetTexture("_NoiseTex", noise);
+            CloudHeatMap.DisplayMaterial.SetInt("_Rows", inst.Rows);
+            CloudHeatMap.DisplayMaterial.SetInt("_Cols", inst.Cols);
+            CloudHeatMap.DisplayMaterial.SetFloat("_CellWidth", inst.CellWidth);
+            CloudHeatMap.DisplayMaterial.SetTexture("_HeatMapScaleTex", inst.GetHeatScaleTexture());
 
             
-
-            //foreach (MeshMaterial m in city.BioParameters.HeatQuadRendererData)
-            //{
-
-            //    m.mat.SetTexture("_DensityTex", density);
-            //    m.mat.SetTexture("_NoiseTex", noise);
-            //    m.mat.SetInt("_Rows", inst.Rows);
-            //    m.mat.SetInt("_Cols", inst.Cols);
-            //    m.mat.SetFloat("_CellWidth", inst.CellWidth);
-            //    m.mat.SetTexture("_HeatMapScaleTex", inst.HeatMapTexture);
-            //    city.HeatQuadMeshes.Add(new MeshInstanceRenderer()
-            //    {
-            //        mesh = m.mesh,
-            //        material = m.mat
-            //    });
-            //}
-
-            //Heatmaptexture
-            //inst.heattextquad.GetComponent<MeshRenderer>().material.SetTexture("_MainTex",inst.HeatMapTexture);
-            //end heatmaptexture
-
-
-
-            //Entity newQuad;
-            //newQuad = entityManager.CreateEntity(city.HeatQuadArchetype);
-            //entityManager.SetComponentData<Position>(newQuad, new Position { Value = new float3(-1f, -1f, 0f) });
-            //entityManager.AddSharedComponentData<MeshInstanceRenderer>(newQuad, city.HeatQuadMeshes[0]);
-
-            //newQuad = entityManager.CreateEntity(city.HeatQuadArchetype);
-            //entityManager.SetComponentData<Position>(newQuad, new Position { Value = new float3(-1f, -1f, 0f) });
-            //entityManager.AddSharedComponentData<MeshInstanceRenderer>(newQuad, city.HeatQuadMeshes[1]);
-
             if (!city.BioParameters.DrawCloudToMarkerLines)
                 World.Active.GetExistingManager<CloudCellDrawLineSystem>().Enabled = false;
 
@@ -225,11 +190,9 @@ namespace BioCities
                     entityManager.SetComponentData<Position>(newCell, new Position { Value = new float3(i, j , 0f) });
                     entityManager.SetComponentData<Rotation>(newCell, new Rotation { Value = quaternion.identity });
                     entityManager.SetComponentData<CellData>(newCell, new CellData { ID = GridConverter.Position2CellID(new float3(i, j, 0f)),
-                                                                                     Area = city.BioParameters.CellWidth * city.BioParameters.CellWidth,
-                                                                                     owningCloud = -1 });
+                                                                                     Area = city.BioParameters.CellWidth * city.BioParameters.CellWidth});
                     cells.Add(new float3(i, j, 0f));
 
-                    //entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCell, city.CellMeshes[cellType]);
                 }
             }
 
@@ -276,7 +239,6 @@ namespace BioCities
                MinRadius = CloudMinRadius(quantity), RadiusChangeSpeed = radiusChangeSpeed});
             entityManager.SetComponentData<CloudGoal>(newCloud, new CloudGoal { SubGoal = goal, EndGoal = goal });
             entityManager.SetComponentData<CloudMoveStep>(newCloud, new CloudMoveStep { Delta = float3.zero});
-            //entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType]);
             entityManager.SetComponentData<SpawnedAgentsCounter>(newCloud, new SpawnedAgentsCounter { Quantity = 0 });
 
         }
@@ -289,8 +251,7 @@ namespace BioCities
 
             for (int i = 0; i < quantity; i++) {
 
-
-                //float3 goal = r.NextFloat3(minPos, maxPos);
+                
                 float3 position = r.NextFloat3(minPos, maxPos);
 
                 AddCloud(position, cloudSize, goal, cloudType, preferredDensity, radiusChangeSpeed);

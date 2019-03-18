@@ -26,10 +26,6 @@ namespace BioCities
     {
         public int ID;
         public float Area;
-        public int owningCloud;
     }
 
-    public struct MarkedCell : IComponentData { }
-
-    
 }

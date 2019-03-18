@@ -57,6 +57,11 @@ namespace BioCities
             float sample = capped_density / Parameters.Instance.MaxColorDensity;
             return new Color(sample, sample, sample, 1.0f);
         }
+
+        public Texture2D GetHeatScaleTexture()
+        {
+            return GetHeatScaleTexture(HeatMapColors, HeatMapColors.Length);
+        }
         public static Texture2D GetHeatScaleTexture(Color[] colors, int HeatmapSize)
         {
             Texture2D heatmapScale = new Texture2D(HeatmapSize, 1);
