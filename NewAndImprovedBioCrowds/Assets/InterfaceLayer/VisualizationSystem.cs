@@ -120,7 +120,7 @@ public class VisualizationSystem : ComponentSystem
     public int frames = 0;
 
 
-    public List<BioCities.Record> bioCloudsRecords = new List<BioCities.Record>();
+    public List<BioClouds.Record> bioCloudsRecords = new List<BioClouds.Record>();
 
     public struct AgentGroup
     {
@@ -131,12 +131,12 @@ public class VisualizationSystem : ComponentSystem
     }
     [Inject] public AgentGroup agentGroup;
 
-    [Inject] public BioCities.CellMarkSystem m_CellMarkSystem;
+    [Inject] public BioClouds.CellMarkSystem m_CellMarkSystem;
 
 
     public struct CloudDataGroup
     {
-        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
         [ReadOnly] public ComponentDataArray<Position> Position;
         [ReadOnly] public readonly int Length;
     }
@@ -164,7 +164,7 @@ public class VisualizationSystem : ComponentSystem
         processing = aux;
 
 
-        var inst = BioCities.Parameters.Instance;
+        var inst = BioClouds.Parameters.Instance;
 
         if (!inst.SaveSimulationData)
             return;
@@ -196,7 +196,7 @@ public class VisualizationSystem : ComponentSystem
 
                     if(inst.IDToRecord == -1 || m_CloudDataGroup.CloudData[i].ID == inst.IDToRecord)
                     {
-                        BioCities.Record record = new BioCities.Record(frames,
+                        BioClouds.Record record = new BioClouds.Record(frames,
                                                                        m_CloudDataGroup.CloudData[i].ID,
                                                                        m_CloudDataGroup.CloudData[i].AgentQuantity,
                                                                        cellIDs.Count,
@@ -216,7 +216,7 @@ public class VisualizationSystem : ComponentSystem
             using (System.IO.StreamWriter file =
             new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", true))
             {
-                foreach (BioCities.Record record in bioCloudsRecords)
+                foreach (BioClouds.Record record in bioCloudsRecords)
                     file.Write(record.ToString() + '\n');
             }
             bioCloudsRecords.Clear();
@@ -246,7 +246,7 @@ public class VisualizationSystem : ComponentSystem
 
 
         base.OnCreateManager();
-        var inst = BioCities.Parameters.Instance;
+        var inst = BioClouds.Parameters.Instance;
 
         using (System.IO.StreamWriter file =
         new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", false))

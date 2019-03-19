@@ -9,7 +9,7 @@ using Unity.Jobs;
 
 
 
-namespace BioCities
+namespace BioClouds
 {
     [UpdateBefore(typeof(PostMarkGroup))]
     public class CellIDMapSystem : JobComponentSystem

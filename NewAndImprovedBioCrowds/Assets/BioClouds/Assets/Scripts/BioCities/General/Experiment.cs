@@ -10,7 +10,7 @@ public class Experiment{
     {
         public float[] Goal;
         public int Type;
-        public float[] Region;
+        public Region Region;
         public int Quantity;
         public int CloudSize;
         public float PreferredDensity;
@@ -24,11 +24,15 @@ public class Experiment{
         public float maxX;
         public float minY;
         public float maxY;
+
+        public override string ToString()
+        {
+            return minX + " " + maxX + " " + minY + " " + maxY;
+        }
     }
 
     public int SeedState;
-    public string RadiusUpdateType;
-    public float[] Domain;
+    public Region Domain;
     public int FramesToRecord;
     public int IDToRecord;
     [SerializeField]

@@ -7,7 +7,7 @@ using Unity.Transforms;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
-namespace BioCities
+namespace BioClouds
 {
 
     [UpdateAfter(typeof(CellIDMapSystem))]

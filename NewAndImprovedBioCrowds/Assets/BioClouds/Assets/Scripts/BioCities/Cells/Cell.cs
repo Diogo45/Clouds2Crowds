@@ -7,7 +7,7 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using Unity.Jobs;
 
-namespace BioCities
+namespace BioClouds
 {
     //grouping component
     public struct Cell : ISharedComponentData, System.IEquatable<Cell>

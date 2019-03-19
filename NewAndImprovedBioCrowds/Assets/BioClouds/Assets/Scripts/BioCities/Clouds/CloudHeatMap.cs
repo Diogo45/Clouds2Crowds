@@ -9,7 +9,7 @@ using Unity.Jobs;
 using Unity.Burst;
 using Unity.Rendering;
 
-namespace BioCities {
+namespace BioClouds {
     
     public struct HeatQuad : IComponentData { } //Marker Component
 
@@ -136,7 +136,7 @@ namespace BioCities {
                     return;
 
                 int2 grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
-                tex_mat[grid_cell.y * mat_cols + grid_cell.x] = densityColor;
+                tex_mat[grid_cell.y * mat_rows + grid_cell.x] = densityColor;
 
                 cloudDensities.TryAdd(CloudData[index].ID, delta);
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BioCities
+namespace BioClouds
 {
     public class FixedParameters : MonoBehaviour
     {

@@ -28,14 +28,16 @@ public class GridConverter
     
     public static int GridCell2CellID(int2 gridCell)
     {
-        return gridCell.x * cols + gridCell.y;
+        //Debug.Log("x y " + gridCell + " id " + (gridCell.x * cols + gridCell.y));
+
+        return gridCell.x * rows + gridCell.y;
     }
     
     public static int2 PositionToGridCell(float3 position)
     {
         var x = (int)((position.x - domain.minx) / Width);
         var y = (int)((position.y - domain.miny) / Width);
-
+        //Debug.Log("x y " + x + " " + y + " pos " + position);
         return new int2(x, y);
     }
     
@@ -85,6 +87,7 @@ public class GridConverter
 
         CellQuantity = rows * cols;
 
+        Debug.Log("rows : " + rows + " cols : " + cols);
     }
 
 

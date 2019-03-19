@@ -9,7 +9,7 @@ using Unity.Jobs;
 using Unity.Burst;
 
 
-namespace BioCities
+namespace BioClouds
 {
 
     [UpdateAfter(typeof(CellMarkSystem))]

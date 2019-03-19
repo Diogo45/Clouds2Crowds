@@ -271,7 +271,7 @@ namespace BioCrowds
     public class MovementVectorsSystemGroup { }
 
 
-    [UpdateInGroup(typeof(MovementVectorsSystemGroup)), UpdateAfter(typeof(MarkerWeightSystem)), UpdateAfter(typeof(BioCities.CellMarkSystem))]
+    [UpdateInGroup(typeof(MovementVectorsSystemGroup)), UpdateAfter(typeof(MarkerWeightSystem)), UpdateAfter(typeof(BioClouds.CellMarkSystem))]
     public class AgentMovementVectors : JobComponentSystem
     {
         public struct AgentGroup
@@ -292,8 +292,8 @@ namespace BioCrowds
         [Inject] MarkerWeightSystem totalWeightSystem;
 
         //TODO BioClouds stuff
-        [Inject] BioCities.CellMarkSystem m_BioCloudsCellMarkSystem;
-        [Inject] BioCities.CloudCellTagSystem m_BioCloudsCellTagSystem;
+        [Inject] BioClouds.CellMarkSystem m_BioCloudsCellMarkSystem;
+        [Inject] BioClouds.CloudCellTagSystem m_BioCloudsCellTagSystem;
             // end BIOCLOUDS
 
         struct CalculateAgentMoveStep : IJobParallelFor
@@ -311,7 +311,7 @@ namespace BioCrowds
 
             //TODO BioClouds Data
 
-            [ReadOnly] public NativeHashMap<int, BioCities.CloudIDPosRadius> BioClouds2PosMap;
+            [ReadOnly] public NativeHashMap<int, BioClouds.CloudIDPosRadius> BioClouds2PosMap;
             [ReadOnly] public NativeHashMap<int, int> BioCloudsCell2OwningCloudMap;
 
 
@@ -320,7 +320,7 @@ namespace BioCrowds
             public void Execute(int index)
             {
 
-                BioCities.CloudIDPosRadius CloudPos;
+                BioClouds.CloudIDPosRadius CloudPos;
                 if (!BioClouds2PosMap.TryGetValue(AgentCloudID[index].CloudID, out CloudPos))
                     return;
                 float3 CloudPosition = CloudPos.position;

@@ -263,11 +263,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c7cf59cfe955b649ba0966910e9a608, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  customPartialParametersDirPath: VHLAB\BioClouds\
+  PartialParametersDirPath: VHLAB\BioClouds\
   CloudSpeed: 1.3
   CloudGoalThreshold: 0
   CellWidth: 2
-  IDToRecord: -1
   MaxColorDensity: 10
   HeatMapColors:
   - {r: 0.19389725, g: 0, b: 1, a: 0}
@@ -279,18 +278,21 @@ MonoBehaviour:
   - {r: 1, g: 0.10174526, b: 0, a: 0}
   - {r: 0, g: 0, b: 0, a: 0}
   HeatMapScaleSize: 512
+  PartialExperimentPath: Experiments\DefaultExperiment.json
   ExperimentPath: Experiments\DefaultExperiment.json
   DefaultDomainMinX: 0
   DefaultDomainMaxX: 0
   DefaultDomainMinY: 0
   DefaultDomainMaxY: 0
   DrawCloudToMarkerLines: 0
-  enableRightPreference: 0
+  EnableRightPreference: 1
   SimulationFramesPerSecond: 10
   MaxSimulationFrames: 0
   FramesForDataSave: 1
+  IDToRecord: -1
   SaveSimulationData: 0
-  LogFile: Experiments\Logs\output
+  PartialLogFilePath: Experiments\Logs\output
+  LogFilePath: 
   BioCloudsActive: 1
 --- !u!114 &114952086574051200
 MonoBehaviour:
