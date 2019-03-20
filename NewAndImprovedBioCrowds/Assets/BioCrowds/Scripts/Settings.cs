@@ -50,14 +50,14 @@ namespace BioCrowds
         public static int BatchSize = 1;
         //Real value is the sum of all groups instantiated in the bootstrap
         public static int agentQuantity = 0;
-        public static CrowdExperiment experiment;
+        private static CrowdExperiment _experiment;
+        public static CrowdExperiment experiment = new CrowdExperiment();//{ get { if (experiment == null) _experiment = new CrowdExperiment(); return _experiment; } }
         
 
 
 
         public void Awake()
         {
-            experiment = new CrowdExperiment();
 
             foreach (Color c in Colors)
             {

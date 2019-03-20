@@ -315,8 +315,8 @@ namespace BioCrowds
 
             //TODO BioClouds Data
 
-            [ReadOnly] public NativeHashMap<int, BioCities.CloudIDPosRadius> BioClouds2PosMap;
-            [ReadOnly] public NativeHashMap<int, int> BioCloudsCell2OwningCloudMap;
+            //[ReadOnly] public NativeHashMap<int, BioCities.CloudIDPosRadius> BioClouds2PosMap;
+            //[ReadOnly] public NativeHashMap<int, int> BioCloudsCell2OwningCloudMap;
 
 
             //END BIOCLOUDS DATA
@@ -325,15 +325,15 @@ namespace BioCrowds
             {
 
                 BioCities.CloudIDPosRadius CloudPos;
-                if (!BioClouds2PosMap.TryGetValue(AgentCloudID[index].CloudID, out CloudPos))
-                    return;
-                float3 CloudPosition = CloudPos.position;
-                float3 BioCrowdsCloudPosition = WindowManager.Clouds2Crowds(CloudPosition);
+                //if (!BioClouds2PosMap.TryGetValue(AgentCloudID[index].CloudID, out CloudPos))
+                    //return;
+                //float3 CloudPosition = CloudPos.position;
+                //float3 BioCrowdsCloudPosition = WindowManager.Clouds2Crowds(CloudPosition);
 
 
-                float3 Agent2CloudCenterVec = BioCrowdsCloudPosition - AgentPos[index].Value;
+                //float3 Agent2CloudCenterVec = BioCrowdsCloudPosition - AgentPos[index].Value;
 
-                float3 NormalizedAgent2CloudCenter = math.normalize(Agent2CloudCenterVec);
+                //float3 NormalizedAgent2CloudCenter = math.normalize(Agent2CloudCenterVec);
 
 
                 float3 currentMarkerPosition;
@@ -349,29 +349,11 @@ namespace BioCrowds
                 if (!keepgoing)
                     return;
 
-                float extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
-
-                //float3 cloudauxinPosition = WindowManager.Crowds2Clouds(currentMarkerPosition);
-                //int bioCloudsCellIdOfAuxin = GridConverter.Position2CellID(cloudauxinPosition);
-                //int owningCloud;
-                //bool cloudOwnsMarker = BioCloudsCell2OwningCloudMap.TryGetValue(bioCloudsCellIdOfAuxin, out owningCloud);
-                
-               // bool sameCloudAsMyself = false;
-                //if (cloudOwnsMarker)
-                //{
-                //    sameCloudAsMyself = owningCloud == AgentCloudID[index].CloudID;
-               // }
-
-                //float extraWeight = 0f;
-                //if (sameCloudAsMyself)
-                //{
-                //    extraWeight = 2f;
-                //}
-
+                //float extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
 
                 float F = AgentCalculations.GetF(currentMarkerPosition, AgentPos[index].Value, AgentGoals[index].SubGoal - AgentPos[index].Value);
 
-                F += extraweight * 0.1f;
+                //F += extraweight * 0.1f;
 
                 direction += AgentCalculations.PartialW(totalW, F) * AgentData[index].MaxSpeed * (currentMarkerPosition - AgentPos[index].Value);
 
@@ -380,29 +362,11 @@ namespace BioCrowds
                 while (AgentMarkersMap.TryGetNextValue(out currentMarkerPosition, ref it))
                 {
 
-                    //BioClouds
-                    //cloudauxinPosition = WindowManager.Crowds2Clouds(currentMarkerPosition);
-                    //bioCloudsCellIdOfAuxin = GridConverter.Position2CellID(cloudauxinPosition);
-                    //cloudOwnsMarker = BioCloudsCell2OwningCloudMap.TryGetValue(bioCloudsCellIdOfAuxin, out owningCloud);
-
-                    //sameCloudAsMyself = false;
-                    //if (cloudOwnsMarker)
-                    //{
-                    //    sameCloudAsMyself = owningCloud == AgentCloudID[index].CloudID;
-                    //}
-
-                    //extraWeight = 0f;
-                    //if (sameCloudAsMyself)
-                    //{
-                    //    extraWeight = 2f;
-                    //}
-                    //BIOCLOUDS
-
-                    extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
+                    //extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
 
                     F = AgentCalculations.GetF(currentMarkerPosition, AgentPos[index].Value, AgentGoals[index].SubGoal - AgentPos[index].Value);
 
-                    F += extraweight * 0.1f;
+                    //F += extraweight * 0.1f;
 
                     direction += AgentCalculations.PartialW(totalW, F) * AgentData[index].MaxSpeed * (currentMarkerPosition - AgentPos[index].Value);
                 }
@@ -435,8 +399,8 @@ namespace BioCrowds
                 AgentStep = agentGroup.AgentStep,
                 AgentTotalW = totalWeightSystem.AgentTotalMarkerWeight,
                 AgentMarkersMap = markerSystem.AgentMarkers,
-                BioCloudsCell2OwningCloudMap = m_BioCloudsCellMarkSystem.Cell2OwningCloud,
-                BioClouds2PosMap = m_BioCloudsCellTagSystem.cloudIDPositions,
+                //BioCloudsCell2OwningCloudMap = m_BioCloudsCellMarkSystem.Cell2OwningCloud,
+                //BioClouds2PosMap = m_BioCloudsCellTagSystem.cloudIDPositions,
                 AgentCloudID = agentGroup.AgentCloudID
             };
 

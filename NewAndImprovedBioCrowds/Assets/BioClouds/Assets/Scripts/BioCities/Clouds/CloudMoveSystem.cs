@@ -15,7 +15,7 @@ namespace BioCities
     [UpdateInGroup(typeof(PostMarkGroup))]
     public class CloudMoveSystem : JobComponentSystem
     {
-        //Moves based on marked cell list
+
         public struct CellsGroup
         {
             [WriteOnly] public ComponentDataArray<Position> Position;
