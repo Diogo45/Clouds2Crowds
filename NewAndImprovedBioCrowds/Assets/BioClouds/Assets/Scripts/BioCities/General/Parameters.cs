@@ -45,10 +45,6 @@ namespace BioClouds
             //Generates a default parameters file.
         }
 
-        public static Parameters LoadParameters(string path)
-        {
-            return new Parameters();
-        }
 
         public static Color Density2Color(float density, int idowner)
         {
@@ -91,11 +87,11 @@ namespace BioClouds
         public void InitializeParameters()
         {
 
-            LoadOrGenerateParameters();
+            //LoadOrGenerateParameters();
 
             //Parameters userParameters = Parameters.LoadParameters(customParametersTotalPath);
             
-            HeatMapScaleSize = HeatMapColors.Length;
+
 
             FixedParameters.HeatMapTexture = Parameters.GetHeatScaleTexture(HeatMapColors, HeatMapScaleSize);
 
@@ -161,7 +157,7 @@ namespace BioClouds
 
 
         public bool BioCloudsActive = true;
-
+        public bool RenderClouds = true;
     }
 
 

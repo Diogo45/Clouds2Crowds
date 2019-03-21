@@ -9,69 +9,18 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1406320004997392}
+  m_RootGameObject: {fileID: 1738955297846668}
   m_IsPrefabAsset: 1
---- !u!1 &1406320004997392
+--- !u!1 &1045541710108052
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4307312306715442}
-  m_Layer: 0
-  m_Name: BioCloudsStartup
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!1 &1769292446197694
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4129316774544728}
-  - component: {fileID: 33113230044045704}
-  - component: {fileID: 23844034284415124}
-  - component: {fileID: 65420354507736818}
-  m_Layer: 0
-  m_Name: Background
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!1 &1825953317915470
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4677827694405246}
-  - component: {fileID: 114556887650857184}
-  - component: {fileID: 114315352802192664}
-  - component: {fileID: 114952086574051200}
-  m_Layer: 0
-  m_Name: Parameters
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!1 &1871552638976640
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4389777017469948}
-  - component: {fileID: 33314125157029958}
-  - component: {fileID: 23654424537770554}
+  - component: {fileID: 4508028578007398}
+  - component: {fileID: 33401716711346810}
+  - component: {fileID: 23835175854712742}
   m_Layer: 0
   m_Name: DensityQuad
   m_TagString: Untagged
@@ -79,67 +28,118 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4129316774544728
+--- !u!1 &1550441350781978
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4548045930030400}
+  - component: {fileID: 114854459378886316}
+  - component: {fileID: 114556298740066012}
+  - component: {fileID: 114314477160630844}
+  m_Layer: 0
+  m_Name: Parameters
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &1639316580416718
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4864703142210506}
+  - component: {fileID: 33829588062130064}
+  - component: {fileID: 23904513413433576}
+  - component: {fileID: 65351486699042070}
+  m_Layer: 0
+  m_Name: Background
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &1738955297846668
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4278372950374560}
+  m_Layer: 0
+  m_Name: BioCloudsStartup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4278372950374560
 Transform:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1769292446197694}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 249, y: 249, z: 0}
-  m_LocalScale: {x: 500, y: 500, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4307312306715442}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4307312306715442
-Transform:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1406320004997392}
+  m_GameObject: {fileID: 1738955297846668}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 4677827694405246}
-  - {fileID: 4389777017469948}
-  - {fileID: 4129316774544728}
+  - {fileID: 4548045930030400}
+  - {fileID: 4508028578007398}
+  - {fileID: 4864703142210506}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4389777017469948
+--- !u!4 &4508028578007398
 Transform:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1871552638976640}
+  m_GameObject: {fileID: 1045541710108052}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 249, y: 249, z: 5}
   m_LocalScale: {x: 500, y: 500, z: 1}
   m_Children: []
-  m_Father: {fileID: 4307312306715442}
+  m_Father: {fileID: 4278372950374560}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4677827694405246
+--- !u!4 &4548045930030400
 Transform:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1825953317915470}
+  m_GameObject: {fileID: 1550441350781978}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -169.47882, y: -124.69828, z: -214.26688}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 4307312306715442}
+  m_Father: {fileID: 4278372950374560}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23654424537770554
+--- !u!4 &4864703142210506
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1639316580416718}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 249, y: 249, z: 0}
+  m_LocalScale: {x: 500, y: 500, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4278372950374560}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!23 &23835175854712742
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1871552638976640}
+  m_GameObject: {fileID: 1045541710108052}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -169,12 +169,12 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!23 &23844034284415124
+--- !u!23 &23904513413433576
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1769292446197694}
+  m_GameObject: {fileID: 1639316580416718}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -204,60 +204,79 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!33 &33113230044045704
+--- !u!33 &33401716711346810
 MeshFilter:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1769292446197694}
+  m_GameObject: {fileID: 1045541710108052}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!33 &33314125157029958
+--- !u!33 &33829588062130064
 MeshFilter:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1871552638976640}
+  m_GameObject: {fileID: 1639316580416718}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!65 &65420354507736818
+--- !u!65 &65351486699042070
 BoxCollider:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1769292446197694}
+  m_GameObject: {fileID: 1639316580416718}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 0.99999994, y: 0.99999994, z: 6.1232336e-17}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114315352802192664
+--- !u!114 &114314477160630844
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1825953317915470}
+  m_GameObject: {fileID: 1550441350781978}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0a1e797c4d3fff4fa4a6607d5c9b9c0, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d1dd22945c313649addf7e69f010781, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CloudRendererData:
+  - mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    mat: {fileID: 2100000, guid: 71bfd43583ba26743834fb37fb4eb57f, type: 2}
+  HeatQuadRendererData: []
+  HeatMapTexture: {fileID: 0}
+--- !u!114 &114556298740066012
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1550441350781978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4a3df2f8c5f9ad4ea8329ed70559060, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   exp:
     SeedState: 0
-    RadiusUpdateType: 
-    Domain: []
+    Domain:
+      minX: 0
+      maxX: 0
+      minY: 0
+      maxY: 0
     FramesToRecord: 0
     IDToRecord: 0
     CellRegions: []
     AgentTypes: []
-  background: {fileID: 1769292446197694}
-  densityQuad: {fileID: 1871552638976640}
+  background: {fileID: 1639316580416718}
+  densityQuad: {fileID: 1045541710108052}
   mainCamera: {fileID: 0}
---- !u!114 &114556887650857184
+--- !u!114 &114854459378886316
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1825953317915470}
+  m_GameObject: {fileID: 1550441350781978}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6c7cf59cfe955b649ba0966910e9a608, type: 3}
@@ -277,14 +296,14 @@ MonoBehaviour:
   - {r: 1, g: 0.28068683, b: 0, a: 0}
   - {r: 1, g: 0.10174526, b: 0, a: 0}
   - {r: 0, g: 0, b: 0, a: 0}
-  HeatMapScaleSize: 512
+  HeatMapScaleSize: 5
   PartialExperimentPath: Experiments\DefaultExperiment.json
   ExperimentPath: Experiments\DefaultExperiment.json
   DefaultDomainMinX: 0
   DefaultDomainMaxX: 0
   DefaultDomainMinY: 0
   DefaultDomainMaxY: 0
-  DrawCloudToMarkerLines: 0
+  DrawCloudToMarkerLines: 1
   EnableRightPreference: 1
   SimulationFramesPerSecond: 10
   MaxSimulationFrames: 0
@@ -294,23 +313,4 @@ MonoBehaviour:
   PartialLogFilePath: Experiments\Logs\output
   LogFilePath: 
   BioCloudsActive: 1
---- !u!114 &114952086574051200
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1825953317915470}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac77f5a36ffa9384bbf9cde2ed04c258, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CloudRendererData:
-  - mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-    mat: {fileID: 2100000, guid: 71bfd43583ba26743834fb37fb4eb57f, type: 2}
-  - mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-    mat: {fileID: 2100000, guid: 91c0e02ef69536a48a6462908f7a1969, type: 2}
-  HeatQuadRendererData:
-  - mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-    mat: {fileID: 2100000, guid: 0fce074a27b6d754688d097077050907, type: 2}
-  HeatMapTexture: {fileID: 0}
+  RenderClouds: 1

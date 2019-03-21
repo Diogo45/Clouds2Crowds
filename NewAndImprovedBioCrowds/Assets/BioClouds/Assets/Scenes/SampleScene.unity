@@ -655,32 +655,28 @@ Transform:
 --- !u!114 &743224604
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 114952086574051200, guid: d6a2ed25cbc4b3c4ba556ee33978d45b,
-    type: 2}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 743224602}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41442a0481bec234d8229d465d6c52c3, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d1dd22945c313649addf7e69f010781, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   CloudRendererData:
   - mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
     mat: {fileID: 2100000, guid: 71bfd43583ba26743834fb37fb4eb57f, type: 2}
-  HeatQuadRendererData:
-  - mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-    mat: {fileID: 2100000, guid: 0fce074a27b6d754688d097077050907, type: 2}
+  HeatQuadRendererData: []
   HeatMapTexture: {fileID: 0}
 --- !u!114 &743224605
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 114315352802192664, guid: d6a2ed25cbc4b3c4ba556ee33978d45b,
-    type: 2}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 743224602}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 082d75ac8bb0a6644bea88ec283cc44f, type: 3}
+  m_Script: {fileID: 11500000, guid: d4a3df2f8c5f9ad4ea8329ed70559060, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   exp:

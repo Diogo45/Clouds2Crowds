@@ -48,7 +48,7 @@ namespace BioClouds
         {
             cellId2Cellfloat3.Dispose();
         }
-        protected override void OnStartRunning()
+        protected override void OnCreateManager()
         {
 
             cellId2Cellfloat3 = new NativeHashMap<int, float3>(m_CellsgGroup.Length, Allocator.Persistent);

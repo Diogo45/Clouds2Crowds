@@ -47,18 +47,6 @@ namespace BioClouds {
         
         Parameters inst;
 
-        //struct DeBufferQuads : IJobParallelFor
-        //{
-        //    [WriteOnly] public ComponentDataArray<Position> QuadPositions;
-        //    public NativeQueue<int> quadQueue;
-
-        //    public void Execute(int index)
-        //    {
-        //        int ind = quadQueue.Dequeue();
-
-        //        QuadPositions[ind] = new Position { Value = new float3(-10.0f, -10.0f, 0.0f) };
-        //    }
-        //}
 
         struct ClearMat : IJobParallelFor
         {
@@ -70,37 +58,6 @@ namespace BioClouds {
             }
         }
         
-        //struct MoveHeatMapQuads : IJobParallelFor
-        //{
-        //    [NativeDisableParallelForRestriction] public ComponentDataArray<Position> QuadPositions;
-        //    [ReadOnly] public ComponentDataArray<CloudData> CloudData;
-        //    [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
-            
-
-        //    public NativeArray<int> quadQuantities;
-        //    public NativeArray<int> quadIndexes;
-
-
-        //    public void Execute(int index)
-        //    {
-        //        float3 currentCellPosition;
-
-        //        NativeMultiHashMapIterator<int> it;
-        //        int idx = quadIndexes[index];
-
-        //        if (!CloudMarkersMap.TryGetFirstValue(CloudData[index].ID, out currentCellPosition, out it))
-        //            return;
-                
-        //        QuadPositions[idx++] = new Position { Value = currentCellPosition };
-                
-        //        while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
-        //        //Do stuff 2
-        //            QuadPositions[idx++] = new Position { Value = currentCellPosition };
-
-        //    }
-        //}
-
-
         struct FillDensityTex : IJobParallelFor
         {
             [ReadOnly] public ComponentDataArray<CloudData> CloudData;
@@ -210,7 +167,6 @@ namespace BioClouds {
 
         protected override void OnDestroyManager()
         {
-            //quadQuantities.Dispose();
             tex_mat.Dispose();
             cloudDensities.Dispose();
         }
