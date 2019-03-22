@@ -19,7 +19,6 @@ namespace BioClouds
         //View
         public EntityArchetype HeatQuadArchetype;
 
-        public EntityArchetype RelationHelper;
         public EntityManager BioEntityManager;
 
         public List<MeshInstanceRenderer> CellMeshes;
@@ -155,14 +154,15 @@ namespace BioClouds
 
 
 
-            CloudHeatMap.DisplayMaterial = densityQuad.GetComponent<MeshRenderer>().material;
-            CloudHeatMap.DisplayMaterial.SetTexture("_DensityTex", density);
-            CloudHeatMap.DisplayMaterial.SetTexture("_NoiseTex", noise);
-            CloudHeatMap.DisplayMaterial.SetInt("_Rows", inst.Rows);
-            CloudHeatMap.DisplayMaterial.SetInt("_Cols", inst.Cols);
-            CloudHeatMap.DisplayMaterial.SetFloat("_CellWidth", inst.CellWidth);
-            CloudHeatMap.DisplayMaterial.SetTexture("_HeatMapScaleTex", inst.GetHeatScaleTexture());
+            CloudHeatMap.DensityRenderer = densityQuad.GetComponent<MeshRenderer>();
+            CloudHeatMap.DensityRenderer.material.SetTexture("_DensityTex", density);
+            CloudHeatMap.DensityRenderer.material.SetTexture("_NoiseTex", noise);
+            CloudHeatMap.DensityRenderer.material.SetInt("_Rows", inst.Rows);
+            CloudHeatMap.DensityRenderer.material.SetInt("_Cols", inst.Cols);
+            CloudHeatMap.DensityRenderer.material.SetFloat("_CellWidth", inst.CellWidth);
+            CloudHeatMap.DensityRenderer.material.SetTexture("_HeatMapScaleTex", inst.GetHeatScaleTexture());
 
+            
             
             if (!city.BioParameters.DrawCloudToMarkerLines)
                 World.Active.GetExistingManager<CloudCellDrawLineSystem>().Enabled = false;
@@ -178,21 +178,25 @@ namespace BioClouds
 
         }
 
-        public void CreateCells(float x, float xf, float y, float yf, int cellType)
+        public void CreateCells(float x, float xf, float y, float yf)
         {
 
             List<float3> cells = new List<float3>();
 
-            for(float i = x; i < xf; i+= city.BioParameters.CellWidth)
+            for (float i = x; i < xf; i += city.BioParameters.CellWidth)
             {
-                for (float j = y; j < yf; j+=city.BioParameters.CellWidth)
+                for (float j = y; j < yf; j += city.BioParameters.CellWidth)
                 {
+                    
                     Entity newCell = entityManager.CreateEntity(city.CellArchetype);
 
-                    entityManager.SetComponentData<Position>(newCell, new Position { Value = new float3(i, j , 0f) });
+                    entityManager.SetComponentData<Position>(newCell, new Position { Value = new float3(i, j, 0f) });
                     entityManager.SetComponentData<Rotation>(newCell, new Rotation { Value = quaternion.identity });
-                    entityManager.SetComponentData<CellData>(newCell, new CellData { ID = GridConverter.Position2CellID(new float3(i, j, 0f)),
-                                                                                     Area = city.BioParameters.CellWidth * city.BioParameters.CellWidth});
+                    entityManager.SetComponentData<CellData>(newCell, new CellData
+                    {
+                        ID = GridConverter.Position2CellID(new float3(i, j, 0f)),
+                        Area = city.BioParameters.CellWidth * city.BioParameters.CellWidth
+                    });
                     cells.Add(new float3(i, j, 0f));
                 }
             }
@@ -277,14 +281,13 @@ namespace BioClouds
         public void StartExperiment()
         {
 
-
             for(int i = 0; i < exp.CellRegions.Length; i++)
             {
+                //Debug.Log("Make Cells!");
                 CreateCells(exp.CellRegions[i].minX,
                             exp.CellRegions[i].maxX,
                             exp.CellRegions[i].minY,
-                            exp.CellRegions[i].maxY,
-                            0);
+                            exp.CellRegions[i].maxY);
             }
 
             for (int i = 0; i < exp.AgentTypes.Length; i++)

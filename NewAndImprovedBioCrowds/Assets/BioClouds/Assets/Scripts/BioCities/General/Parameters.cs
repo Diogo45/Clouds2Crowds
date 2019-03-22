@@ -87,7 +87,7 @@ namespace BioClouds
         public void InitializeParameters()
         {
 
-            //LoadOrGenerateParameters();
+            LoadOrGenerateParameters();
 
             //Parameters userParameters = Parameters.LoadParameters(customParametersTotalPath);
             

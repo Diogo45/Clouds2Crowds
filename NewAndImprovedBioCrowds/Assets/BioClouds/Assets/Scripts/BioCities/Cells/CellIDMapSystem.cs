@@ -11,6 +11,12 @@ using Unity.Jobs;
 
 namespace BioClouds
 {
+
+    /// <summary>
+    /// Creates a map of Cell ID to Cell Position.
+    /// Updates map whenever cell quantity changes.
+    /// Inject to obtain updated map.
+    /// </summary>
     [UpdateBefore(typeof(PostMarkGroup))]
     public class CellIDMapSystem : JobComponentSystem
     {
@@ -18,6 +24,9 @@ namespace BioClouds
         //Data structure sizes
         int lastsize_cellId2Cellfloat3Map;
 
+        /// <summary>
+        /// Map of Cell ID to Cell Position.
+        /// </summary>
         public NativeHashMap<int, float3> cellId2Cellfloat3;
 
         public struct CellsGroup
@@ -34,8 +43,6 @@ namespace BioClouds
             [ReadOnly] public ComponentDataArray<CellData> CellData;
             [ReadOnly] public ComponentDataArray<Position> Position;
             [WriteOnly] public NativeHashMap<int, float3>.Concurrent id2float3;
-
-            //[WriteOnly] public NativeQueue<DoublePosition>.Concurrent aux_draw;
 
             public void Execute(int cellGroupIndex)
             {
@@ -57,8 +64,6 @@ namespace BioClouds
             for (int i = 0; i < m_CellsgGroup.Length; i++)
                 cellId2Cellfloat3.TryAdd(m_CellsgGroup.Cell[i].ID, m_CellsgGroup.Position[i].Value);
 
-            //Debug
-            //auxDraw = new NativeQueue<DoublePosition>(Allocator.TempJob);
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)

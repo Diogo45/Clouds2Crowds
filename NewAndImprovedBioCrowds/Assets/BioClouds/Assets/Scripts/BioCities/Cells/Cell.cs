@@ -9,18 +9,6 @@ using Unity.Jobs;
 
 namespace BioClouds
 {
-    //grouping component
-    public struct Cell : ISharedComponentData, System.IEquatable<Cell>
-    {
-        public int X;
-        public int Y;
-
-        public bool Equals(Cell other)
-        {
-            return X == other.X && Y == other.Y;
-        }
-    }
-   
 
     public struct CellData : IComponentData
     {

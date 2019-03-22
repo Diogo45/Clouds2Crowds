@@ -13,6 +13,10 @@ public class GridConverter
         public float maxx;
         public float maxy;
 
+        public override string ToString()
+        {
+            return "minX=" + minx + " " + " minY=" + miny + " maxX=" + maxx + " maxY=" + maxy;
+        }
     }
 
     static Rect domain;

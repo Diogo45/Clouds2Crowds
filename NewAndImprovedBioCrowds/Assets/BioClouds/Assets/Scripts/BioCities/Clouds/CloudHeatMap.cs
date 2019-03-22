@@ -33,7 +33,7 @@ namespace BioClouds {
         public int tex_mat_col;
         public NativeHashMap<int, float> cloudDensities;
 
-        public static Material DisplayMaterial;
+        public static MeshRenderer DensityRenderer;
 
         public struct CloudDataGroup
         {
@@ -76,6 +76,9 @@ namespace BioClouds {
                 int cellCount = 0;
                 NativeMultiHashMapIterator<int> it;
 
+
+                //Debug.Log("CloudDataLength" + CloudData.Length);
+
                 if (!CloudMarkersMap.TryGetFirstValue(CloudData[index].ID, out currentCellPosition, out it))
                     return;
                 cellCount++;
@@ -94,6 +97,9 @@ namespace BioClouds {
 
                 int2 grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
                 tex_mat[grid_cell.y * mat_rows + grid_cell.x] = densityColor;
+
+
+                //Debug.Log("color:" + densityColor);
 
                 cloudDensities.TryAdd(CloudData[index].ID, delta);
 
@@ -160,7 +166,7 @@ namespace BioClouds {
             tex.filterMode = FilterMode.Point;
             tex.wrapMode = TextureWrapMode.Clamp;
 
-            DisplayMaterial.SetTexture("_DensityTex", tex);
+            DensityRenderer.material.SetTexture("_DensityTex", tex);
 
             return calculateMatDeps;
         }
