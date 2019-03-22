@@ -6,6 +6,7 @@ using Unity.Transforms;
 using Unity.Jobs;
 using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine;
+using System;
 
 namespace BioCrowds
 {
@@ -424,6 +425,7 @@ namespace BioCrowds
         {
             [WriteOnly] public ComponentDataArray<Position> Position;
             [ReadOnly] public ComponentDataArray<AgentStep> AgentStep;
+            public ComponentDataArray<AgentGoal> Goal;
             [ReadOnly] public readonly int Length;
         }
         [Inject] MarkersGroup markersGroup;
@@ -432,6 +434,8 @@ namespace BioCrowds
         {
             public ComponentDataArray<Position> Positions;
             [ReadOnly] public ComponentDataArray<AgentStep> Deltas;
+            public ComponentDataArray<AgentGoal> Goal;
+
 
             public void Execute(int index)
             {
@@ -439,6 +443,20 @@ namespace BioCrowds
                 //Debug.Log("MOVE:" + Positions[index].Value);
 
                 Positions[index] = new Position { Value = old + Deltas[index].delta };
+
+
+
+                //DONOW: Remove encherto
+                if (math.distance(old + Deltas[index].delta, Goal[index].SubGoal) <= 1f)
+                {
+                    var w = AgentCalculations.RandomWayPoint();
+                    Debug.Log(w);
+                    Goal[index] = new AgentGoal
+                    {
+                        SubGoal = w
+
+                    };
+                }
             }
         }
 
@@ -450,7 +468,8 @@ namespace BioCrowds
             MoveCloudsJob moveJob = new MoveCloudsJob()
             {
                 Positions = markersGroup.Position,
-                Deltas = markersGroup.AgentStep
+                Deltas = markersGroup.AgentStep,
+                Goal = markersGroup.Goal
             };
 
             var deps = moveJob.Schedule(markersGroup.Length, Settings.BatchSize, inputDeps);
@@ -463,6 +482,9 @@ namespace BioCrowds
     }
 
     
+
+
+
 
     public static class AgentCalculations
     {
@@ -484,6 +506,13 @@ namespace BioCrowds
         public static float PartialW(float totalW, float fValue)
         {
             return fValue / totalW;
+        }
+
+        public static float3 RandomWayPoint()
+        {
+            System.Random r = new System.Random(System.DateTime.UtcNow.Millisecond);
+            int i = r.Next(0, Settings.experiment.WayPoints.Length);
+            return Settings.experiment.WayPoints[i];
         }
     }
 

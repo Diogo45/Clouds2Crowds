@@ -33,6 +33,26 @@ namespace BioCrowds
                                          max = new int3 {x = 15, y = 0, z = 50},
                                          min = new int3 {x = 0, y = 0, z = 0 },
                                          maxSpeed = 1.3f} };
+        public float3[] WayPoints = new float3[]{
+            new float3(25,0,25),
+            new float3(45,0,25),
+            new float3(25,0,45),
+            new float3(15,0,25),
+            new float3(25,0,15),
+        };
+
+
+        public int[][] AdjacencyMatrix =
+        {
+            new int[]{1,1,1,1,1},
+            new int[]{1,1,1,1,1},
+            new int[]{1,1,1,1,1},
+            new int[]{1,1,1,1,1},
+            new int[]{1,1,1,1,1},
+        };
+
+
+        public bool WayPointOn = false;
         public float agentRadius = 1f;
         public float markerRadius = 0.1f;
         public float MarkerDensity = 0.65f;

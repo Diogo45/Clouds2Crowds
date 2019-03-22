@@ -24,6 +24,7 @@ namespace BioCrowds
         [Inject] StressSystem stressSystem;
         [Inject] NormaLifeAgentMovementVectors normaLifeAgentMovementVectors;
         [Inject] AgentMovementVectors agentMovementVectors;
+        [Inject] AgentDespawner despawner;
 
         protected override void OnUpdate()
         {
@@ -47,6 +48,13 @@ namespace BioCrowds
                 markerSystem.Enabled = false;
                 agentMovementVectors.Enabled = false;
             }
+
+
+            if (!modules.BioCloudsEnabled)
+            {
+                despawner.Enabled = false;
+            }
+
 
         }
         
