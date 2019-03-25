@@ -299,7 +299,8 @@ namespace BioCrowds
         //TODO BioClouds stuff
         [Inject] BioCities.CellMarkSystem m_BioCloudsCellMarkSystem;
         [Inject] BioCities.CloudCellTagSystem m_BioCloudsCellTagSystem;
-            // end BIOCLOUDS
+        // end BIOCLOUDS
+
 
         struct CalculateAgentMoveStep : IJobParallelFor
         {
@@ -309,7 +310,7 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<Position> AgentPos;
 
             [ReadOnly] public SharedComponentDataArray<AgentCloudID> AgentCloudID;
-            
+
             [ReadOnly] public NativeMultiHashMap<int, float3> AgentMarkersMap;
             [ReadOnly] public NativeHashMap<int, float> AgentTotalW;
             [WriteOnly] public ComponentDataArray<AgentStep> AgentStep;
@@ -327,7 +328,7 @@ namespace BioCrowds
 
                 BioCities.CloudIDPosRadius CloudPos;
                 //if (!BioClouds2PosMap.TryGetValue(AgentCloudID[index].CloudID, out CloudPos))
-                    //return;
+                //return;
                 //float3 CloudPosition = CloudPos.position;
                 //float3 BioCrowdsCloudPosition = WindowManager.Clouds2Crowds(CloudPosition);
 
@@ -389,29 +390,143 @@ namespace BioCrowds
             }
         }
 
+        struct CalculateAgentMoveStepCloudCohesion : IJobParallelFor
+        {
+
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            [ReadOnly] public ComponentDataArray<AgentGoal> AgentGoals;
+            [ReadOnly] public ComponentDataArray<Position> AgentPos;
+
+            [ReadOnly] public SharedComponentDataArray<AgentCloudID> AgentCloudID;
+            
+            [ReadOnly] public NativeMultiHashMap<int, float3> AgentMarkersMap;
+            [ReadOnly] public NativeHashMap<int, float> AgentTotalW;
+            [WriteOnly] public ComponentDataArray<AgentStep> AgentStep;
+
+
+            [ReadOnly] public NativeHashMap<int, BioCities.CloudIDPosRadius> BioClouds2PosMap;
+            [ReadOnly] public NativeHashMap<int, int> BioCloudsCell2OwningCloudMap;
+
+
+
+            public void Execute(int index)
+            {
+
+                BioCities.CloudIDPosRadius CloudPos;
+                if (!BioClouds2PosMap.TryGetValue(AgentCloudID[index].CloudID, out CloudPos))
+                    return;
+                float3 CloudPosition = CloudPos.position;
+                float3 BioCrowdsCloudPosition = WindowManager.Clouds2Crowds(CloudPosition);
+
+
+                float3 Agent2CloudCenterVec = BioCrowdsCloudPosition - AgentPos[index].Value;
+
+                float3 NormalizedAgent2CloudCenter = math.normalize(Agent2CloudCenterVec);
+
+
+                float3 currentMarkerPosition;
+                NativeMultiHashMapIterator<int> it;
+
+                float3 moveStep = float3.zero;
+                float3 direction = float3.zero;
+                float totalW;
+                AgentTotalW.TryGetValue(AgentData[index].ID, out totalW);
+
+                bool keepgoing = AgentMarkersMap.TryGetFirstValue(AgentData[index].ID, out currentMarkerPosition, out it);
+
+                if (!keepgoing)
+                    return;
+
+                //float extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
+
+                float F = AgentCalculations.GetF(currentMarkerPosition, AgentPos[index].Value, AgentGoals[index].SubGoal - AgentPos[index].Value);
+
+                //F += extraweight * 0.1f;
+
+                direction += AgentCalculations.PartialW(totalW, F) * AgentData[index].MaxSpeed * (currentMarkerPosition - AgentPos[index].Value);
+
+
+
+                while (AgentMarkersMap.TryGetNextValue(out currentMarkerPosition, ref it))
+                {
+
+                    //extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
+
+                    F = AgentCalculations.GetF(currentMarkerPosition, AgentPos[index].Value, AgentGoals[index].SubGoal - AgentPos[index].Value);
+
+                    //F += extraweight * 0.1f;
+
+                    direction += AgentCalculations.PartialW(totalW, F) * AgentData[index].MaxSpeed * (currentMarkerPosition - AgentPos[index].Value);
+                }
+
+
+                float moduleM = math.length(direction);
+                float s = (float)(moduleM * math.PI);
+
+                if (s > AgentData[index].MaxSpeed)
+                    s = AgentData[index].MaxSpeed;
+
+                if (moduleM > 0.00001f)
+                    moveStep = s * (math.normalize(direction));
+                else
+                    moveStep = float3.zero;
+
+                AgentStep[index] = new AgentStep() { delta = moveStep };
+
+            }
+        }
+
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
 
-            var calculateMoveStepJob = new CalculateAgentMoveStep()
+
+            if (Settings.experiment.BioCloudsEnabled)
             {
-                AgentData = agentGroup.AgentData,
-                AgentGoals = agentGroup.AgentGoal,
-                AgentPos = agentGroup.Position,
-                AgentStep = agentGroup.AgentStep,
-                AgentTotalW = totalWeightSystem.AgentTotalMarkerWeight,
-                AgentMarkersMap = markerSystem.AgentMarkers,
-                //BioCloudsCell2OwningCloudMap = m_BioCloudsCellMarkSystem.Cell2OwningCloud,
-                //BioClouds2PosMap = m_BioCloudsCellTagSystem.cloudIDPositions,
-                AgentCloudID = agentGroup.AgentCloudID
-            };
+                var calculateMoveStepJob = new CalculateAgentMoveStepCloudCohesion()
+                {
+                    AgentData = agentGroup.AgentData,
+                    AgentGoals = agentGroup.AgentGoal,
+                    AgentPos = agentGroup.Position,
+                    AgentStep = agentGroup.AgentStep,
+                    AgentTotalW = totalWeightSystem.AgentTotalMarkerWeight,
+                    AgentMarkersMap = markerSystem.AgentMarkers,
+                    BioCloudsCell2OwningCloudMap = m_BioCloudsCellMarkSystem.Cell2OwningCloud,
+                    BioClouds2PosMap = m_BioCloudsCellTagSystem.cloudIDPositions,
+                    AgentCloudID = agentGroup.AgentCloudID
+                };
 
-            //Debug.Log("AgentCount: " + agentGroup.Length);
+                //Debug.Log("AgentCount: " + agentGroup.Length);
 
-            var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+                var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
 
-            calculateMoveStepDeps.Complete();
+                calculateMoveStepDeps.Complete();
 
-            return calculateMoveStepDeps;
+                return calculateMoveStepDeps;
+
+            }
+            else
+            {
+                var calculateMoveStepJob = new CalculateAgentMoveStep()
+                {
+                    AgentData = agentGroup.AgentData,
+                    AgentGoals = agentGroup.AgentGoal,
+                    AgentPos = agentGroup.Position,
+                    AgentStep = agentGroup.AgentStep,
+                    AgentTotalW = totalWeightSystem.AgentTotalMarkerWeight,
+                    AgentMarkersMap = markerSystem.AgentMarkers,
+                    AgentCloudID = agentGroup.AgentCloudID
+                };
+
+                //Debug.Log("AgentCount: " + agentGroup.Length);
+
+                var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+
+                calculateMoveStepDeps.Complete();
+
+                return calculateMoveStepDeps;
+            }
+
+            
         }
 
     }

@@ -155,6 +155,10 @@ namespace BioCrowds
     [UpdateBefore(typeof(CellTagSystem)), UpdateAfter(typeof(MarkerSpawnSystem))]
     public class SpawnBarrier : BarrierSystem { }
 
+
+    /// <summary>
+    /// Spawns markers cell by cell with random positions and a marker radius apart, given the marker density
+    /// </summary>
     [UpdateBefore(typeof(CellTagSystem))]
     public class MarkerSpawnSystem : JobComponentSystem
     {
@@ -222,7 +226,6 @@ namespace BioCrowds
                    
                     if (canInstantiate)
                     {
-                        //Debug.Log("Instaciou uma");
                         CommandBuffer.CreateEntity(index, MakerArchetype);
 
                         CommandBuffer.SetComponent(index, new Position
@@ -233,22 +236,16 @@ namespace BioCrowds
                         {
                             id = markersAdded
                         });
-                        //CommandBuffer.SetComponent(index, new CellName
-                        //{
-                        //    Value = cellNames[index].Value
-                        //});
                         CommandBuffer.AddSharedComponent(index, new MarkerCellName
                         {
                             Value = cellNames[index].Value
-                        });
+                        });                        
                         //CommandBuffer.AddComponent(index, new Active { active = 1 });
 
-                        
                         markersAdded++;
 
-                        //if(Settings.experiment.showMarkers)CommandBuffer.AddSharedComponent(index, MarkerRenderer);
+                        if(Settings.experiment.showMarkers)CommandBuffer.AddSharedComponent(index, MarkerRenderer);
                         tempCellMarkers.Add(new Position { Value = new float3(x, y, z)});
-                        //temptemp.Add(newMarker);
                     }
                     else
                     {
