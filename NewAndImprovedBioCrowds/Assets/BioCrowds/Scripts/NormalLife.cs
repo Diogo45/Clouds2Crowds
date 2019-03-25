@@ -315,7 +315,7 @@ namespace BioCrowds
     }
 
     [UpdateBefore(typeof(NormaLifeAgentMovementVectors)), UpdateAfter(typeof(NormalLifeMarkerSystem))]
-    public class ContadorDeMerda : JobComponentSystem
+    public class MarkerCounter : JobComponentSystem
     {
         [Inject] NormalLifeMarkerSystem normalLifeMarkerSystem;
 

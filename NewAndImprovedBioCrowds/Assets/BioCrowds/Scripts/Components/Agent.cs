@@ -446,8 +446,8 @@ namespace BioCrowds
 
 
 
-                //DONOW: Remove encherto
-                if (math.distance(old + Deltas[index].delta, Goal[index].SubGoal) <= 1f)
+                //DONOW:Remove encherto
+                if (math.distance(old + Deltas[index].delta, Goal[index].SubGoal) <= 1f && Settings.experiment.WayPointOn)
                 {
                     var w = AgentCalculations.RandomWayPoint();
                     Debug.Log(w);

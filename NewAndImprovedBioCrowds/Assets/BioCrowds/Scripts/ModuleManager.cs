@@ -13,14 +13,16 @@ using UnityEditor;
 
 namespace BioCrowds
 {
+    /// <summary>
+    /// Controls witch systems are active based on the modules of BioCrowds.
+    /// </summary>
     [UpdateBefore(typeof(CellTagSystem))]
     public class ModuleManager : ComponentSystem
     {
         
         [Inject] NormalLifeMarkerSystem normalLifeMarkerSystem;
         [Inject] MarkerSystem markerSystem;
-        [Inject] ContadorDeMerda ContadorDeMerda;
-        //[Inject] CellTagSystem cellTagSystem;
+        [Inject] MarkerCounter markerCounter;
         [Inject] StressSystem stressSystem;
         [Inject] NormaLifeAgentMovementVectors normaLifeAgentMovementVectors;
         [Inject] AgentMovementVectors agentMovementVectors;
@@ -35,7 +37,7 @@ namespace BioCrowds
                 stressSystem.Enabled = false;
                 normaLifeAgentMovementVectors.Enabled = false;
                 normalLifeMarkerSystem.Enabled = false;
-                ContadorDeMerda.Enabled = false;
+                markerCounter.Enabled = false;
                 markerSystem.Enabled = true;
                 agentMovementVectors.Enabled = true;
             }
@@ -44,16 +46,11 @@ namespace BioCrowds
                 stressSystem.Enabled = true;
                 normaLifeAgentMovementVectors.Enabled = true;
                 normalLifeMarkerSystem.Enabled = true;
-                ContadorDeMerda.Enabled = true;
+                markerCounter.Enabled = true;
                 markerSystem.Enabled = false;
                 agentMovementVectors.Enabled = false;
             }
 
-
-            if (!modules.BioCloudsEnabled)
-            {
-                despawner.Enabled = false;
-            }
 
 
         }

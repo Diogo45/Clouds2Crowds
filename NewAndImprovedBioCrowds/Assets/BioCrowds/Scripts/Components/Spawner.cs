@@ -1,13 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Mathematics;
-using System.Linq;
 using Unity.Transforms;
 using Unity.Jobs;
-using UnityEngine.Experimental.PlayerLoop;
 using Unity.Rendering;
 using System;
 
@@ -16,10 +12,17 @@ namespace BioCrowds
     [UpdateBefore(typeof(CellTagSystem))]
     public class SpawnerGroup { }
 
+
+    /// <summary>
+    /// Just a sinc point for the creation and modification of entities to be executed in the main thread
+    /// </summary>
     [UpdateAfter(typeof(AgentSpawner)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class SpawnAgentBarrier : BarrierSystem { }
 
-
+    /// <summary>
+    /// Spawns agents in runtime when BioClouds is active, instantiation occurs cell by cell where each one corresponds to a BioClouds cell. The data received is in the BioClouds, that is, the positions are (x,y,0) while BioCrowds is (x,0,z). 
+    /// If bioclouds is not enabled for this experiment them we spawn only once with the data comming from the experiment file already in the necessary format.
+    /// </summary>
     [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class AgentSpawner : JobComponentSystem
     {
@@ -42,7 +45,6 @@ namespace BioCrowds
         public struct Parameters
         {
             public int cloud;
-            //World positions
             public int qtdAgents;
             public float3 spawnOrigin;
             public float2 spawnDimensions;
@@ -101,35 +103,21 @@ namespace BioCrowds
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
                 {
 
-                    //Debug.Log("Agent id : " + i);
-
                     if (doNotFreeze > qtdAgtTotal)
                     {
                         doNotFreeze = 0;
-                        //maxZ += 2;
-                        //maxX += 2;
+
                     }
 
                     float x = (float)r.NextDouble() * (maxX - minX) + minX;
                     float z = (float)r.NextDouble() * (maxZ - minZ) + minZ;
                     float y = 0;
-                    //Debug.Log("AGENT: " + x + " " + z);
-
-
-
 
                     float3 g = spawnList.goal;
-
-                    //x = UnityEngine.Random.Range(x - 0.99f, x + 0.99f);
-                    //float y = 0f;
-                    //z = UnityEngine.Random.Range(z - 0.99f, z + 0.99f);
-
-
 
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
                     CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
-                    //Debug.Log(maxSpeed / Settings.experiment.FramesPerSecond);
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
@@ -146,8 +134,6 @@ namespace BioCrowds
                     });
                     CommandBuffer.SetComponent(index, new CellName { Value = new int3(CellX, CellY, CellZ) });
                     CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
-                    //entityManager.AddComponent(newAgent, ComponentType.FixedArray(typeof(int), qtdMarkers));
-                    //TODO:Normal Life stuff change
                     CommandBuffer.SetComponent(index, new Counter { Value = 0 });
                     CommandBuffer.SetComponent(index, new NormalLifeData
                     {
@@ -292,6 +278,9 @@ namespace BioCrowds
         protected override void OnCreateManager()
         {
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+            //Here we define the agent archetype by adding all the Components, that is, all the Agent's data. 
+            //The respective Systems will act upon the Components added, if such Systems exist.
+            //Also we have to add Components from the modules such as NormalLife so we can turn them on and off in runtime
             AgentArchetype = entityManager.CreateArchetype(
                ComponentType.Create<Position>(),
                ComponentType.Create<Rotation>(),
@@ -302,10 +291,10 @@ namespace BioCrowds
                ComponentType.Create<NormalLifeData>(),
                ComponentType.Create<Animator>(),
                ComponentType.Create<Counter>(),
-               ComponentType.Create<BioCrowdsAnchor>());//,
-                                                        //ComponentType.Create<Attach>());
+               ComponentType.Create<BioCrowdsAnchor>());
 
-
+            //If bioclouds isn't enabled we must use other job to spawn the agents
+            //Here we get the necessary data from the experiment file
             if (!Settings.experiment.BioCloudsEnabled)
             {
                 var exp = Settings.experiment.SpawnAreas;
@@ -350,13 +339,10 @@ namespace BioCrowds
         {
             if (Settings.experiment.BioCloudsEnabled)
             {
-                //Debug.Log("agents spawned " + lastAgentId);
                 lastAgentId = AgentAtCellQuantity[AgentAtCellQuantity.Length - 1] + lastAgentId;
 
-                //Debug.Log("L2 " + clouds2Crowds.parameterBuffer.Length);
                 int lastValue = 0;
 
-                //TODO make parallel
                 for (int i = 1; i < m_CellGroup.Length; i++)
                 {
                     float3 cellPos = WindowManager.Crowds2Clouds(m_CellGroup.CellName[i].Value);
@@ -391,13 +377,10 @@ namespace BioCrowds
             }
             else
             {
-                //Debug.Log("agents spawned " + lastAgentId);
                 lastAgentId = AgentAtCellQuantity[AgentAtCellQuantity.Length - 1] + lastAgentId;
 
-                //Debug.Log("L2 " + clouds2Crowds.parameterBuffer.Length);
                 int lastValue = 0;
 
-                //TODO make parallel
                 for (int i = 1; i < m_CellGroup.Length; i++)
                 {
                     float3 cellPos = WindowManager.Crowds2Clouds(m_CellGroup.CellName[i].Value);
@@ -457,7 +440,6 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<Position> AgtPos;
             [ReadOnly] public EntityArray entities;
             public EntityCommandBuffer.Concurrent CommandBuffer;
-            //[WriteOnly] public NativeQueue<int>.Concurrent destroyedAgents;
 
             public void Execute(int index)
             {
@@ -465,33 +447,37 @@ namespace BioCrowds
                 
                 if (WindowManager.CheckDestructZone(posCloudCoord))
                 {
-                    //Debug.Log(posCloudCoord);
                     CommandBuffer.DestroyEntity(index, entities[index]);
-                    //destroyedAgents.Enqueue(entities[index].Index);
                 }
             }
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            //NativeQueue<int> q = new NativeQueue<int>(Allocator.TempJob);
 
-            var CheckArea = new CheckAreas
+            if (Settings.experiment.BioCloudsEnabled)
             {
-                AgtPos = agentGroup.AgtPos,
-                CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                entities = agentGroup.entities//,
-                //destroyedAgents = q.ToConcurrent()
-            };
+                var CheckArea = new CheckAreas
+                {
+                    AgtPos = agentGroup.AgtPos,
+                    CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
+                    entities = agentGroup.entities
+                };
 
-            var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-            CheckAreaHandle.Complete();
+                var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+                CheckAreaHandle.Complete();
 
-            //Debug.Log("DestroyedAgents : " + q.Count);
-            //q.Dispose();
-            return CheckAreaHandle;
-            //return inputDeps;
-            
+                return CheckAreaHandle;
+            }
+            else
+            {
+                //TODO: Define other methods for despawn
+                this.Enabled = false;
+                return inputDeps;
+            }
+
+
+
         }
 
     }
