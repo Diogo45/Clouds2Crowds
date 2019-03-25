@@ -13,24 +13,30 @@ namespace BioClouds {
     
     public struct HeatQuad : IComponentData { } //Marker Component
 
+    /// <summary>
+    /// Computes the correct cloud crowd densities. 
+    /// Comptues the density texture for the heatmap representation.
+    /// Updates the density texture.
+    /// </summary>
     [UpdateAfter(typeof(CellMarkSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
     public class CloudHeatMap : JobComponentSystem
     {
         //Data structure size data.
         int lastsize_texmat;
-
-        #region Data Recording
         
-        public List<Record> records;
-        public int CurrentFrame;
-
-        #endregion
-
+        /// <summary>
+        /// 2D Density Texture. Each cell id is mapped to a pixel in the texture.
+        /// This is the Crowd Density HeatMap.
+        /// </summary>
         public static Texture2D tex;
         public NativeArray<Color> tex_mat;
         public int tex_mat_row;
         public int tex_mat_col;
+
+        /// <summary>
+        /// The mapping of Cloud ID to crowd density. Measured in agents / sqm
+        /// </summary>
         public NativeHashMap<int, float> cloudDensities;
 
         public static MeshRenderer DensityRenderer;
@@ -63,7 +69,6 @@ namespace BioClouds {
             [ReadOnly] public ComponentDataArray<CloudData> CloudData;
             [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
             [ReadOnly] public float CellArea;
-            //[WriteOnly] public NativeArray<int> cloudQuadQuantity;
             [WriteOnly] public NativeHashMap<int, float>.Concurrent cloudDensities;
             [ReadOnly] public int mat_rows;
             [ReadOnly] public int mat_cols;
@@ -75,9 +80,7 @@ namespace BioClouds {
                 float3 currentCellPosition;
                 int cellCount = 0;
                 NativeMultiHashMapIterator<int> it;
-
-
-                //Debug.Log("CloudDataLength" + CloudData.Length);
+                
 
                 if (!CloudMarkersMap.TryGetFirstValue(CloudData[index].ID, out currentCellPosition, out it))
                     return;
@@ -86,7 +89,6 @@ namespace BioClouds {
                 while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
                     cellCount++;
 
-                //cloudQuadQuantity[index] = cellCount;
                 float totalArea = cellCount * CellArea;
                 CloudData cData = CloudData[index];
                 float delta = cData.AgentQuantity / totalArea;
@@ -97,10 +99,7 @@ namespace BioClouds {
 
                 int2 grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
                 tex_mat[grid_cell.y * mat_rows + grid_cell.x] = densityColor;
-
-
-                //Debug.Log("color:" + densityColor);
-
+                
                 cloudDensities.TryAdd(CloudData[index].ID, delta);
 
                 while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
@@ -179,8 +178,6 @@ namespace BioClouds {
 
         protected override void OnStartRunning()
         {
-            CurrentFrame = 0;
-            records = new List<Record>();
             lastsize_texmat = 0;
             
             cloudDensities = new NativeHashMap<int, float>(0, Allocator.Persistent);

@@ -11,6 +11,9 @@ using Unity.Burst;
 namespace BioClouds
 {
 
+    /// <summary>
+    /// Computes each cloud's Movement Vector for each simulation step.
+    /// </summary>
     [UpdateAfter(typeof(CloudCellTotalWeightSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
     public class CloudMovementVectorSystem : JobComponentSystem
@@ -28,10 +31,8 @@ namespace BioClouds
         [Inject] CloudCellTotalWeightSystem m_cloudCellTotalWeightSystem;
         [Inject] CellIDMapSystem m_cellIdMap;
 
-        [Inject] CloudSplitSystem m_CloudSplit;
-
-        public NativeArray<float3> CloudMovementVectors;
-
+        [Inject] CloudRightPreferenceSystem m_CloudSplit;
+        
         struct CalculateCloudMoveStep : IJobParallelFor
         {
 
@@ -113,7 +114,7 @@ namespace BioClouds
                 CloudGoals = m_CloudDataGroup.CloudGoal,
                 CloudPositions = m_CloudDataGroup.Position,
                 CloudStep = m_CloudDataGroup.CloudStep,
-                CloudTotalW = m_cloudCellTotalWeightSystem.CloudTotalAuxinWeight,
+                CloudTotalW = m_cloudCellTotalWeightSystem.CloudTotalCellWeight,
                 CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
                 CellMap = m_cellIdMap.cellId2Cellfloat3,
                 ExtraWeightCell = m_CloudSplit.extraWeightCellId,

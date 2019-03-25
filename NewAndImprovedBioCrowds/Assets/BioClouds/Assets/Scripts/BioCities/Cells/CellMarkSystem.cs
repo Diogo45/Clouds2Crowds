@@ -12,7 +12,10 @@ using Unity.Jobs;
 namespace BioClouds
 {
 
-  
+  /// <summary>
+  /// Each tagged cell marks the cloud closest to them.
+  /// Produces a map of Cloud ID to list of uniquely marked Cells.
+  /// </summary>
     [UpdateAfter(typeof(CloudCellTagSystem))]
     public class CellMarkSystem : JobComponentSystem
     {
@@ -25,12 +28,16 @@ namespace BioClouds
 
 
         //Holds the positions of eac tagged cell. Paired with the indexed cloud vector.
-
+        /// <summary>
+        /// The mapping of Cloud ID to uniquely marked cells.
+        /// </summary>
         public NativeMultiHashMap<int, float3> cloudID2MarkedCellsMap;
         //Data structure sizes
         int lastsize_cloudID2MarkedCellsMap;
 
-
+        /// <summary>
+        /// The mapping of Cell ID to owning cloud.
+        /// </summary>
         public NativeHashMap<int, int> Cell2OwningCloud;
         int lastsize_cell2owningcloud;
 
@@ -58,6 +65,10 @@ namespace BioClouds
 
         [Inject] CloudCellTagSystem m_cloudCellTagsSystem;
 
+
+        /// <summary>
+        /// This job fills the CloudID -> Marked cell and the Cell ID -> owning cloud relations.
+        /// </summary>
         struct MarkCellsNotifyAgentsJob : IJobParallelFor
         {
             [WriteOnly] public NativeMultiHashMap<int, float3>.Concurrent cloudID2MarkedCellsMap;

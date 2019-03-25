@@ -10,7 +10,10 @@ using Unity.Burst;
 
 namespace BioClouds
 {
-    
+    /// <summary>
+    /// Cloud Movement Vector calculations.
+    /// Follows the implementation of the BioClouds and BioCrowds paper.
+    /// </summary>
     public static class CloudCalculations
     {
         //Current marker position, current cloud position and (goal position - cloud position) vector.

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Experiment definition class.
+/// </summary>
 [System.Serializable]
 public class Experiment{
 

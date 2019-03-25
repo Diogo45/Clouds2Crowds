@@ -11,6 +11,10 @@ using Unity.Jobs;
 
 namespace BioClouds
 {
+    /// <summary>
+    /// Helper System. Determines the quantity of interested cells for each cloud.
+    /// Computes the total number of desired captured markers per cloud.
+    /// </summary>
     [UpdateBefore(typeof(PostMarkGroup))]
     public class CloudTagDesiredQuantitySystem : JobComponentSystem
     {

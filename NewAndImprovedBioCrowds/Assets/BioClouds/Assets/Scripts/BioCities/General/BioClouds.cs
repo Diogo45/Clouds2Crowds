@@ -44,8 +44,8 @@ namespace BioClouds
             activeWorld.GetExistingManager<CloudHeatMap>().Enabled = false;
             activeWorld.GetExistingManager<CloudMovementVectorSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudMoveSystem>().Enabled = false;
-            activeWorld.GetExistingManager<CloudRadiusUpdateSpeed>().Enabled = false;
-            activeWorld.GetExistingManager<CloudSplitSystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudRadiusUpdate>().Enabled = false;
+            activeWorld.GetExistingManager<CloudRightPreferenceSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudTagDesiredQuantitySystem>().Enabled = false;
             activeWorld.GetExistingManager<ExperimentEndSystem>().Enabled = false;
         }
@@ -168,7 +168,7 @@ namespace BioClouds
                 World.Active.GetExistingManager<CloudCellDrawLineSystem>().Enabled = false;
 
             if (!city.BioParameters.EnableRightPreference)
-                World.Active.GetExistingManager<CloudSplitSystem>().Enabled = false;
+                World.Active.GetExistingManager<CloudRightPreferenceSystem>().Enabled = false;
         }
 
 

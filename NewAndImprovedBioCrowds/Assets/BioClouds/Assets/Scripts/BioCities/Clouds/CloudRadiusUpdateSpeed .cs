@@ -11,10 +11,15 @@ using Unity.Burst;
 
 namespace BioClouds {
 
+
+    /// <summary>
+    /// Recalculates a cloud's radius based on its immediate density.
+    /// The radius update follows the equations described on the paper.
+    /// </summary>
     [UpdateAfter(typeof(CellMarkSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
     [UpdateAfter(typeof(CloudMovementVectorSystem))]
-    public class CloudRadiusUpdateSpeed : JobComponentSystem
+    public class CloudRadiusUpdate : JobComponentSystem
     {
         public struct CloudDataGroup
         {
@@ -54,29 +59,13 @@ namespace BioClouds {
                 float delta = cData.AgentQuantity / totalArea;
 
                 float beta = math.min((math.pow(delta,2f) / math.pow(cData.PreferredDensity,2f)), 2f);
-                //float beta = math.min(delta / cData.PreferredDensity, 2f);
+                
                 beta = beta - 1.0f;
-                //float beta = (math.sqrt(delta) / math.sqrt(cData.PreferredDensity));
-
-                //float maxChange = math.length(CloudStep[index].Delta);
+                
                 float maxChange = cData.MaxSpeed;
                 float radiusChange = math.max(-maxChange, (math.min(maxChange, cData.RadiusChangeSpeed * (beta) * cData.Radius)));
-                //float radiusChange = cData.RadiusChangeSpeed * (beta);// * cData.Radius;
 
-                //cData.Radius *= 1f + cData.RadiusChangeSpeed * (beta);
-                //cData.Radius += radiusChange;
-
-                //float maxRadius = Parameters.Instance.CloudMaxRadius;
-                //float maxRadius = (float)math.ceil(math.sqrt((cData.AgentQuantity/(cData.PreferredDensity * math.PI))));
-                //Debug.Log(maxRadius);
-                //float minRadius = Parameters.Instance.CloudMinRadius;
-
-                //if (cData.Radius + radiusChange > maxRadius)
-                //    cData.Radius = maxRadius;
-                //else if (cData.Radius + radiusChange < minRadius)
-                //    cData.Radius = minRadius;
-                //else
-                    cData.Radius += radiusChange;
+                cData.Radius += radiusChange;
 
 
                 CloudData[index] = cData;

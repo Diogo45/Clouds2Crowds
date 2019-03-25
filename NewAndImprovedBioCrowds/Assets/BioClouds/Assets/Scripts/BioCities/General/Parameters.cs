@@ -14,7 +14,9 @@ namespace BioClouds
         public Material mat;
     }
 
-    
+    /// <summary>
+    /// Parameter configuration file.
+    /// </summary>
     public class Parameters : MonoBehaviour
     {
         public void LoadOrGenerateParameters()
@@ -27,7 +29,7 @@ namespace BioClouds
             string filePath = string.Join("\\", customParametersTotalDirPath, "Settings.json");
 
             if (!System.IO.File.Exists(filePath))
-                GenerateDefaultParametersFile(filePath);
+                SaveCurrentState(filePath);
 
             string json = System.IO.File.ReadAllText(filePath);
             JsonUtility.FromJsonOverwrite(json, this);
@@ -37,7 +39,7 @@ namespace BioClouds
 
         }
 
-        public void GenerateDefaultParametersFile(string path)
+        public void SaveCurrentState(string path)
         {
 
             string jsonThis = JsonUtility.ToJson(this, true);
@@ -88,10 +90,6 @@ namespace BioClouds
         {
 
             LoadOrGenerateParameters();
-
-            //Parameters userParameters = Parameters.LoadParameters(customParametersTotalPath);
-            
-
 
             FixedParameters.HeatMapTexture = Parameters.GetHeatScaleTexture(HeatMapColors, HeatMapScaleSize);
 
