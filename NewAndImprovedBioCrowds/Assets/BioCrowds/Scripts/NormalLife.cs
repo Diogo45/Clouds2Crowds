@@ -297,7 +297,7 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
             int qtdAgents = Settings.agentQuantity;
-            float densityToQtd = Settings.instance.MarkerDensity / Mathf.Pow(Settings.instance.markerRadius, 2f);
+            float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
             int qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
             AgentMarkers = new NativeMultiHashMap<int, float3>(qtdAgents * qtdMarkers * 4, Allocator.Persistent);
@@ -315,7 +315,7 @@ namespace BioCrowds
     }
 
     [UpdateBefore(typeof(NormaLifeAgentMovementVectors)), UpdateAfter(typeof(NormalLifeMarkerSystem))]
-    public class ContadorDeMerda : JobComponentSystem
+    public class MarkerCounter : JobComponentSystem
     {
         [Inject] NormalLifeMarkerSystem normalLifeMarkerSystem;
 

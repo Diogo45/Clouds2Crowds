@@ -18,21 +18,154 @@ namespace BioCrowds
 
     }
 
+    public struct MarkerCellName: ISharedComponentData
+    {
+        public int3 Value;
+
+    }
+
     public struct SpawnData : IComponentData
     {
         
         public int qtdPerCell;
     }
 
+
+    [System.Obsolete("In development do not use", true)]
+    [DisableAutoCreation]
+    [UpdateBefore(typeof(MarkerSystem)), UpdateAfter(typeof(ActivateCells))]
+    public class ActivateBarrier : BarrierSystem {    }
+
+    [System.Obsolete("In development do not use",true)]
+    [DisableAutoCreation]
+    [UpdateAfter(typeof(CellTagSystem)), UpdateBefore(typeof(MarkerSystem))]
+    public class ActivateCells : JobComponentSystem
+    {
+        [Inject] private ActivateBarrier barrier;
+        [Inject] public CellTagSystem tagSystem;
+
+        public struct Markers
+        {
+            [ReadOnly] public ComponentDataArray<MarkerData> data;
+            [ReadOnly] public SharedComponentDataArray<MarkerCellName> cell;
+            [ReadOnly] public SubtractiveComponent<Active> active;
+            [ReadOnly] public EntityArray entity;
+            [ReadOnly] public readonly int Length;
+            [ReadOnly] public readonly int GroupIndex;
+
+        }
+        [Inject] Markers markerGroup;
+
+        public struct CellData
+        {
+            [ReadOnly] public ComponentDataArray<Position> CellPos;
+            [ReadOnly] public ComponentDataArray<CellName> CellName;
+            [ReadOnly] public SubtractiveComponent<MarkerData> Subtractive2;
+            [ReadOnly] public readonly int Length;
+            [ReadOnly] public SubtractiveComponent<AgentData> Subtractive;
+
+        }
+        [Inject] CellData cellData;
+
+
+        public struct ActivateMarkers : IJobParallelFor
+        {
+            public EntityCommandBuffer.Concurrent CommandBuffer;
+            [ReadOnly] public EntityArray entity;
+
+            public void Execute(int index)
+            {
+
+
+                CommandBuffer.AddComponent(index, entity[index], new Active { active = 1 });
+
+            }
+        }
+
+
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
+            //TODO: RESOLVER DEPENDENCIAS
+            if (!tagSystem.Enabled || !tagSystem.CellToMarkedAgents.IsCreated) return inputDeps;
+
+            var cellMarkers = ComponentGroups[markerGroup.GroupIndex];
+
+
+            var manager = World.Active.GetOrCreateManager<EntityManager>();
+            for (int i = 0; i < markerGroup.Length; i++)
+            {
+
+                cellMarkers.SetFilter(markerGroup.cell[i]);
+
+                //Debug.Log(markerGroup.Length);
+
+                NativeMultiHashMapIterator<int3> it;
+                int outAgt;
+
+
+                bool activate = tagSystem.CellToMarkedAgents.TryGetFirstValue(markerGroup.cell[i].Value, out outAgt, out it);
+
+                if (activate)
+                {
+
+                    //var entities = cellMarkers.GetEntityArray();
+
+
+
+                    //for (int j = 0; j < entities.Length; j++)
+                    //{
+                    //    Debug.Log(markerGroup.cell[i].Value + " " + cellMarkers.GetComponentDataArray<MarkerData>()[j].id );
+                    //    manager.AddComponent(entities[j], typeof(Active));
+                    //    //manager.SetComponentData(entities[j], new Active { active = 1});
+                    //    UpdateInjectedComponentGroups();
+
+                    //}
+
+
+                    var job = new ActivateMarkers
+                    {
+                        CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
+                        entity = cellMarkers.GetEntityArray(),
+                    };
+
+
+
+                    var handle = job.Schedule(cellMarkers.GetEntityArray().Length, Settings.BatchSize, inputDeps);
+                    //JobHandle.CombineDependencies(inputDeps, handle);
+                    //TODO:DISABLE
+                    handle.Complete();
+                    UpdateInjectedComponentGroups();
+                }
+
+                cellMarkers.ResetFilter();
+
+
+
+            }
+
+
+
+            return inputDeps;
+        }
+    }
+
+
+
+
     [UpdateBefore(typeof(CellTagSystem)), UpdateAfter(typeof(MarkerSpawnSystem))]
     public class SpawnBarrier : BarrierSystem { }
 
 
+    /// <summary>
+    /// Spawns markers cell by cell with random positions and a marker radius apart, given the marker density
+    /// </summary>
     [UpdateBefore(typeof(CellTagSystem))]
     public class MarkerSpawnSystem : JobComponentSystem
     {
         [Inject] private SpawnBarrier m_SpawnerBarrier;
         public static MeshInstanceRenderer MarkerRenderer;
+
+        public static NativeMultiHashMap<int3, int> CellMarkers;
 
         public static EntityArchetype MakerArchetype;
 
@@ -52,6 +185,8 @@ namespace BioCrowds
         }
         [Inject] CellData cellData;
 
+
+       
 
         struct SpawnMarkers : IJobParallelFor
         {
@@ -82,7 +217,7 @@ namespace BioCrowds
                     for (int j = 0; j < tempCellMarkers.Length; j++)
                     {
                         float distanceAA = math.distance(new float3(x, y, z), tempCellMarkers[j].Value);
-                        if (distanceAA < Settings.instance.markerRadius)
+                        if (distanceAA < Settings.experiment.markerRadius)
                         {
                             canInstantiate = false;
                             break;
@@ -91,7 +226,6 @@ namespace BioCrowds
                    
                     if (canInstantiate)
                     {
-                        //Debug.Log("Instaciou uma");
                         CommandBuffer.CreateEntity(index, MakerArchetype);
 
                         CommandBuffer.SetComponent(index, new Position
@@ -102,18 +236,16 @@ namespace BioCrowds
                         {
                             id = markersAdded
                         });
-                        CommandBuffer.SetComponent(index, new CellName
+                        CommandBuffer.AddSharedComponent(index, new MarkerCellName
                         {
                             Value = cellNames[index].Value
-                        });
-                        CommandBuffer.SetComponent(index, new Active { active = 1 });
-
+                        });                        
+                        //CommandBuffer.AddComponent(index, new Active { active = 1 });
 
                         markersAdded++;
 
-                        if(Settings.instance.showMarkers)CommandBuffer.AddSharedComponent(index, MarkerRenderer);
+                        if(Settings.experiment.showMarkers)CommandBuffer.AddSharedComponent(index, MarkerRenderer);
                         tempCellMarkers.Add(new Position { Value = new float3(x, y, z)});
-                        //temptemp.Add(newMarker);
                     }
                     else
                     {
@@ -137,7 +269,7 @@ namespace BioCrowds
             MakerArchetype = entityManager.CreateArchetype(
                ComponentType.Create<Position>(),
                ComponentType.Create<CellName>(),
-               ComponentType.Create<Active>(),
+               //ComponentType.Create<Active>(),
                ComponentType.Create<MarkerData>());
             MarkerRenderer = BioCrowdsBootStrap.GetLookFromPrototype("MarkerMesh");
 
@@ -157,6 +289,11 @@ namespace BioCrowds
             var SpawnJobHandle = SpawnJob.Schedule(cellData.Length, Settings.BatchSize, inputDeps);
 
             SpawnJobHandle.Complete();
+
+            UpdateInjectedComponentGroups();
+
+           
+
 
             this.Enabled = false;
 

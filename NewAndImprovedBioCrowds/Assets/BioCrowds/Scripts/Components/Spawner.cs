@@ -1,13 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Entities;
 using Unity.Collections;
 using Unity.Mathematics;
-using System.Linq;
 using Unity.Transforms;
 using Unity.Jobs;
-using UnityEngine.Experimental.PlayerLoop;
 using Unity.Rendering;
 using System;
 
@@ -16,10 +12,17 @@ namespace BioCrowds
     [UpdateBefore(typeof(CellTagSystem))]
     public class SpawnerGroup { }
 
+
+    /// <summary>
+    /// Just a sinc point for the creation and modification of entities to be executed in the main thread
+    /// </summary>
     [UpdateAfter(typeof(AgentSpawner)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class SpawnAgentBarrier : BarrierSystem { }
 
-
+    /// <summary>
+    /// Spawns agents in runtime when BioClouds is active, instantiation occurs cell by cell where each one corresponds to a BioClouds cell. The data received is in the BioClouds, that is, the positions are (x,y,0) while BioCrowds is (x,0,z). 
+    /// If bioclouds is not enabled for this experiment them we spawn only once with the data comming from the experiment file already in the necessary format.
+    /// </summary>
     [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class AgentSpawner : JobComponentSystem
     {
@@ -34,6 +37,7 @@ namespace BioCrowds
 
         [Inject] public SpawnAgentBarrier barrier;
         [Inject] public Clouds2CrowdsSystem clouds2Crowds;
+        public NativeList<Parameters> parBuffer;
 
 
         public int lastAgentId;
@@ -41,7 +45,6 @@ namespace BioCrowds
         public struct Parameters
         {
             public int cloud;
-            //World positions
             public int qtdAgents;
             public float3 spawnOrigin;
             public float2 spawnDimensions;
@@ -64,6 +67,96 @@ namespace BioCrowds
         }
         [Inject] public CellGroup m_CellGroup;
 
+        public struct InicialSpawn : IJobParallelFor
+        {
+            [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
+            [ReadOnly] public int LastIDUsed;
+
+            [ReadOnly] public NativeList<Parameters> parBuffer;
+            public EntityCommandBuffer.Concurrent CommandBuffer;
+
+
+            public void Execute(int index)
+            {
+                int doNotFreeze = 0;
+
+                var spawnList = parBuffer[index];
+                float3 origin = spawnList.spawnOrigin;
+                float2 dim = spawnList.spawnDimensions;
+
+                int qtdAgtTotal = spawnList.qtdAgents;
+                int maxZ = (int)(origin.z + dim.y);
+                int maxX = (int)(origin.x + dim.x);
+                int minZ = (int)origin.z;
+                int minX = (int)origin.x;
+                float maxSpeed = spawnList.maxSpeed;
+
+                int startID = AgentAtCellQuantity[index] + LastIDUsed;
+
+                int CellX = minX + 1;
+                int CellZ = minZ + 1;
+                int CellY = 0;
+
+                System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
+
+
+                for (int i = startID; i < qtdAgtTotal + startID; i++)
+                {
+
+                    if (doNotFreeze > qtdAgtTotal)
+                    {
+                        doNotFreeze = 0;
+
+                    }
+
+                    float x = (float)r.NextDouble() * (maxX - minX) + minX;
+                    float z = (float)r.NextDouble() * (maxZ - minZ) + minZ;
+                    float y = 0;
+
+                    float3 g = spawnList.goal;
+
+                    CommandBuffer.CreateEntity(index, AgentArchetype);
+                    CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
+                    CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
+                    CommandBuffer.SetComponent(index, new AgentData
+                    {
+                        ID = i,
+                        MaxSpeed = maxSpeed/Settings.experiment.FramesPerSecond,//Set sampling rate
+                        Radius = 1f
+                    });
+                    CommandBuffer.SetComponent(index, new AgentStep
+                    {
+                        delta = float3.zero
+                    });
+                    CommandBuffer.SetComponent(index, new Rotation
+                    {
+                        Value = quaternion.identity
+                    });
+                    CommandBuffer.SetComponent(index, new CellName { Value = new int3(CellX, CellY, CellZ) });
+                    CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
+                    CommandBuffer.SetComponent(index, new Counter { Value = 0 });
+                    CommandBuffer.SetComponent(index, new NormalLifeData
+                    {
+                        confort = 0,
+                        stress = 0,
+                        agtStrAcumulator = 0f,
+                        movStrAcumulator = 0f,
+                        incStress = 0f
+                    });
+
+                    CommandBuffer.SetComponent<BioCrowdsAnchor>(index, new BioCrowdsAnchor { Pivot = float3.zero });
+
+                    CommandBuffer.AddSharedComponent(index, AgentRenderer);
+                    CommandBuffer.AddSharedComponent(index, new AgentCloudID { CloudID = spawnList.cloud });
+
+
+                }
+
+
+            }
+        }
+
+
         public struct SpawnGroup : IJobParallelFor
         {
             [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
@@ -77,16 +170,17 @@ namespace BioCrowds
                 int doNotFreeze = 0;
 
                 float3 cellPos = WindowManager.Crowds2Clouds(CellName[index].Value);
+
+                
                 int ind = GridConverter.Position2CellID(cellPos);
+                    
 
                 Parameters spawnList;
                 bool keepgoing = parBuffer.TryGetValue(ind, out spawnList);
                 if(!keepgoing)
                 {
-                    //Debug.Log("AAAAAAA");
                     return;
                 }
-                //Debug.Log("PASSO");
                 float3 convertedOrigin = WindowManager.Clouds2Crowds(spawnList.spawnOrigin);
                 float2 dim = spawnList.spawnDimensions;
 
@@ -141,11 +235,11 @@ namespace BioCrowds
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
                     CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
-                    //Debug.Log(maxSpeed / Settings.instance.FramesPerSecond);
+                    //Debug.Log(maxSpeed / Settings.experiment.FramesPerSecond);
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.2f),// / Settings.instance.FramesPerSecond,
+                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.2f),// / Settings.experiment.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -184,6 +278,9 @@ namespace BioCrowds
         protected override void OnCreateManager()
         {
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+            //Here we define the agent archetype by adding all the Components, that is, all the Agent's data. 
+            //The respective Systems will act upon the Components added, if such Systems exist.
+            //Also we have to add Components from the modules such as NormalLife so we can turn them on and off in runtime
             AgentArchetype = entityManager.CreateArchetype(
                ComponentType.Create<Position>(),
                ComponentType.Create<Rotation>(),
@@ -194,25 +291,39 @@ namespace BioCrowds
                ComponentType.Create<NormalLifeData>(),
                ComponentType.Create<Animator>(),
                ComponentType.Create<Counter>(),
-               ComponentType.Create<BioCrowdsAnchor>());//,
-               //ComponentType.Create<Attach>());
+               ComponentType.Create<BioCrowdsAnchor>());
 
+            //If bioclouds isn't enabled we must use other job to spawn the agents
+            //Here we get the necessary data from the experiment file
+            if (!Settings.experiment.BioCloudsEnabled)
+            {
+                var exp = Settings.experiment.SpawnAreas;
+                parBuffer = new NativeList<Parameters>(exp.Length,Allocator.Persistent);
 
-            //spawnList[0] = new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 50, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) };
-            //spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 10, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 52, 0) });
+                for (int i = 0; i < exp.Length; i++)
+                {
+                    Parameters par = new Parameters
+                    {
+                        cloud = i,
+                        goal = exp[i].goal,
+                        maxSpeed = exp[i].maxSpeed,
+                        qtdAgents = exp[i].qtd,
+                        spawnOrigin = exp[i].min,
+                        spawnDimensions = new float2(exp[i].max.x, exp[i].max.z)
+                    };
 
-            //spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 10, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(50, 50, 0) });
+                    parBuffer.Add(par);
+                }
 
+            }
 
-            //spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 15, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(52, 50, 0) });
-
-            //spawnList.Add(new Parameters { cloud = 0, goal = new int3(50, 0, 25), maxSpeed = 1.3f, qtdAgents = 15, spawnDimensions = new int2(2, 2), spawnOrigin = new float3(50, 52, 0) });
 
         }
 
         protected override void OnStopRunning()
         {
             AgentAtCellQuantity.Dispose();
+            parBuffer.Dispose();
         }
 
         protected override void OnStartRunning()
@@ -226,114 +337,83 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-
-            //Debug.Log("agents spawned " + lastAgentId);
-            lastAgentId = AgentAtCellQuantity[AgentAtCellQuantity.Length - 1] + lastAgentId;
-
-            //Debug.Log("L2 " + clouds2Crowds.parameterBuffer.Length);
-            int lastValue = 0;
-
-            //TODO make parallel
-            for (int i = 1; i < m_CellGroup.Length; i++)
+            if (Settings.experiment.BioCloudsEnabled)
             {
-                float3 cellPos = WindowManager.Crowds2Clouds(m_CellGroup.CellName[i].Value);
-                int ind = GridConverter.Position2CellID(cellPos);
-                
-                AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
-                if (clouds2Crowds.parameterBuffer.TryGetValue(ind, out Parameters spawnList))
+                lastAgentId = AgentAtCellQuantity[AgentAtCellQuantity.Length - 1] + lastAgentId;
+
+                int lastValue = 0;
+
+                for (int i = 1; i < m_CellGroup.Length; i++)
                 {
-                    lastValue = spawnList.qtdAgents;
+                    float3 cellPos = WindowManager.Crowds2Clouds(m_CellGroup.CellName[i].Value);
+                    int ind = GridConverter.Position2CellID(cellPos);
+
+                    AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
+                    if (clouds2Crowds.parameterBuffer.TryGetValue(ind, out Parameters spawnList))
+                    {
+                        lastValue = spawnList.qtdAgents;
+                    }
                 }
+
+
+                var SpawnGroupJob = new SpawnGroup
+                {
+                    parBuffer = clouds2Crowds.parameterBuffer,
+                    CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
+                    CellName = m_CellGroup.CellName,
+                    AgentAtCellQuantity = AgentAtCellQuantity,
+                    LastIDUsed = lastAgentId
+                };
+
+
+
+                var SpawnGroupHandle = SpawnGroupJob.Schedule(m_CellGroup.Length, Settings.BatchSize, inputDeps);
+
+
+
+                SpawnGroupHandle.Complete();
+
+                return SpawnGroupHandle;
+            }
+            else
+            {
+                lastAgentId = AgentAtCellQuantity[AgentAtCellQuantity.Length - 1] + lastAgentId;
+
+                int lastValue = 0;
+
+                for (int i = 1; i < m_CellGroup.Length; i++)
+                {
+                    float3 cellPos = WindowManager.Crowds2Clouds(m_CellGroup.CellName[i].Value);
+                    int ind = GridConverter.Position2CellID(cellPos);
+
+                    AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
+                    if (clouds2Crowds.parameterBuffer.TryGetValue(ind, out Parameters spawnList))
+                    {
+                        lastValue = spawnList.qtdAgents;
+                    }
+                }
+
+                var job = new InicialSpawn
+                {
+                    AgentAtCellQuantity = AgentAtCellQuantity,
+                    CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
+                    LastIDUsed = lastAgentId,
+                    parBuffer = parBuffer
+                };
+
+                var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+                handle.Complete();
+                this.Enabled = false;
+                return handle;
+
+
+
             }
 
-
-            var SpawnGroupJob = new SpawnGroup
-            {
-                parBuffer = clouds2Crowds.parameterBuffer,
-                CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                CellName = m_CellGroup.CellName,
-                AgentAtCellQuantity = AgentAtCellQuantity,
-                LastIDUsed = lastAgentId
-            };
-
-            
-
-            var SpawnGroupHandle = SpawnGroupJob.Schedule(m_CellGroup.Length, Settings.BatchSize, inputDeps);
-
-            
-
-            SpawnGroupHandle.Complete();
-
-            //for (int i = 0; i < clouds2Crowds.parameterBuffer.Length; i++)
-            //{
-            //    Parameters par;
-            //    clouds2Crowds.parameterBuffer.TryGetValue(i, out par);
-            //}
-
-            //spawnList.Clear();
-
-            return SpawnGroupHandle;
-        }
+}
 
     }
 
-    //[UpdateAfter(typeof(SpawnAgentBarrier)), UpdateInGroup(typeof(SpawnerGroup))]
-    //public class SpawnAttacherSystem : ComponentSystem
-    //{
-    //    public struct AgentGroup
-    //    {
-    //        [ReadOnly] public ComponentDataArray<Position> AgtPos;
-    //        [ReadOnly] public ComponentDataArray<AgentData> AgtData;
-    //        [ReadOnly] public SubtractiveComponent<Attached> Attached;
-    //        [ReadOnly] public EntityArray entities;
-    //        [ReadOnly] public readonly int Length;
-    //    }
-    //    [Inject] AgentGroup m_agentGroup;
-
-    //    //public Entity Window;
-
-    //    protected override void OnUpdate()
-    //    {
-    //        EntityManager entityManager =  World.Active.GetOrCreateManager<EntityManager>();
-
-    //        for(int i = 0; i < m_agentGroup.Length; i++)
-    //        {
-    //            entityManager.SetComponentData(m_agentGroup.entities[i], new Attach
-    //            {
-    //                Child = m_agentGroup.entities[i],
-    //                Parent = WindowManager.Window
-    //            });
-    //            Debug.Log("Attached");
-    //        }
-    //    }
-    //}
-
-    //[UpdateAfter(typeof(SpawnAgentBarrier)), UpdateInGroup(typeof(SpawnerGroup))]
-    //public class SpawnAttacherSystem : ComponentSystem
-    //{
-    //    public struct AgentGroup
-    //    {
-    //        [ReadOnly] public ComponentDataArray<Position> AgtPos;
-    //        [ReadOnly] public ComponentDataArray<AgentData> AgtData;
-    //        [ReadOnly] public ComponentDataArray<LocalToWorld> WindowTransform;
-    //        [ReadOnly] public EntityArray entities;
-    //        [ReadOnly] public readonly int Length;
-    //    }
-    //    [Inject] AgentGroup m_agentGroup;
-
-    //    //public Entity Window;
-
-    //    protected override void OnUpdate()
-    //    {
-    //        EntityManager entityManager = World.Active.GetOrCreateManager<EntityManager>();
-
-    //        for (int i = 0; i < m_agentGroup.Length; i++)
-    //        {
-
-    //            //Debug.Log(m_agentGroup.WindowTransform[i].Value);
-    //        }
-    //    }
-    //}
 
     [UpdateAfter(typeof(AgentDespawner))]
     public class DespawnAgentBarrier : BarrierSystem { }
@@ -360,7 +440,6 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<Position> AgtPos;
             [ReadOnly] public EntityArray entities;
             public EntityCommandBuffer.Concurrent CommandBuffer;
-            //[WriteOnly] public NativeQueue<int>.Concurrent destroyedAgents;
 
             public void Execute(int index)
             {
@@ -368,33 +447,37 @@ namespace BioCrowds
                 
                 if (WindowManager.CheckDestructZone(posCloudCoord))
                 {
-                    //Debug.Log(posCloudCoord);
                     CommandBuffer.DestroyEntity(index, entities[index]);
-                    //destroyedAgents.Enqueue(entities[index].Index);
                 }
             }
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            //NativeQueue<int> q = new NativeQueue<int>(Allocator.TempJob);
 
-            var CheckArea = new CheckAreas
+            if (Settings.experiment.BioCloudsEnabled)
             {
-                AgtPos = agentGroup.AgtPos,
-                CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                entities = agentGroup.entities//,
-                //destroyedAgents = q.ToConcurrent()
-            };
+                var CheckArea = new CheckAreas
+                {
+                    AgtPos = agentGroup.AgtPos,
+                    CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
+                    entities = agentGroup.entities
+                };
 
-            var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-            CheckAreaHandle.Complete();
+                var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+                CheckAreaHandle.Complete();
 
-            //Debug.Log("DestroyedAgents : " + q.Count);
-            //q.Dispose();
-            return CheckAreaHandle;
-            //return inputDeps;
-            
+                return CheckAreaHandle;
+            }
+            else
+            {
+                //TODO: Define other methods for despawn
+                this.Enabled = false;
+                return inputDeps;
+            }
+
+
+
         }
 
     }

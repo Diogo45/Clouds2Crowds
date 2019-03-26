@@ -25,9 +25,6 @@ namespace BioCrowds
     }
 
 
-    [UpdateAfter(typeof(MarkerSystem))]
-    public class MarkerBarrier : BarrierSystem { }
-
     [UpdateAfter(typeof(CellTagSystem))]
     [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystem : JobComponentSystem
@@ -35,8 +32,7 @@ namespace BioCrowds
 
         private int qtdMarkers = 0;
 
-        [Inject] private MarkerBarrier m_SpawnerBarrier;
-
+        [Inject] private m_SpawnerBarrier m_SpawnerBarrier;
 
         [Inject] public CellTagSystem CellTagSystem;
 
@@ -55,9 +51,11 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<MarkerData> Data;
             //[ReadOnly] public ComponentDataArray<Active> Active;
             //[ReadOnly] public EntityArray Entities;
-            [ReadOnly] public ComponentDataArray<CellName> MarkerCell;
+            [ReadOnly] public SharedComponentDataArray<MarkerCellName> MarkerCell;
             [ReadOnly] public readonly int Length;
         }
+         
+   
         [Inject] MarkerGroup markerGroup;
         [Inject] AgentGroup agentGroup;
 
@@ -68,7 +66,7 @@ namespace BioCrowds
             [ReadOnly] public NativeMultiHashMap<int3, int> cellToAgent;
             //public EntityCommandBuffer.Concurrent CommandBuffer;
             //[ReadOnly] public EntityArray Entities;
-            [ReadOnly] public ComponentDataArray<CellName> MarkerCell;
+            [ReadOnly] public SharedComponentDataArray<MarkerCellName> MarkerCell;
             [ReadOnly] public ComponentDataArray<Position> MarkerPos;
 
             public void Execute(int index)
@@ -86,6 +84,8 @@ namespace BioCrowds
 
                 if (!keepgoing)
                 {
+                    //CommandBuffer.RemoveComponent(index, Entities[index], typeof(Active));
+
                     //CommandBuffer.RemoveComponent(index, Entities[index], typeof(Active));
                     return;
                 }
@@ -132,8 +132,8 @@ namespace BioCrowds
 
                 if (bestAgent == -1) return;
                 //Debug.Log(bestAgent);
-                //CommandBuffer.AddComponent(index, Entities[index], new Active { active = 1 });
                 AgentMarkers.Add(bestAgent, MarkerPos[index].Value);
+
 
             }
 
@@ -166,7 +166,6 @@ namespace BioCrowds
                 cellToAgent = CellTagSystem.CellToMarkedAgents,
                 MarkerCell = markerGroup.MarkerCell,
                 MarkerPos = markerGroup.Position
-                
                 //Entities = markerGroup.Entities,
                 //CommandBuffer = m_SpawnerBarrier.CreateCommandBuffer().ToConcurrent()
             };
@@ -186,7 +185,7 @@ namespace BioCrowds
         {
             UpdateInjectedComponentGroups();
             int qtdAgents = Settings.agentQuantity;
-            float densityToQtd = Settings.instance.MarkerDensity / Mathf.Pow(Settings.instance.markerRadius, 2f);
+            float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
             AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
@@ -200,8 +199,8 @@ namespace BioCrowds
 
     }
 
-
-
-
-
+    [UpdateAfter(typeof(MarkerSystemGroup))]
+    public class m_SpawnerBarrier:BarrierSystem
+    {
+    }
 }

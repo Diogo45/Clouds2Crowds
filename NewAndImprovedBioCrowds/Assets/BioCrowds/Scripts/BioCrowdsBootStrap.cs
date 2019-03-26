@@ -14,7 +14,7 @@ using Unity.Jobs;
  */
 namespace BioCrowds
 {
-
+    [System.Obsolete("Contains the data for the deprecated agent spawn method")]
     public struct Group
     {
         public List<GameObject> goals;
@@ -24,10 +24,6 @@ namespace BioCrowds
         public float maxSpeed;
         public const float agentRadius = 1f;
     }
-
-
-
-
 
     public class BioCrowdsBootStrap
     {
@@ -46,31 +42,35 @@ namespace BioCrowds
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         public static void Intialize()
         {
-            //UnityEditor.AI.NavMeshBuilder.BuildNavMesh();
 
 
 
-            //Get the simulation settings from the settings script
-            var gSettings = GameObject.Find("BCSettings");
-            BioSettings = gSettings?.GetComponent<Settings>();
             //Getting data from settings
-            float agentRadius = BioSettings.agentRadius;
+            float agentRadius = Settings.experiment.agentRadius;
 
-            int framesPerSecond = BioSettings.FramesPerSecond;
+            int framesPerSecond = Settings.experiment.FramesPerSecond;
 
-            float markerRadius = BioSettings.markerRadius;
+            float markerRadius = Settings.experiment.markerRadius;
 
-            float MarkerDensity = BioSettings.MarkerDensity;
+            float MarkerDensity = Settings.experiment.MarkerDensity;
 
-            bool showCells = BioSettings.showCells;
+            bool showCells = Settings.experiment.showCells;
 
-            bool showMarkers = BioSettings.showMarkers;
+            bool showMarkers = Settings.experiment.showMarkers;
 
+            int2 size = new int2(Settings.experiment.TerrainX, Settings.experiment.TerrainZ);
 
+            if((size.x % 2 !=0 || size.y % 2 != 0))
+            {
+                Debug.Log("Tamanho do Terreno Invalido");
+                return;
+            }
 
-            //FUTURE: BioCrowds in complex 3d models of scenarios
-            //TODO: Truncate the Terrain size if the cells don't fit
-            var ground = GameObject.Find("Terrain").GetComponent<Terrain>();
+            //Just to have a nicer terrain
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.localScale = new Vector3(size.x, 0.5f, size.y);
+            ground.transform.position = ground.transform.localScale / 2; 
+
             //The EntityManager is responsible for the creation of all Archetypes, Entities, ... and adding or removing Components from existing Entities 
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
@@ -79,36 +79,21 @@ namespace BioCrowds
             float densityToQtd = MarkerDensity / Mathf.Pow(markerRadius, 2f);
             int qtdMarkers = Mathf.FloorToInt(densityToQtd);
             Debug.Log("Marcadores por celula:" + qtdMarkers);
-            //Here we define the agent archetype by adding all the Components, that is, all the Agent's data. The respective Systems will act upon the Components added, if such Systems exist.
-            //REVIEW: See if those are all the necessary Components
-            AgentArchetype = entityManager.CreateArchetype(
-                ComponentType.Create<Position>(),
-                ComponentType.Create<Rotation>(),
-                ComponentType.Create<CellName>(),
-                ComponentType.Create<AgentData>(),
-                ComponentType.Create<AgentStep>(),
-                ComponentType.Create<AgentGoal>(),
-                ComponentType.Create<NormalLifeData>(),
-                ComponentType.Create<Counter>());
 
             CellArchetype = entityManager.CreateArchetype(
                 ComponentType.Create<CellName>(),
                 ComponentType.Create<Position>());
 
-            int qtdX = (int)(ground.terrainData.size.x / (agentRadius * 2));
-            int qtdZ = (int)(ground.terrainData.size.z / (agentRadius * 2));
+            //The cells are 2x2 so there are (X*Z)/2*2 cells 
+            int qtdX = (int)(ground.transform.localScale.x / (agentRadius * 2));
+            int qtdZ = (int)(ground.transform.localScale.z / (agentRadius * 2));
             Debug.Log(qtdX + "X" + qtdZ);
-            Settings.TerrainX = (int)ground.terrainData.size.x;
-            Settings.TerrainZ = (int)ground.terrainData.size.z;
+
             //For instantiating Entities we first need to create a buffer for all the Enities of the same archetype.
             NativeArray<Entity> cells = new NativeArray<Entity>(qtdX * qtdZ, Allocator.Persistent);
-            NativeList<Entity> cellsPersistent = new NativeList<Entity>(qtdX * qtdZ, Allocator.Persistent);
 
             //Array contaning the cell names, that is, their position on the world
             NativeList<int3> cellNames = new NativeList<int3>(qtdX * qtdZ, Allocator.Persistent);
-
-            //Maping between a cell and their respective markers
-            NativeHashMap<int3, NativeSlice<MarkerData>> cellMarkersCache = new NativeHashMap<int3, NativeSlice<MarkerData>>(qtdX * qtdZ, Allocator.Persistent);
 
             //Creates a Entity of CellArchetype for each basic entity in cells
             entityManager.CreateEntity(CellArchetype, cells);
@@ -116,8 +101,10 @@ namespace BioCrowds
             CellRenderer = GetLookFromPrototype("CellMesh");
 
 
-            //FUTURE: Make the instantiation easily modifiable
             //Now for each Entity of CellArchetype we define the proper data to the Components int the archetype.  
+
+            int qtd = math.max(qtdX, qtdZ);
+
             for (int i = 0; i < qtdX; i++)
             {
                 for (int j = 0; j < qtdZ; j++)
@@ -128,8 +115,8 @@ namespace BioCrowds
                     float y = 0f;
                     float z = j * (agentRadius * 2);
 
-                    int index = i * qtdX + j;
-                    //Debug.Log(index + " " + i + " " + x + " " + z);
+                    int index = j * qtd + i;
+
                     entityManager.SetComponentData(cells[index], new Position
                     {
                         Value = new float3(x, y, z)
@@ -141,10 +128,6 @@ namespace BioCrowds
                         Value = new int3(Mathf.FloorToInt(x) + 1, Mathf.FloorToInt(y), Mathf.FloorToInt(z) + 1)
                     });
 
-
-
-
-                    cellsPersistent.Add(cells[index]);
                     if (showCells) entityManager.AddSharedComponentData(cells[index], CellRenderer);
 
                     cellNames.Add(entityManager.GetComponentData<CellName>(cells[index]).Value);
@@ -153,59 +136,20 @@ namespace BioCrowds
 
             }
 
+
             cells.Dispose();
+
+            //Create one entity so the marker spawner injects it and the system runs
             var temp = entityManager.CreateEntity();
             entityManager.AddComponentData(temp, new SpawnData
             {
                 qtdPerCell = qtdMarkers
             });
-
-
-
-            //List<Group> groups = new List<Group>();
-            //int group = 1;
-            //foreach(SpawnArea area in Settings.instance.SpawnAreas)
-            //{
-            //    List<GameObject> res;
-            //    FindGoals(group, out res);
-            //    group++;
-            //    Group i = new Group
-            //    {
-            //        goals = res,
-            //        //TODO:Hardcode MaxSpeed
-            //        maxSpeed = 1.3f,
-            //        qtdAgents = area.Size,
-            //        maxX = area.max.x,
-            //        minX = area.min.x,
-            //        maxZ = area.max.z,
-            //        minZ = area.min.z
-
-            //    };
-            //    Settings.agentQuantity += area.Size;
-            //    groups.Add(i);
-            //}
-            //group = 0;
-            //int startID = 0;
-            //foreach (Group g in groups)
-            //{
-            //    int frameRate = Settings.instance.FramesPerSecond;
-            //    var renderer = Settings.instance.Renderers[group];
-            //    int lastID;
-            //    SpawnAgent(frameRate, entityManager, g, startID, out lastID, renderer);
-            //    startID = lastID;
-            //    group++;
-            //}
-
-
-            cellMarkersCache.Dispose();
-
             cellNames.Dispose();
-            cellsPersistent.Dispose();
-            //system.Update();
 
         }
-
-        //TODO: Parameters according to Group
+        
+        [System.Obsolete("This method is deprecated, use the AgentSpawn system")]
         public static void SpawnAgent(int framesPerSecond, EntityManager entityManager, Group group, int startID, out int lastId, MeshInstanceRenderer AgentRenderer)
         {
             int doNotFreeze = 0;
@@ -304,14 +248,6 @@ namespace BioCrowds
             }
         }
 
-        public static float Distance(float3 X, float3 Y)
-        {
-            float result = Mathf.Infinity;
-            float x1 = X.x, x2 = X.y, x3 = X.z;
-            float y1 = Y.x, y2 = Y.y, y3 = Y.z;
-            result = Mathf.Sqrt(Mathf.Pow(y1 - x1, 2) + Mathf.Pow(y2 - x2, 2) + Mathf.Pow(y3 - x3, 2));
-            return result;
-        }
 
         public static MeshInstanceRenderer GetLookFromPrototype(string protoName)
         {
@@ -322,6 +258,7 @@ namespace BioCrowds
             return result;
         }
 
+        [System.Obsolete("This method is deprecated, define goals by the experiment file")]
         public static bool FindGoals(int group, out List<GameObject> res)
         {
             int i = 1;

@@ -210,7 +210,6 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
             List<float3> positionList = new List<float3>();
 
-            //TODO DESPAWN FORA DA JANELA LEMBRAAAAAR
 
             NativeMultiHashMapIterator<int> it;
             float3 currentCellPosition;
