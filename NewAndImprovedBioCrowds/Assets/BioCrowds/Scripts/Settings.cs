@@ -22,7 +22,7 @@ namespace BioCrowds
 
 
         public bool NormalLife = false;
-        public bool BioCloudsEnabled = false;
+        public bool BioCloudsEnabled = true;
         public int TerrainX = 50;
         public int TerrainZ = 50;
         public int FramesPerSecond = 30;
