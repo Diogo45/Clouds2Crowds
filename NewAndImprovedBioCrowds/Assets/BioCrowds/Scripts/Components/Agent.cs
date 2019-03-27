@@ -437,11 +437,11 @@ namespace BioCrowds
                 if (!keepgoing)
                     return;
 
-                //float extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
+                float extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
 
                 float F = AgentCalculations.GetF(currentMarkerPosition, AgentPos[index].Value, AgentGoals[index].SubGoal - AgentPos[index].Value);
 
-                //F += extraweight * 0.1f;
+                F += extraweight * 0.1f;
 
                 direction += AgentCalculations.PartialW(totalW, F) * AgentData[index].MaxSpeed * (currentMarkerPosition - AgentPos[index].Value);
 
@@ -450,11 +450,11 @@ namespace BioCrowds
                 while (AgentMarkersMap.TryGetNextValue(out currentMarkerPosition, ref it))
                 {
 
-                    //extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
+                    extraweight = math.dot(NormalizedAgent2CloudCenter, currentMarkerPosition - AgentPos[index].Value);
 
                     F = AgentCalculations.GetF(currentMarkerPosition, AgentPos[index].Value, AgentGoals[index].SubGoal - AgentPos[index].Value);
 
-                    //F += extraweight * 0.1f;
+                    F += extraweight * 0.1f;
 
                     direction += AgentCalculations.PartialW(totalW, F) * AgentData[index].MaxSpeed * (currentMarkerPosition - AgentPos[index].Value);
                 }

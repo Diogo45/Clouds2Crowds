@@ -41,6 +41,7 @@ namespace BioCrowds
         public struct AgentGroup
         {
             [ReadOnly] public ComponentDataArray<AgentData> Agents;
+            [ReadOnly] public ComponentDataArray<Position> Positions;
             [ReadOnly] public readonly int Length;
 
         }
@@ -174,7 +175,32 @@ namespace BioCrowds
            // {
                 JobHandle takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, Settings.BatchSize, inputDeps);
                 takeMakersHandle.Complete();
-                return takeMakersHandle;
+
+
+                NativeMultiHashMap<int, float3> agtM = AgentMarkers;
+
+                NativeMultiHashMapIterator<int> iter;
+                float3 marker;
+                for (int i = 0; i < agentGroup.Length; i++)
+                {
+                    bool keepGoing = agtM.TryGetFirstValue(agentGroup.Agents[i].ID, out marker, out iter);
+                    if (keepGoing)
+                    {
+                        //Debug.Log(i);
+
+                        Debug.DrawLine(agentGroup.Positions[i].Value, marker);
+                        while (agtM.TryGetNextValue(out marker, ref iter))
+                        {
+                            Debug.DrawLine(agentGroup.Positions[i].Value, marker);
+
+                        }
+
+                    }
+
+                }
+
+
+            return takeMakersHandle;
            // }
             
            // return inputDeps;

@@ -29,10 +29,21 @@ namespace BioCrowds
         public bool showMarkers = false;
         public bool showCells = true;
         public SpawnArea[] SpawnAreas = { new SpawnArea{qtd = 50,
+                                         goal = new float3{x = 25, y = 0, z = 50},
+                                         max = new int3 {x = 15, y = 0, z = 50},
+                                         min = new int3 {x = 0, y = 0, z = 0 },
+                                         maxSpeed = 1.3f},
+                                         new SpawnArea{qtd = 50,
                                          goal = new float3{x = 50, y = 0, z = 25},
                                          max = new int3 {x = 15, y = 0, z = 50},
                                          min = new int3 {x = 0, y = 0, z = 0 },
-                                         maxSpeed = 1.3f} };
+                                         maxSpeed = 2f},
+                                         new SpawnArea{qtd = 50,
+                                         goal = new float3{x = 25, y = 0, z = 25},
+                                         max = new int3 {x = 15, y = 0, z = 50},
+                                         min = new int3 {x = 0, y = 0, z = 0 },
+                                         maxSpeed = 1.5f},
+                                        };
         public float3[] WayPoints = new float3[]{
             new float3(25,0,25),
             new float3(45,0,25),
@@ -52,7 +63,7 @@ namespace BioCrowds
 
     }
 
-
+    
     public class Settings : MonoBehaviour
     {
         public static Settings instance;
@@ -105,9 +116,15 @@ namespace BioCrowds
             //Debug.Log(basisCase + " " + settingsFile);
 
             if(!basisCase)
-                System.IO.File.WriteAllText(settingsFile, JsonUtility.ToJson(experiment, true));            
+                System.IO.File.WriteAllText(settingsFile, JsonUtility.ToJson(experiment, true));
+            else
+            {
+                string file = System.IO.File.ReadAllText(settingsFile);
+                experiment = JsonUtility.FromJson<CrowdExperiment>(file);
+            }
 
-       
+
+
 
 
 

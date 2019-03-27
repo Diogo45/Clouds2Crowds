@@ -99,6 +99,7 @@ namespace BioCrowds
 
                 System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
 
+                Debug.Log(spawnList.goal);
 
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
                 {
@@ -293,12 +294,30 @@ namespace BioCrowds
                ComponentType.Create<Counter>(),
                ComponentType.Create<BioCrowdsAnchor>());
 
+            
+
+
+        }
+
+        protected override void OnStopRunning()
+        {
+            AgentAtCellQuantity.Dispose();
+            parBuffer.Dispose();
+        }
+
+        protected override void OnStartRunning()
+        {
+            AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
+            UpdateInjectedComponentGroups();
+            
+            lastAgentId = 0;
             //If bioclouds isn't enabled we must use other job to spawn the agents
             //Here we get the necessary data from the experiment file
             if (!Settings.experiment.BioCloudsEnabled)
             {
                 var exp = Settings.experiment.SpawnAreas;
-                parBuffer = new NativeList<Parameters>(exp.Length,Allocator.Persistent);
+
+                parBuffer = new NativeList<Parameters>(exp.Length, Allocator.Persistent);
 
                 for (int i = 0; i < exp.Length; i++)
                 {
@@ -314,24 +333,14 @@ namespace BioCrowds
 
                     parBuffer.Add(par);
                 }
+                AgentAtCellQuantity = new NativeArray<int>(parBuffer.Length, Allocator.Persistent);
 
             }
+            else
+            {
+                AgentAtCellQuantity = new NativeArray<int>(m_CellGroup.Length, Allocator.Persistent);
 
-
-        }
-
-        protected override void OnStopRunning()
-        {
-            AgentAtCellQuantity.Dispose();
-            parBuffer.Dispose();
-        }
-
-        protected override void OnStartRunning()
-        {
-            AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
-            UpdateInjectedComponentGroups();
-            AgentAtCellQuantity = new NativeArray<int>(m_CellGroup.Length, Allocator.Persistent);
-            lastAgentId = 0;
+            }
 
         }
 
@@ -377,27 +386,22 @@ namespace BioCrowds
             }
             else
             {
-                lastAgentId = AgentAtCellQuantity[AgentAtCellQuantity.Length - 1] + lastAgentId;
 
-                int lastValue = 0;
-
-                for (int i = 1; i < m_CellGroup.Length; i++)
+                int lastValue = parBuffer[0].qtdAgents;
+                AgentAtCellQuantity[0] = 0;
+                for (int i = 1; i < parBuffer.Length; i++)
                 {
-                    float3 cellPos = WindowManager.Crowds2Clouds(m_CellGroup.CellName[i].Value);
-                    int ind = GridConverter.Position2CellID(cellPos);
 
                     AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
-                    if (clouds2Crowds.parameterBuffer.TryGetValue(ind, out Parameters spawnList))
-                    {
-                        lastValue = spawnList.qtdAgents;
-                    }
+                    Debug.Log(AgentAtCellQuantity[i]);
+                    Parameters spawnList = parBuffer[i-1];
+                    lastValue = spawnList.qtdAgents;
+                    
                 }
-
                 var job = new InicialSpawn
                 {
                     AgentAtCellQuantity = AgentAtCellQuantity,
                     CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                    LastIDUsed = lastAgentId,
                     parBuffer = parBuffer
                 };
 
