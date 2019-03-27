@@ -120,7 +120,7 @@ public class VisualizationSystem : ComponentSystem
     public int frames = 0;
 
 
-    public List<BioCities.Record> bioCloudsRecords = new List<BioCities.Record>();
+    public List<BioClouds.Record> bioCloudsRecords = new List<BioClouds.Record>();
 
     public struct AgentGroup
     {
@@ -131,12 +131,12 @@ public class VisualizationSystem : ComponentSystem
     }
     [Inject] public AgentGroup agentGroup;
 
-    [Inject] public BioCities.CellMarkSystem m_CellMarkSystem;
+    [Inject] public BioClouds.CellMarkSystem m_CellMarkSystem;
 
 
     public struct CloudDataGroup
     {
-        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
         [ReadOnly] public ComponentDataArray<Position> Position;
         [ReadOnly] public readonly int Length;
     }
@@ -164,9 +164,9 @@ public class VisualizationSystem : ComponentSystem
         processing = aux;
 
 
-        var inst = BioCities.Parameters.Instance;
+        var inst = BioClouds.Parameters.Instance;
 
-        if (!inst.SavePositions)
+        if (!inst.SaveSimulationData)
             return;
 
         //Data recording
@@ -196,7 +196,7 @@ public class VisualizationSystem : ComponentSystem
 
                     if(inst.IDToRecord == -1 || m_CloudDataGroup.CloudData[i].ID == inst.IDToRecord)
                     {
-                        BioCities.Record record = new BioCities.Record(frames,
+                        BioClouds.Record record = new BioClouds.Record(frames,
                                                                        m_CloudDataGroup.CloudData[i].ID,
                                                                        m_CloudDataGroup.CloudData[i].AgentQuantity,
                                                                        cellIDs.Count,
@@ -214,9 +214,9 @@ public class VisualizationSystem : ComponentSystem
             //if (inst.MaxSimulationFrames == CurrentFrame - 1)
             //{
             using (System.IO.StreamWriter file =
-            new System.IO.StreamWriter(inst.LogFile + "Clouds.txt", true))
+            new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", true))
             {
-                foreach (BioCities.Record record in bioCloudsRecords)
+                foreach (BioClouds.Record record in bioCloudsRecords)
                     file.Write(record.ToString() + '\n');
             }
             bioCloudsRecords.Clear();
@@ -230,7 +230,7 @@ public class VisualizationSystem : ComponentSystem
         //if (inst.MaxSimulationFrames == CurrentFrame - 1)
         //{
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "Agents.txt", true))
+        new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", true))
         {
             file.Write(complete.ToString() + '\n');
         }
@@ -246,24 +246,24 @@ public class VisualizationSystem : ComponentSystem
 
 
         base.OnCreateManager();
-        var inst = BioCities.Parameters.Instance;
+        var inst = BioClouds.Parameters.Instance;
 
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "Agents.txt", false))
+        new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", false))
         {
             file.Write("#This file stores the Agent Data for each Agent." + '\n' +
             "#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;" + '\n');
         }
 
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "Clouds.txt", false))
+        new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", false))
         {
             file.Write("#This file stores the Cloud Data for each cloud." + '\n' + 
                        "#CurrentFrame;CloudID;RadiusSize;AgentsInCloud;CloudPositionX;CloudPositionY;CapturedCellsQuantity;CellIDs;" + '\n');
         }
 
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFile + "FrameTimes.txt", false))
+        new System.IO.StreamWriter(inst.LogFilePath + "FrameTimes.txt", false))
         {
             file.Write("#This file stores the processing time for each frame. Measured in Seconds." + '\n');
         }

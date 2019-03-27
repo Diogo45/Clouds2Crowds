@@ -10,7 +10,7 @@ using Unity.Burst;
 using BioCrowds;
 using System.IO;
 
-[UpdateBefore(typeof(BioCities.CloudTagDesiredQuantitySystem))]
+[UpdateBefore(typeof(BioClouds.CloudTagDesiredQuantitySystem))]
 public class FrameCounter : ComponentSystem {
 
     public float currentTime;
@@ -43,7 +43,7 @@ public class EndFrameCounter : ComponentSystem
     {
         float t = Time.realtimeSinceStartup - m_frameCounterSystem.currentTime;
         frameTimes.Add(t);
-        filename = BioCities.Parameters.Instance.LogFile + "FrameTimes.txt";
+        filename = BioClouds.Parameters.Instance.LogFilePath + "FrameTimes.txt";
         //Debug.Log(t);
     }
 

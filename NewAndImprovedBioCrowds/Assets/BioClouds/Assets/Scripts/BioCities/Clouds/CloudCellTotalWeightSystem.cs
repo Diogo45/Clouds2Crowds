@@ -9,8 +9,13 @@ using Unity.Jobs;
 using Unity.Burst;
 
 
-namespace BioCities {
+namespace BioClouds {
 
+
+
+    /// <summary>
+    /// Computes a mapping of Cloud ID to total weight for captured markers.
+    /// </summary>
     [UpdateAfter(typeof(CellMarkSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
     public class CloudCellTotalWeightSystem : JobComponentSystem
@@ -29,7 +34,10 @@ namespace BioCities {
         [Inject] CloudDataGroup m_CloudDataGroup;
         [Inject] CellMarkSystem m_CellMarkSystem;
 
-        public NativeHashMap<int, float> CloudTotalAuxinWeight;
+        /// <summary>
+        /// Mapping of Cloud ID to total captured marker cell weight.
+        /// </summary>
+        public NativeHashMap<int, float> CloudTotalCellWeight;
 
         struct CalculateTotalMarkerWeight : IJobParallelFor
         {
@@ -69,16 +77,16 @@ namespace BioCities {
             int size = m_CloudDataGroup.Length * 2;
             if (lastsize_CloudTotalAuxinWeight != size)
             {
-                CloudTotalAuxinWeight.Dispose();
-                CloudTotalAuxinWeight = new NativeHashMap<int, float>(size, Allocator.Persistent);
+                CloudTotalCellWeight.Dispose();
+                CloudTotalCellWeight = new NativeHashMap<int, float>(size, Allocator.Persistent);
             }
             else
-                CloudTotalAuxinWeight.Clear();
+                CloudTotalCellWeight.Clear();
             lastsize_CloudTotalAuxinWeight = size;
 
             CalculateTotalMarkerWeight CalculateWJob = new CalculateTotalMarkerWeight()
             {
-                cloudTotalAuxinWeight = CloudTotalAuxinWeight.ToConcurrent(),
+                cloudTotalAuxinWeight = CloudTotalCellWeight.ToConcurrent(),
                 CloudData = m_CloudDataGroup.CloudData,
                 CloudGoals = m_CloudDataGroup.CloudGoal,
                 CloudPositions = m_CloudDataGroup.Position,
@@ -95,12 +103,12 @@ namespace BioCities {
 
         protected override void OnStartRunning()
         {
-            CloudTotalAuxinWeight = new NativeHashMap<int, float>(0, Allocator.Persistent);
+            CloudTotalCellWeight = new NativeHashMap<int, float>(0, Allocator.Persistent);
         }
 
         protected override void OnDestroyManager()
         {
-            CloudTotalAuxinWeight.Dispose();
+            CloudTotalCellWeight.Dispose();
         }
     }
 

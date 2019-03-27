@@ -8,9 +8,12 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
 
-namespace BioCities
+namespace BioClouds
 {
 
+    /// <summary>
+    /// Moves each cloud according to the CloudMoveStep previously computed.
+    /// </summary>
     [UpdateAfter(typeof(CloudMovementVectorSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
     public class CloudMoveSystem : JobComponentSystem
@@ -32,14 +35,11 @@ namespace BioCities
             public void Execute(int index)
             {
                 float3 old = Positions[index].Value;
-                //Debug.Log(Deltas[index].Delta);
+
                 Positions[index] = new Position { Value = old + Deltas[index].Delta };
             }
         }
-
-
-
-
+        
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             MoveCloudsJob moveJob = new MoveCloudsJob()

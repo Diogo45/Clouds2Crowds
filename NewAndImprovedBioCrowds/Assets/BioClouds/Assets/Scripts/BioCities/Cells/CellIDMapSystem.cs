@@ -9,8 +9,14 @@ using Unity.Jobs;
 
 
 
-namespace BioCities
+namespace BioClouds
 {
+
+    /// <summary>
+    /// Creates a map of Cell ID to Cell Position.
+    /// Updates map whenever cell quantity changes.
+    /// Inject to obtain updated map.
+    /// </summary>
     [UpdateBefore(typeof(PostMarkGroup))]
     public class CellIDMapSystem : JobComponentSystem
     {
@@ -18,6 +24,9 @@ namespace BioCities
         //Data structure sizes
         int lastsize_cellId2Cellfloat3Map;
 
+        /// <summary>
+        /// Map of Cell ID to Cell Position.
+        /// </summary>
         public NativeHashMap<int, float3> cellId2Cellfloat3;
 
         public struct CellsGroup
@@ -35,8 +44,6 @@ namespace BioCities
             [ReadOnly] public ComponentDataArray<Position> Position;
             [WriteOnly] public NativeHashMap<int, float3>.Concurrent id2float3;
 
-            //[WriteOnly] public NativeQueue<DoublePosition>.Concurrent aux_draw;
-
             public void Execute(int cellGroupIndex)
             {
                 id2float3.TryAdd(CellData[cellGroupIndex].ID, Position[cellGroupIndex].Value);
@@ -48,7 +55,7 @@ namespace BioCities
         {
             cellId2Cellfloat3.Dispose();
         }
-        protected override void OnStartRunning()
+        protected override void OnCreateManager()
         {
 
             cellId2Cellfloat3 = new NativeHashMap<int, float3>(m_CellsgGroup.Length, Allocator.Persistent);
@@ -57,8 +64,6 @@ namespace BioCities
             for (int i = 0; i < m_CellsgGroup.Length; i++)
                 cellId2Cellfloat3.TryAdd(m_CellsgGroup.Cell[i].ID, m_CellsgGroup.Position[i].Value);
 
-            //Debug
-            //auxDraw = new NativeQueue<DoublePosition>(Allocator.TempJob);
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)

@@ -9,10 +9,13 @@ using Unity.Jobs;
 
 
 
-namespace BioCities
+namespace BioClouds
 {
 
-  
+  /// <summary>
+  /// Each tagged cell marks the cloud closest to them.
+  /// Produces a map of Cloud ID to list of uniquely marked Cells.
+  /// </summary>
     [UpdateAfter(typeof(CloudCellTagSystem))]
     public class CellMarkSystem : JobComponentSystem
     {
@@ -25,17 +28,19 @@ namespace BioCities
 
 
         //Holds the positions of eac tagged cell. Paired with the indexed cloud vector.
-        //public NativeArray<float3> taggedCellPositions;
+        /// <summary>
+        /// The mapping of Cloud ID to uniquely marked cells.
+        /// </summary>
         public NativeMultiHashMap<int, float3> cloudID2MarkedCellsMap;
         //Data structure sizes
         int lastsize_cloudID2MarkedCellsMap;
 
-
+        /// <summary>
+        /// The mapping of Cell ID to owning cloud.
+        /// </summary>
         public NativeHashMap<int, int> Cell2OwningCloud;
         int lastsize_cell2owningcloud;
 
-        //Debug
-        //private NativeQueue<DoublePosition> auxDraw;
 
         //Each cell chooses from among the tags for the closest agent
 
@@ -60,6 +65,10 @@ namespace BioCities
 
         [Inject] CloudCellTagSystem m_cloudCellTagsSystem;
 
+
+        /// <summary>
+        /// This job fills the CloudID -> Marked cell and the Cell ID -> owning cloud relations.
+        /// </summary>
         struct MarkCellsNotifyAgentsJob : IJobParallelFor
         {
             [WriteOnly] public NativeMultiHashMap<int, float3>.Concurrent cloudID2MarkedCellsMap;
@@ -68,9 +77,6 @@ namespace BioCities
 
             [ReadOnly] public NativeMultiHashMap<int, int> cellTagMap;
             [ReadOnly] public ComponentDataArray<CellData> CellData;
-            [ReadOnly] public Parameters.DistanceFunction DistanceFunction;
-            //[WriteOnly] public NativeQueue<DoublePosition>.Concurrent aux_draw;
-
 
             //Cell 2 Cloud Map
             [WriteOnly] public NativeHashMap<int, int>.Concurrent Cell2OwnCloud;
@@ -82,12 +88,6 @@ namespace BioCities
                 return math.distance(target, pos);
             }
 
-            public float MinRadiusSubMark(float3 target, float3 pos,  float minradius)
-            {
-                var aux_dist = math.distance(target, pos);
-                if ((aux_dist - minradius) < 0) return float.NegativeInfinity;
-                return (aux_dist - minradius);
-            }
 
             public float PowerDistanceMark(float3 target, float3 pos, float radius)
             {
@@ -99,17 +99,7 @@ namespace BioCities
 
             public float CaptureDistanceFunction(float3 target, float3 current, float radius, float minradius)
             {
-                switch (DistanceFunction)
-                {
-                    case Parameters.DistanceFunction.Euclidian:
-                        return EuclidianMark(target, current);
-                    case Parameters.DistanceFunction.Power:
-                        return PowerDistanceMark(target, current, radius);
-                    case Parameters.DistanceFunction.MinRadiusSubtraction:
-                        return MinRadiusSubMark(target, current, minradius);
-                    default:
-                        return EuclidianMark(target, current);
-                }
+                return PowerDistanceMark(target, current, radius);
             }
 
 
@@ -121,7 +111,7 @@ namespace BioCities
                 int currentCloudId = -1;
 
                 int closestId = -1;
-                float closestDistance = 100000f;
+                float closestDistance = float.PositiveInfinity;
 
                 bool keepgoing = cellTagMap.TryGetFirstValue(cellId, out currentCloudId, out it);
 
@@ -185,7 +175,7 @@ namespace BioCities
 
             Cell2OwningCloud.Dispose();
 
-            //auxDraw.Dispose();
+
         }
         protected override void OnStartRunning()
         {
@@ -196,8 +186,6 @@ namespace BioCities
             Cell2OwningCloud = new NativeHashMap<int, int>(0, Allocator.Persistent);
             lastsize_cell2owningcloud = 0;
 
-            //Debug
-            //auxDraw = new NativeQueue<DoublePosition>(Allocator.TempJob);
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -208,10 +196,10 @@ namespace BioCities
                 total += m_cloudCellTagsSystem.tagQuantityByCloud[i];
             }
 
-            int mapsize = (int)(total);//+ m_CloudGroup.Length);
+            int mapsize = (int)(total);
             int mapsizeupd = (int)(mapsize * 1.1f);
-            //Debug.Log("mapsizedup " + mapsizeupd + " " +  cloudID2MarkedCellsMap.Length);
-            if (cloudID2MarkedCellsMap.Length < mapsize )//|| lastsize_cloudID2MarkedCellsMap > mapsize * 1.3f)
+
+            if (cloudID2MarkedCellsMap.Length < mapsize )
             {
                 cloudID2MarkedCellsMap.Dispose();
                 cloudID2MarkedCellsMap = new NativeMultiHashMap<int, float3>(mapsizeupd, Allocator.Persistent);
@@ -232,8 +220,6 @@ namespace BioCities
                 Cell2OwningCloud.Clear();
             }
 
-            //auxDraw = new NativeQueue<DoublePosition>(Allocator.TempJob);
-
             MarkCellsNotifyAgentsJob markCellsJob = new MarkCellsNotifyAgentsJob()
             {
                 cloudID2MarkedCellsMap = cloudID2MarkedCellsMap.ToConcurrent(),
@@ -241,7 +227,6 @@ namespace BioCities
                 cloudIDPositions = m_cloudCellTagsSystem.cloudIDPositions,
                 cellTagMap = m_cloudCellTagsSystem.cellTagMap,
                 CellData = m_MarkedCellsgGroup.Cell,
-                DistanceFunction = Parameters.Instance.DistanceFunctionToUse,
                 Cell2OwnCloud = Cell2OwningCloud.ToConcurrent()
 
             };

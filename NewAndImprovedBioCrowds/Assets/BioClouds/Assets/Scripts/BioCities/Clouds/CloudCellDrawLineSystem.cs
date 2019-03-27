@@ -9,9 +9,12 @@ using Unity.Jobs;
 using Unity.Burst;
 
 
-namespace BioCities
+namespace BioClouds
 {
 
+    /// <summary>
+    /// Debug System. Draws Lines from Cloud center to captured Cells.
+    /// </summary>
     [UpdateAfter(typeof(CellMarkSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
     public class CloudCellDrawLineSystem : ComponentSystem

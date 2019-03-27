@@ -7,29 +7,13 @@ using Unity.Transforms;
 using Unity.Mathematics;
 using Unity.Jobs;
 
-namespace BioCities
+namespace BioClouds
 {
-    //grouping component
-    public struct Cell : ISharedComponentData, System.IEquatable<Cell>
-    {
-        public int X;
-        public int Y;
-
-        public bool Equals(Cell other)
-        {
-            return X == other.X && Y == other.Y;
-        }
-    }
-   
 
     public struct CellData : IComponentData
     {
         public int ID;
         public float Area;
-        public int owningCloud;
     }
 
-    public struct MarkedCell : IComponentData { }
-
-    
 }

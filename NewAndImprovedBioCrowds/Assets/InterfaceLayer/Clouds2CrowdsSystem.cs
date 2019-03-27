@@ -20,7 +20,7 @@ public struct AgentCloudID : ISharedComponentData
     public int CloudID;
 }
 
-[UpdateAfter(typeof(BioCities.CloudHeatMap))]
+[UpdateAfter(typeof(BioClouds.CloudHeatMap))]
 public class Clouds2CrowdsSystem : JobComponentSystem
 {
     private static bool _ChangedWindow;
@@ -53,8 +53,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     public struct CloudDataGroup 
     {
         public ComponentDataArray<SpawnedAgentsCounter> SpawnedAgents;
-        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
-        [ReadOnly] public ComponentDataArray<BioCities.CloudGoal> CloudGoal;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudGoal> CloudGoal;
         [ReadOnly] public ComponentDataArray<Position> Position;
         [ReadOnly] public readonly int Length;
     }
@@ -68,15 +68,15 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     }
 
     [Inject] CloudDataGroup m_CloudDataGroup;
-    [Inject] BioCities.CellMarkSystem m_CellMarkSystem;
-    [Inject] BioCities.CellIDMapSystem m_CellID2PosSystem;
+    [Inject] BioClouds.CellMarkSystem m_CellMarkSystem;
+    [Inject] BioClouds.CellIDMapSystem m_CellID2PosSystem;
     [Inject] AgentsDataGroup m_AgentDataGroup;
-    [Inject] BioCities.CloudHeatMap m_heatmap;
+    [Inject] BioClouds.CloudHeatMap m_heatmap;
 
 
     struct DesiredCloudAgent2CrowdAgentJob : IJobParallelFor
     {
-        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
 
         [ReadOnly] public NativeHashMap<int, float3> cellid2pos;
         [ReadOnly] public NativeHashMap<int, float> cloudDensities;
@@ -87,7 +87,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
         public void Execute(int index)
         {
-            BioCities.CloudData currentCloudData = CloudData[index];
+            BioClouds.CloudData currentCloudData = CloudData[index];
 
             float3 currentCellPosition;
             int desiredCellQnt = 0;
@@ -121,7 +121,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             {
                 //Debug.Log("DESIRED2");
                 //Debug.Log(cloudDensity);
-                int agentQuantity = (int)(desiredCellQnt * cloudDensity * BioCities.Parameters.Instance.CellArea);
+                int agentQuantity = (int)(desiredCellQnt * cloudDensity * BioClouds.Parameters.Instance.CellArea);
                 desiredQuantity.TryAdd(currentCloudData.ID, agentQuantity);
             }
 
@@ -169,8 +169,8 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
     struct AddDifferencePerCloudJob : IJobParallelFor
     {
-        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
-        [ReadOnly] public ComponentDataArray<BioCities.CloudGoal> CloudGoal;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudGoal> CloudGoal;
         [ReadOnly] public ComponentDataArray<SpawnedAgentsCounter> Counter;
 
         [ReadOnly] public NativeHashMap<int, int> CloudID2AgentInWindow;
@@ -297,7 +297,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     struct CloudAgentAccumulator : IJobParallelFor
     {
 
-        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
         [ReadOnly] public NativeMultiHashMap<int, int> AddedAgentsInFramePerCloud;
         public ComponentDataArray<SpawnedAgentsCounter> Counter;
 
@@ -325,7 +325,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
     struct ResetCloudAccumulator : IJobParallelFor
     {
 
-        [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
+        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
         [ReadOnly] public NativeHashMap<int, int> AgentsPerCloud;
         public ComponentDataArray<SpawnedAgentsCounter> Counter;
 
