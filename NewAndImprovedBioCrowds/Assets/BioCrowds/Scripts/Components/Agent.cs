@@ -66,9 +66,9 @@ namespace BioCrowds
 
             public void Execute(int index)
             {
-
                 //Get the 8 neighbors cells to the agent's cell + it's cell
                 int agent = AgentData[index].ID;
+                MyCell[index] = new CellName { Value = new int3((int)math.floor(Position[index].Value.x / 2.0f) * 2 + 1, 0, (int)(math.floor(Position[index].Value.z / 2.0f)) * 2 + 1) };
                 int3 cell = MyCell[index].Value;
 
                 CellToAgent.Add(cell, agent);
@@ -92,15 +92,18 @@ namespace BioCrowds
                         CellToAgent.Add(key, agent);
                         //Debug.Log(cell + " " + key);
 
-                        float distNewCell = math.distance((float3)key, agentPos);
-                        if (distNewCell < distCell)
-                        {
-                            distCell = distNewCell;
-                            MyCell[index] = new CellName { Value = key };
-                        }
+                        //float distNewCell = math.distance((float3)key, agentPos);
+                        //if (distNewCell < distCell)
+                        //{
+                        //    distCell = distNewCell;
+                        //    MyCell[index] = new CellName { Value = key };
+                        //}
+
+                        
                     }
                 }
-
+                MyCell[index] = new CellName { Value = new int3((int)math.floor(Position[index].Value.x / 2.0f) * 2 + 1, 0, (int)(math.floor(Position[index].Value.z / 2.0f)) * 2 + 1) };
+                //Debug.Log(MyCell[index].Value);
             }
         }
 
@@ -502,7 +505,7 @@ namespace BioCrowds
 
     }
 
-
+    
     [UpdateAfter(typeof(AgentMovementVectors))]
     public class AgentMovementSystem : JobComponentSystem
     {
