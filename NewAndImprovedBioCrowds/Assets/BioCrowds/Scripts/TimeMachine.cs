@@ -46,8 +46,7 @@ namespace BioCrowds
                 float3 moveStep = AgentStep[index].delta * TimeJump;
                 moveStep.y = y;
                 AgentStep[index] = new AgentStep() { delta = moveStep };
-
-                //Debug.Log("index " + index + " " + math.length(moveStep));
+                
 
             }
         }
