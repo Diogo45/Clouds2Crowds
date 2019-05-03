@@ -1,0 +1,2 @@
+#This file stores the Agent Data for each Agent.
+#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;

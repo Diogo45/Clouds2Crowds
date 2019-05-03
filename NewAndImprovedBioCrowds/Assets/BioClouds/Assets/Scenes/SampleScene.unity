@@ -190,6 +190,50 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!1 &207778063 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1852189815542098, guid: 008ae5c67752e274da812237df40a6d4,
+    type: 2}
+  m_PrefabInternal: {fileID: 1109548827}
+--- !u!114 &207778065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 207778063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b50e185e2f223946bc307cb730b319b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CloudRendererData: []
+  HeatQuadRendererData: []
+  HeatMapTexture: {fileID: 0}
+--- !u!114 &207778066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 207778063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3355483e159158c458b31c41b659f4d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  exp:
+    SeedState: 0
+    Domain:
+      minX: 0
+      maxX: 0
+      minY: 0
+      maxY: 0
+    FramesToRecord: 0
+    IDToRecord: 0
+    CellRegions: []
+    AgentTypes: []
+  background: {fileID: 2118126782}
+  densityQuad: {fileID: 1011581459}
+  mainCamera: {fileID: 534669902}
 --- !u!4 &362483570
 Transform:
   m_ObjectHideFlags: 0
@@ -474,6 +518,11 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1011581459 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1491475793968838, guid: 008ae5c67752e274da812237df40a6d4,
+    type: 2}
+  m_PrefabInternal: {fileID: 1109548827}
 --- !u!1 &1035271675
 GameObject:
   m_ObjectHideFlags: 0
@@ -575,7 +624,14 @@ Prefab:
       propertyPath: m_RootOrder
       value: 7
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 114879114376412670, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: BioCloudsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 114235667156344404, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
+    - {fileID: 114357232586286638, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
   m_SourcePrefab: {fileID: 100100000, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
   m_IsPrefabAsset: 0
 --- !u!1001 &1501088152
@@ -780,3 +836,8 @@ Prefab:
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6369cc13a744b4c4c8a381171c2a1902, type: 2}
   m_IsPrefabAsset: 0
+--- !u!1 &2118126782 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1306471280117382, guid: 008ae5c67752e274da812237df40a6d4,
+    type: 2}
+  m_PrefabInternal: {fileID: 1109548827}

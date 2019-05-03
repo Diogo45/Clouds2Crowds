@@ -99,7 +99,7 @@ namespace BioCrowds
 
                 System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
 
-                Debug.Log(spawnList.goal);
+                //Debug.Log(spawnList.goal);
 
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
                 {
@@ -393,7 +393,6 @@ namespace BioCrowds
                 {
 
                     AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
-                    Debug.Log(AgentAtCellQuantity[i]);
                     Parameters spawnList = parBuffer[i-1];
                     lastValue = spawnList.qtdAgents;
                     

@@ -85,7 +85,14 @@ namespace BioClouds
             city.BioEntityManager = entityManager;
             city.BioParameters = Object.FindObjectOfType<Parameters>();
 
+            var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            var bioCloudsFolder = System.IO.Directory.CreateDirectory(folder + "\\VHLAB\\BioClouds");
+            var expFolder = System.IO.Directory.CreateDirectory(folder + "\\VHLAB\\BioClouds\\Experiments");
+
+
+
             exp = LoadExperiment(city.BioParameters.ExperimentPath);
+
             r.InitState((uint)exp.SeedState);
 
             Debug.Log("domain: " + exp.Domain);

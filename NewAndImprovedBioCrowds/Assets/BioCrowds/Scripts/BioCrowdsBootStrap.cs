@@ -147,8 +147,11 @@ namespace BioCrowds
             });
             cellNames.Dispose();
 
+            QuadTree qt = new QuadTree(new Rectangle { x = 0, y = 0, w = size.x, h = size.y }, 0);
+
+
         }
-        
+
         [System.Obsolete("This method is deprecated, use the AgentSpawn system")]
         public static void SpawnAgent(int framesPerSecond, EntityManager entityManager, Group group, int startID, out int lastId, MeshInstanceRenderer AgentRenderer)
         {

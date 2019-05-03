@@ -9,7 +9,7 @@ using System;
 
 namespace BioCrowds
 {
-
+    [DisableAutoCreation]
     [UpdateBefore(typeof(AgentMovementSystem)),
      UpdateAfter(typeof(AgentMovementVectors)),
       UpdateInGroup(typeof(MovementVectorsSystemGroup))]

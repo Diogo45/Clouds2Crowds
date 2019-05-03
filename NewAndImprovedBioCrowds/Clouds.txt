@@ -1,0 +1,2 @@
+#This file stores the Cloud Data for each cloud.
+#CurrentFrame;CloudID;RadiusSize;AgentsInCloud;CloudPositionX;CloudPositionY;CapturedCellsQuantity;CellIDs;
