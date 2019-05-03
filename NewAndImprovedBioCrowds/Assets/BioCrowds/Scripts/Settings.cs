@@ -77,7 +77,7 @@ namespace BioCrowds
         private static CrowdExperiment _experiment;
         public static CrowdExperiment experiment = new CrowdExperiment();//{ get { if (experiment == null) _experiment = new CrowdExperiment(); return _experiment; } }
         
-        public int treeHeight = 0;
+        public int treeHeight = 124123423;
 
         public void Awake()
         {
