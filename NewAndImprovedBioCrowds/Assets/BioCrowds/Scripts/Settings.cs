@@ -27,7 +27,7 @@ namespace BioCrowds
         public int TerrainZ = 50;
         public int FramesPerSecond = 30;
         public bool showMarkers = false;
-        public bool showCells = true;
+        public bool showCells = false;
         public SpawnArea[] SpawnAreas = { new SpawnArea{qtd = 50,
                                          goal = new float3{x = 25, y = 0, z = 50},
                                          max = new int3 {x = 15, y = 0, z = 50},
@@ -77,7 +77,7 @@ namespace BioCrowds
         private static CrowdExperiment _experiment;
         public static CrowdExperiment experiment = new CrowdExperiment();//{ get { if (experiment == null) _experiment = new CrowdExperiment(); return _experiment; } }
         
-        public int treeHeight = 124123423;
+        public int treeHeight = 5;
 
         public void Awake()
         {

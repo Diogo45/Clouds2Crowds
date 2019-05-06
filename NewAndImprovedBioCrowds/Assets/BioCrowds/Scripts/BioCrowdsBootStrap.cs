@@ -136,6 +136,9 @@ namespace BioCrowds
 
             }
 
+            QuadTree qt = new QuadTree(new Rectangle { x = 0, y = 0, w = size.x, h = size.y }, 0);
+            ShowQuadTree.qt = qt;
+
 
             cells.Dispose();
 
@@ -147,7 +150,6 @@ namespace BioCrowds
             });
             cellNames.Dispose();
 
-            QuadTree qt = new QuadTree(new Rectangle { x = 0, y = 0, w = size.x, h = size.y }, 0);
 
 
         }
