@@ -172,8 +172,11 @@ namespace BioClouds {
 
         protected override void OnDestroyManager()
         {
-            tex_mat.Dispose();
-            cloudDensities.Dispose();
+            if(tex_mat.IsCreated)
+                tex_mat.Dispose();
+
+            if(cloudDensities.IsCreated)
+                cloudDensities.Dispose();
         }
 
         protected override void OnStartRunning()

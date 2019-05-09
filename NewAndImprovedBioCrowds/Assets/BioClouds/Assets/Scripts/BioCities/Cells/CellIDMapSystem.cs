@@ -53,7 +53,8 @@ namespace BioClouds
 
         protected override void OnDestroyManager()
         {
-            cellId2Cellfloat3.Dispose();
+            if(cellId2Cellfloat3.IsCreated)
+                cellId2Cellfloat3.Dispose();
         }
         protected override void OnCreateManager()
         {

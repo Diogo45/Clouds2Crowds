@@ -120,9 +120,9 @@ namespace BioClouds
             }
         }
 
-        protected override void OnCreateManager()
+        protected override void OnStartRunning()
         {
-            base.OnCreateManager();
+            //base.OnCreateManager();
 
             sums = new NativeArray<float3>(m_CloudDataGroup.Length, Allocator.Persistent);
             dessums = new NativeArray<float3>(m_CloudDataGroup.Length, Allocator.Persistent);
@@ -133,11 +133,21 @@ namespace BioClouds
         protected override void OnDestroyManager()
         {
             base.OnDestroyManager();
-            sums.Dispose();
-            dessums.Dispose();
-            dotVector.Dispose();
-            crossVector.Dispose();
-            extraWeightCellId.Dispose();
+
+            if(sums.IsCreated)
+                sums.Dispose();
+
+            if(dessums.IsCreated)
+                dessums.Dispose();
+
+            if(dotVector.IsCreated)
+                dotVector.Dispose();
+
+            if(crossVector.IsCreated)
+                crossVector.Dispose();
+
+            if(extraWeightCellId.IsCreated)
+                extraWeightCellId.Dispose();
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -178,13 +188,6 @@ namespace BioClouds
 
             calculateRDeps.Complete();
 
-            //for (int i = 0; i < m_CloudDataGroup.Length; i++)
-            //{
-                //Debug.DrawLine(m_CloudDataGroup.Position[i].Value, sums[i] + m_CloudDataGroup.Position[i].Value, Color.yellow);
-                //Debug.DrawLine(m_CloudDataGroup.Position[i].Value, dessums[i] + m_CloudDataGroup.Position[i].Value, Color.green);
-            //    if (dotVector[i] < 0f)
-             //       Debug.DrawLine(m_CloudDataGroup.Position[i].Value, sums[i] - dessums[i]  + m_CloudDataGroup.Position[i].Value, Color.magenta);
-            //}
             
             return calculateRDeps;
         }

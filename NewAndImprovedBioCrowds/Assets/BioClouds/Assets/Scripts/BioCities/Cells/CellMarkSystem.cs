@@ -171,9 +171,11 @@ namespace BioClouds
 
         protected override void OnDestroyManager()
         {
-            cloudID2MarkedCellsMap.Dispose();
+            if(cloudID2MarkedCellsMap.IsCreated)
+                cloudID2MarkedCellsMap.Dispose();
 
-            Cell2OwningCloud.Dispose();
+            if(Cell2OwningCloud.IsCreated)
+                Cell2OwningCloud.Dispose();
 
 
         }
