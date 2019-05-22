@@ -247,7 +247,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b50e185e2f223946bc307cb730b319b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CloudRendererData: []
+  CloudRendererData:
+  - mesh: {fileID: 4300006, guid: 7d3e167d9761a744b8c751bb0c1bd2a5, type: 3}
+    mat: {fileID: 2100000, guid: a568da71e8b5b03448d43b0c1cfb6747, type: 2}
   HeatQuadRendererData: []
   HeatMapTexture: {fileID: 0}
 --- !u!114 &207778066
@@ -724,6 +726,42 @@ Prefab:
       propertyPath: cam
       value: 
       objectReference: {fileID: 534669904}
+    - target: {fileID: 114739369977578050, guid: d30a199632d608d4da4c906ea9f76b6e,
+        type: 2}
+      propertyPath: originCreate.x
+      value: 1e+12
+      objectReference: {fileID: 0}
+    - target: {fileID: 114739369977578050, guid: d30a199632d608d4da4c906ea9f76b6e,
+        type: 2}
+      propertyPath: originCreate.y
+      value: 534
+      objectReference: {fileID: 0}
+    - target: {fileID: 114739369977578050, guid: d30a199632d608d4da4c906ea9f76b6e,
+        type: 2}
+      propertyPath: originBase.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114739369977578050, guid: d30a199632d608d4da4c906ea9f76b6e,
+        type: 2}
+      propertyPath: originBase.y
+      value: 530
+      objectReference: {fileID: 0}
+    - target: {fileID: 4182070476685430, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4182070476685430, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4182070476685430, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4182070476685430, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
+      propertyPath: m_LocalScale.y
+      value: 50
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
   m_IsPrefabAsset: 0

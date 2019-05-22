@@ -29,7 +29,6 @@ namespace BioCrowds
     [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystem : JobComponentSystem
     {
-
         private int qtdMarkers = 0;
 
         [Inject] private m_SpawnerBarrier m_SpawnerBarrier;
@@ -43,7 +42,6 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<AgentData> Agents;
             [ReadOnly] public ComponentDataArray<Position> Positions;
             [ReadOnly] public readonly int Length;
-
         }
 
         public struct MarkerGroup
@@ -224,6 +222,92 @@ namespace BioCrowds
         }
 
     }
+
+
+    public class MarkerSystemMk2 : JobComponentSystem
+    {
+
+        private int qtdMarkers = 0;
+
+        [Inject] private m_SpawnerBarrier m_SpawnerBarrier;
+
+        [Inject] public CellTagSystem CellTagSystem;
+
+        public NativeMultiHashMap<int, float3> AgentMarkers;
+
+
+        public struct MarkerGroup
+        {
+            [ReadOnly] public ComponentDataArray<Position> Position;
+            [ReadOnly] public ComponentDataArray<MarkerData> Data;
+            [ReadOnly] public SharedComponentDataArray<MarkerCellName> MarkerCell;
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] MarkerGroup markerGroup;
+
+        public struct AgentGroup
+        {
+            [ReadOnly] public ComponentDataArray<AgentData> Agents;
+            [ReadOnly] public ComponentDataArray<Position> Positions;
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] AgentGroup agentGroup;
+
+
+        struct TakeMarkers : IJobParallelFor
+        {
+
+            [ReadOnly] public Dictionary<int3, float3[]> cellMarkers;
+            [ReadOnly] public List<int3> cells;
+            [WriteOnly] public NativeMultiHashMap<int, float3> AgentMarkers;
+
+
+
+
+            public void Execute(int index)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
+            QuadTree qt = CellTagSystem.qt;
+            //Get QuadTree quadrants that need to be schedueled
+            var schedule = qt.GetScheduled();
+            //list<quadrants> --> [[cell1, cell2, ..., celln], [celln+1, ...], ...]
+            //[cell1, cell2, ..., celln] --> ComponentDataArray<Position>
+            //Job <-- Position, MarkedCells { markerCell --> checkAgents } 
+            
+
+
+
+
+            return base.OnUpdate(inputDeps);
+        }
+
+        protected override void OnStartRunning()
+        {
+            UpdateInjectedComponentGroups();
+            int qtdAgents = Settings.agentQuantity;
+            float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
+            qtdMarkers = Mathf.FloorToInt(densityToQtd);
+
+            AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
+
+        }
+
+        protected override void OnStopRunning()
+        {
+            AgentMarkers.Dispose();
+        }
+    }
+
+
+
+
+
 
     [UpdateAfter(typeof(MarkerSystemGroup))]
     public class m_SpawnerBarrier:BarrierSystem

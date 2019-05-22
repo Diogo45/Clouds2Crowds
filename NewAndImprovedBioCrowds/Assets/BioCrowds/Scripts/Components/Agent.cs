@@ -7,6 +7,7 @@ using Unity.Jobs;
 using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 namespace BioCrowds
 {
@@ -45,10 +46,20 @@ namespace BioCrowds
 
         public NativeMultiHashMap<int3, int> CellToMarkedAgents;
         public NativeHashMap<int, float3> AgentIDToPos;
+        public QuadTree qt;
+
+        public struct CellGroup
+        {
+            [ReadOnly] public ComponentDataArray<CellName> CellName;
+            [ReadOnly] public SubtractiveComponent<AgentData> Agent;
+            [ReadOnly] public SubtractiveComponent<MarkerData> Marker;
+
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] public CellGroup cellGroup;
 
         public struct AgentGroup
         {
-            public ComponentDataArray<CellName> MyCell;
             [ReadOnly] public ComponentDataArray<Position> AgentPos;
             [ReadOnly] public ComponentDataArray<AgentData> AgentData;
             [ReadOnly] public readonly int Length;
@@ -61,27 +72,24 @@ namespace BioCrowds
             [WriteOnly] public NativeHashMap<int, float3>.Concurrent AgentIDToPos;
 
             [ReadOnly] public ComponentDataArray<Position> Position;
-            public ComponentDataArray<CellName> MyCell;
             [ReadOnly] public ComponentDataArray<AgentData> AgentData;
 
             public void Execute(int index)
             {
                 //Get the 8 neighbors cells to the agent's cell + it's cell
                 int agent = AgentData[index].ID;
-                MyCell[index] = new CellName { Value = new int3((int)math.floor(Position[index].Value.x / 2.0f) * 2 + 1, 0, (int)(math.floor(Position[index].Value.z / 2.0f)) * 2 + 1) };
-                int3 cell = MyCell[index].Value;
+                int3 cell = new int3((int)math.floor(Position[index].Value.x / 2.0f) * 2 + 1, 0,
+                                     (int)math.floor(Position[index].Value.z / 2.0f) * 2 + 1);
 
                 CellToAgent.Add(cell, agent);
-                int startX = MyCell[index].Value.x - 2;
-                int startZ = MyCell[index].Value.z - 2;
-                int endX = MyCell[index].Value.x + 2;
-                int endZ = MyCell[index].Value.z + 2;
+                int startX = cell.x - 2;
+                int startZ = cell.z - 2;
+                int endX = cell.x + 2;
+                int endZ = cell.z + 2;
 
                 float3 agentPos = Position[index].Value;
-                //Debug.Log(agent + " " + agentPos);
                 AgentIDToPos.TryAdd(agent, agentPos);
-                float distCell = math.distance((float3)MyCell[index].Value, agentPos);
-
+                float distCell = math.distance((float3)cell, agentPos);
 
                 for (int i = startX; i <= endX; i = i + 2)
                 {
@@ -90,20 +98,10 @@ namespace BioCrowds
                         int3 key = new int3(i, 0, j);
 
                         CellToAgent.Add(key, agent);
-                        //Debug.Log(cell + " " + key);
-
-                        //float distNewCell = math.distance((float3)key, agentPos);
-                        //if (distNewCell < distCell)
-                        //{
-                        //    distCell = distNewCell;
-                        //    MyCell[index] = new CellName { Value = key };
-                        //}
-
                         
                     }
                 }
-                MyCell[index] = new CellName { Value = new int3((int)math.floor(Position[index].Value.x / 2.0f) * 2 + 1, 0, (int)(math.floor(Position[index].Value.z / 2.0f)) * 2 + 1) };
-                //Debug.Log(MyCell[index].Value);
+
             }
         }
 
@@ -111,6 +109,8 @@ namespace BioCrowds
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             //int qtdAgts = Settings.agentQuantity;
+            qt.Reset();
+
             if (AgentIDToPos.Capacity < agentGroup.Length)
             {
                 AgentIDToPos.Dispose();
@@ -121,12 +121,10 @@ namespace BioCrowds
 
             CellToMarkedAgents.Clear();
 
-
             MapCellToAgents mapCellToAgentsJob = new MapCellToAgents
             {
                 CellToAgent = CellToMarkedAgents.ToConcurrent(),
                 AgentData = agentGroup.AgentData,
-                MyCell = agentGroup.MyCell,
                 Position = agentGroup.AgentPos,
                 AgentIDToPos = AgentIDToPos.ToConcurrent()
             };
@@ -135,7 +133,20 @@ namespace BioCrowds
 
             mapCellToAgentsJobDep.Complete();
 
-            //Debug.Log(AgentIDToPos.Length);
+            List<int3> addedCells = new List<int3>();
+
+            for(int i = 0; i < cellGroup.Length; i++)
+            {
+                int3 key = cellGroup.CellName[i].Value;
+                int item;
+                NativeMultiHashMapIterator<int3> it;
+                if(CellToMarkedAgents.TryGetFirstValue(key, out item, out it))
+                {
+                    //Debug.Log(key);
+                    qt.Insert(key);
+                }
+
+            }
 
             return mapCellToAgentsJobDep;
         }
@@ -145,6 +156,9 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
+            Rectangle size = new Rectangle { x = 0, y = 0, h = Settings.experiment.TerrainZ, w = Settings.experiment.TerrainX };
+            qt = new QuadTree(size, 0);
+            ShowQuadTree.qt = qt;
             int qtdAgts = Settings.agentQuantity;
             //TODO dynamize
             CellToMarkedAgents = new NativeMultiHashMap<int3, int>(160000, Allocator.Persistent);

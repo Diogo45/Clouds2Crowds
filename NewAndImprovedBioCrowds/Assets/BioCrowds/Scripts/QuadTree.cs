@@ -19,8 +19,6 @@ public struct Rectangle
 }
 
 
-
-
 public class QuadTree
 {
 
@@ -29,7 +27,7 @@ public class QuadTree
     public Rectangle size;
     //Grows downwards
     private int heigth;
-    private bool schedule = false;
+    public bool schedule = false;
     public List<int3> myCells;
 
     private bool subDivided = false;
@@ -80,7 +78,7 @@ public class QuadTree
             TopRight = new QuadTree(tr, nh);
             BottomLeft = new QuadTree(bl, nh);
             BottomRight = new QuadTree(br, nh);
-
+            this.subDivided = true;
         }
         else
         {
@@ -88,6 +86,7 @@ public class QuadTree
             int qtdMarkers = Mathf.FloorToInt(densityToQtd);
             myCells = new List<int3>();
             this.getCells();
+            this.subDivided = false;
         }
 
         
@@ -96,8 +95,7 @@ public class QuadTree
     private void getCells()
     {
         int3 cell = new int3 { x = (int)math.floor(size.x / 2.0f) * 2 + 1, y = 0, z = (int)math.floor(size.y / 2.0f) * 2 + 1 };
-        //int3 cell = new int3 { x = size.x, y = 0, z = size.y };
-        //Debug.Log(cell + " " + heigth);
+
         for(int i = cell.x; i < size.w + size.x; i = i + 2)
         {
             for(int j = cell.z; j < size.h + size.y; j = j + 2)
@@ -107,7 +105,52 @@ public class QuadTree
             }
 
         }
-        //Debug.Log(myCells.Count);
+    }
+
+    public void Insert(int3 cell)
+    {
+        int x = cell.x;
+        int z = cell.z;
+
+        this.schedule = true;
+
+        if (subDivided)
+        {
+            if(x < BottomRight.size.x)
+            {
+                //LeftSide
+                if(z < TopRight.size.y)
+                {
+                    //BottomLeft
+                    BottomLeft.Insert(cell);
+                }
+                else
+                {
+                    //TopLeft
+                    TopLeft.Insert(cell);
+                }
+
+            }
+            else
+            {
+                //RigthSide
+                if (z < TopRight.size.y)
+                {
+                    //BottomRigth
+                    BottomRight.Insert(cell);
+                }
+                else
+                {
+                    //TopRigth
+                    TopRight.Insert(cell);
+                }
+            }
+        }
+        else
+        {
+            this.schedule = true;
+        }
+
     }
 
     public bool IsSubdividable()
@@ -115,18 +158,67 @@ public class QuadTree
         return this.heigth < BioCrowds.Settings.instance.treeHeight;
     }
 
+    public List<int3[]> GetScheduled()
+    {
+        List<int3[]> res = new List<int3[]>();
+
+        if(!this.subDivided && this.schedule)
+        {
+            res.Add(myCells.ToArray());
+            return res;
+        }
+        else 
+        if(this.subDivided && this.schedule)
+        {
+            if (TopLeft.schedule)
+            {
+                res.AddRange(TopLeft.GetScheduled());
+            }
+            if (TopRight.schedule)
+            {
+                res.AddRange(TopRight.GetScheduled());
+            }
+            if (BottomLeft.schedule)
+            {
+                res.AddRange(BottomLeft.GetScheduled());
+            }
+            if (BottomRight.schedule)
+            {
+                res.AddRange(BottomRight.GetScheduled());
+            }
+        }
+
+        return res;
+
+    }
+
+    public void Reset()
+    {
+        this.schedule = false;
+        if (subDivided)
+        {
+            TopLeft.Reset();
+            TopRight.Reset();
+            BottomLeft.Reset();
+            BottomRight.Reset();
+        }
+
+    }
+
     public void Draw(int max)
     {
+        Color sc = schedule ? Color.red : Color.white; 
+
         Vector3 x1, x2, x3, x4;
         x1 = new Vector3( size.x, 0, size.y );
         x2 = new Vector3( size.x + size.w, 0, size.y );
         x3 = new Vector3( size.x, 0, size.y + size.h);
         x4 = new Vector3( size.x + size.w , 0, size.y + size.h);
 
-        Debug.DrawLine(x1, x2);
-        Debug.DrawLine(x1, x3);
-        Debug.DrawLine(x2, x4);
-        Debug.DrawLine(x3, x4);
+        Debug.DrawLine(x1, x2, sc);
+        Debug.DrawLine(x1, x3, sc);
+        Debug.DrawLine(x2, x4, sc);
+        Debug.DrawLine(x3, x4, sc);
 
         if(heigth < max)
         {

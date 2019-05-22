@@ -518,6 +518,7 @@ namespace BioCrowds
                 int currentAgent = -1;
                 float radius = 0.45f;
 
+                //TODO:calculate cell
                 bool keepgoing = cellToAgent.TryGetFirstValue(MyCell[index].Value, out currentAgent, out iter);
 
                 if (!keepgoing) return;
