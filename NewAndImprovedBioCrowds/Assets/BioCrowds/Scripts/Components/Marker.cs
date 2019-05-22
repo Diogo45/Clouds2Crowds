@@ -37,6 +37,8 @@ namespace BioCrowds
 
         public NativeMultiHashMap<int, float3> AgentMarkers;
 
+        public NativeHashMap<int3, float> LocalDensities;
+
         public struct AgentGroup
         {
             [ReadOnly] public ComponentDataArray<AgentData> Agents;
@@ -60,18 +62,17 @@ namespace BioCrowds
 
         struct TakeMarkers : IJobParallelFor
         {
+            [WriteOnly] public NativeHashMap<int3, float>.Concurrent Densities;
             [WriteOnly] public NativeMultiHashMap<int, float3>.Concurrent AgentMarkers;
             [ReadOnly] public NativeHashMap<int, float3> AgentIDToPos;
             [ReadOnly] public NativeMultiHashMap<int3, int> cellToAgent;
-            //public EntityCommandBuffer.Concurrent CommandBuffer;
-            //[ReadOnly] public EntityArray Entities;
             [ReadOnly] public SharedComponentDataArray<MarkerCellName> MarkerCell;
             [ReadOnly] public ComponentDataArray<Position> MarkerPos;
 
             public void Execute(int index)
             {
                 NativeMultiHashMapIterator<int3> iter;
-
+                int agents = 0;
                 //int3 currentCell;
                 int currentAgent = -1;
                 int bestAgent = -1;
@@ -83,16 +84,14 @@ namespace BioCrowds
 
                 if (!keepgoing)
                 {
-                    //CommandBuffer.RemoveComponent(index, Entities[index], typeof(Active));
-
-                    //CommandBuffer.RemoveComponent(index, Entities[index], typeof(Active));
                     return;
                 }
-
-                //Debug.Log("Passou: " + MarkerCell[index].Value);
+                
 
                 float3 agentPos;
                 AgentIDToPos.TryGetValue(currentAgent, out agentPos);
+
+                agents++;
 
                 float dist = math.distance(MarkerPos[index].Value, agentPos);
 
@@ -104,6 +103,7 @@ namespace BioCrowds
 
                 while (cellToAgent.TryGetNextValue(out currentAgent, ref iter))
                 {
+                    agents++;
                     AgentIDToPos.TryGetValue(currentAgent, out agentPos);
                     dist = math.distance(MarkerPos[index].Value, agentPos);
                     if (dist < agentRadius && dist <= closestDistance)
@@ -133,7 +133,7 @@ namespace BioCrowds
                 //Debug.Log(bestAgent);
                 AgentMarkers.Add(bestAgent, MarkerPos[index].Value);
 
-
+                Densities.TryAdd(MarkerCell[index].Value, (float)agents / 36f);
             }
 
         }
@@ -164,7 +164,8 @@ namespace BioCrowds
                 AgentMarkers = AgentMarkers.ToConcurrent(),
                 cellToAgent = CellTagSystem.CellToMarkedAgents,
                 MarkerCell = markerGroup.MarkerCell,
-                MarkerPos = markerGroup.Position
+                MarkerPos = markerGroup.Position,
+                Densities = LocalDensities.ToConcurrent()
                 //Entities = markerGroup.Entities,
                 //CommandBuffer = m_SpawnerBarrier.CreateCommandBuffer().ToConcurrent()
             };
@@ -213,12 +214,14 @@ namespace BioCrowds
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
             AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
+            LocalDensities = new NativeHashMap<int3, float>(markerGroup.Length, Allocator.Persistent);
 
         }
 
         protected override void OnStopRunning()
         {
             AgentMarkers.Dispose();
+            LocalDensities.Dispose();
         }
 
     }

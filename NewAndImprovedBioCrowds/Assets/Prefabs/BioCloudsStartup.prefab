@@ -55,8 +55,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4045369759691428}
   - component: {fileID: 114879114376412670}
-  - component: {fileID: 114235667156344404}
-  - component: {fileID: 114357232586286638}
+  - component: {fileID: 114935254387895060}
+  - component: {fileID: 114417955130599368}
   m_Layer: 0
   m_Name: Parameters
   m_TagString: Untagged
@@ -230,7 +230,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.99999994, y: 0.99999994, z: 6.1232336e-17}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114235667156344404
+--- !u!114 &114417955130599368
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1852189815542098}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4a3df2f8c5f9ad4ea8329ed70559060, type: 3}
+  m_Script: {fileID: 11500000, guid: 3355483e159158c458b31c41b659f4d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   exp:
@@ -255,22 +255,6 @@ MonoBehaviour:
   background: {fileID: 1306471280117382}
   densityQuad: {fileID: 1491475793968838}
   mainCamera: {fileID: 0}
---- !u!114 &114357232586286638
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1852189815542098}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d1dd22945c313649addf7e69f010781, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CloudRendererData:
-  - mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 3}
-    mat: {fileID: 2100000, guid: 71bfd43583ba26743834fb37fb4eb57f, type: 2}
-  HeatQuadRendererData: []
-  HeatMapTexture: {fileID: 0}
 --- !u!114 &114879114376412670
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -314,3 +298,19 @@ MonoBehaviour:
   LogFilePath: 
   BioCloudsActive: 0
   RenderClouds: 1
+--- !u!114 &114935254387895060
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1852189815542098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b50e185e2f223946bc307cb730b319b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CloudRendererData:
+  - mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    mat: {fileID: 2100000, guid: 71bfd43583ba26743834fb37fb4eb57f, type: 2}
+  HeatQuadRendererData: []
+  HeatMapTexture: {fileID: 0}

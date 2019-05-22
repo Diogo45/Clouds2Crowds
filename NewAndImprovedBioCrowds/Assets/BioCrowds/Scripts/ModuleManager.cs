@@ -28,6 +28,20 @@ namespace BioCrowds
         [Inject] AgentMovementVectors agentMovementVectors;
         [Inject] AgentDespawner despawner;
 
+        World activeWorld;
+
+        protected override void OnStartRunning()
+        {
+            Debug.Log(TimeMachineSettings.experiment.Enabled);
+            if (TimeMachineSettings.experiment.Enabled)
+            {
+                Debug.Log("TimeMachine On");
+                SetupTimeMachine();
+            }
+            
+
+        }
+
         protected override void OnUpdate()
         {
             
@@ -51,10 +65,34 @@ namespace BioCrowds
                 agentMovementVectors.Enabled = false;
             }
 
+            if (!modules.BioCloudsEnabled)
+                BioClouds.BioClouds.DeactivateBioclouds();
 
 
+            if (!TimeMachineSettings.experiment.Enabled && World.Active.GetExistingManager<AgentMovementTimeMachine>().Enabled)
+                DisableTimeMachine();
         }
-        
+
+        public void SetupTimeMachine()
+        {
+            World activeWorld = World.Active;
+            var manager = activeWorld.GetOrCreateManager<AgentMovementTimeMachine>();
+            //manager.LoadDensityValues();
+            manager.Enabled = true;
+        }
+
+        public void EnableTimeMachine()
+        {
+            World activeWorld = World.Active;
+            activeWorld.GetExistingManager<AgentMovementTimeMachine>().Enabled = true;
+        }
+
+        public void DisableTimeMachine()
+        {
+            World activeWorld = World.Active;
+            activeWorld.GetExistingManager<AgentMovementTimeMachine>().Enabled = false;
+        }
+
     }
     
 }

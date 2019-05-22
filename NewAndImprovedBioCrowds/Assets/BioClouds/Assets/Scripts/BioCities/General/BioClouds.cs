@@ -47,7 +47,7 @@ namespace BioClouds
             activeWorld.GetExistingManager<CloudRadiusUpdate>().Enabled = false;
             activeWorld.GetExistingManager<CloudRightPreferenceSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudTagDesiredQuantitySystem>().Enabled = false;
-            activeWorld.GetExistingManager<ExperimentEndSystem>().Enabled = false;
+            //activeWorld.GetExistingManager<ExperimentEndSystem>().Enabled = false;
         }
 
         //Properties

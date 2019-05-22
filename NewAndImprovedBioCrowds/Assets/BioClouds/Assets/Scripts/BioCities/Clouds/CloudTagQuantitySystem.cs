@@ -51,16 +51,14 @@ namespace BioClouds
 
         protected override void OnDestroyManager()
         {
-            CloudDesiredCellTagQuantity.Dispose();
+            if(CloudDesiredCellTagQuantity.IsCreated)
+                CloudDesiredCellTagQuantity.Dispose();
         }
         protected override void OnStartRunning()
         {
 
             CloudDesiredCellTagQuantity = new NativeArray<int>(m_CloudGroup.Length, Allocator.Persistent);
             lastsize_cloudtagquantity = 0;
-
-            //Debug
-            //auxDraw = new NativeQueue<DoublePosition>(Allocator.TempJob);
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)

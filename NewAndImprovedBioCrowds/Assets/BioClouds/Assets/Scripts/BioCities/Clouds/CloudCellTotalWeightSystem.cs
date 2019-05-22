@@ -108,7 +108,8 @@ namespace BioClouds {
 
         protected override void OnDestroyManager()
         {
-            CloudTotalCellWeight.Dispose();
+            if (CloudTotalCellWeight.IsCreated)
+                CloudTotalCellWeight.Dispose();
         }
     }
 

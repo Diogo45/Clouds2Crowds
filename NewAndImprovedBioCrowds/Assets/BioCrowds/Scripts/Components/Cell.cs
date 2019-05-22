@@ -75,10 +75,7 @@ namespace BioCrowds
 
             public void Execute(int index)
             {
-
-
                 CommandBuffer.AddComponent(index, entity[index], new Active { active = 1 });
-
             }
         }
 
@@ -108,18 +105,6 @@ namespace BioCrowds
                 if (activate)
                 {
 
-                    //var entities = cellMarkers.GetEntityArray();
-
-
-
-                    //for (int j = 0; j < entities.Length; j++)
-                    //{
-                    //    Debug.Log(markerGroup.cell[i].Value + " " + cellMarkers.GetComponentDataArray<MarkerData>()[j].id );
-                    //    manager.AddComponent(entities[j], typeof(Active));
-                    //    //manager.SetComponentData(entities[j], new Active { active = 1});
-                    //    UpdateInjectedComponentGroups();
-
-                    //}
 
 
                     var job = new ActivateMarkers
@@ -131,16 +116,13 @@ namespace BioCrowds
 
 
                     var handle = job.Schedule(cellMarkers.GetEntityArray().Length, Settings.BatchSize, inputDeps);
-                    //JobHandle.CombineDependencies(inputDeps, handle);
+
                     //TODO:DISABLE
                     handle.Complete();
                     UpdateInjectedComponentGroups();
                 }
 
                 cellMarkers.ResetFilter();
-
-
-
             }
 
 

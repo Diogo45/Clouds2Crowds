@@ -153,9 +153,12 @@ namespace BioClouds
 
         protected override void OnDestroyManager()
         {
-            tagQuantityByCloud.Dispose();
-            cellTagMap.Dispose();
-            cloudIDPositions.Dispose();
+            if (tagQuantityByCloud.IsCreated)
+                tagQuantityByCloud.Dispose();
+            if(cellTagMap.IsCreated)
+                cellTagMap.Dispose();
+            if(cloudIDPositions.IsCreated)
+                cloudIDPositions.Dispose();
         }
 
     }
