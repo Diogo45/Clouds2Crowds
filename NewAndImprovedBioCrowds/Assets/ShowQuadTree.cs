@@ -6,7 +6,13 @@ using UnityEngine;
 public class ShowQuadTree : MonoBehaviour
 {
     public static QuadTree qt;
-    public int maxShowHeigth = BioCrowds.Settings.instance.treeHeight;
+    public int maxShowHeigth;
+
+
+    void Start()
+    {
+        maxShowHeigth = BioCrowds.Settings.instance.treeHeight;
+    }
 
     void Update()
     {

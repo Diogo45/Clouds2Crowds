@@ -18,17 +18,17 @@ public struct Rectangle
 
 }
 
-
 public class QuadTree
 {
 
  
     //size <- (x,y,w,h)
     public Rectangle size;
-    //Grows downwards
     private int heigth;
     public bool schedule = false;
     public List<int3> myCells;
+    public static int LastId = 0;
+    public int Id = 0;
 
     private bool subDivided = false;
     private QuadTree TopRight = null;
@@ -87,6 +87,8 @@ public class QuadTree
             myCells = new List<int3>();
             this.getCells();
             this.subDivided = false;
+            this.Id = LastId;
+            LastId++;
         }
 
         
@@ -105,6 +107,42 @@ public class QuadTree
             }
 
         }
+    }
+
+    public List<int> GetQuadrants()
+    {
+        
+        List<int> res = new List<int>();
+        if (!this.subDivided)
+        {
+            res.Add(Id);
+            return res;
+        }
+        else{
+            if(this.subDivided)
+            {
+                if (TopLeft.schedule)
+                {
+                    res.AddRange(TopLeft.GetQuadrants());
+                }
+                if (TopRight.schedule)
+                {
+                    res.AddRange(TopRight.GetQuadrants());
+                }
+                if (BottomLeft.schedule)
+                {
+                    res.AddRange(BottomLeft.GetQuadrants());
+                }
+                if (BottomRight.schedule)
+                {
+                    res.AddRange(BottomRight.GetQuadrants());
+                }
+            }
+        }
+
+
+        return res;
+
     }
 
     public void Insert(int3 cell)
@@ -187,7 +225,6 @@ public class QuadTree
                 res.AddRange(BottomRight.GetScheduled());
             }
         }
-
         return res;
 
     }

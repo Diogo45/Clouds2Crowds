@@ -133,7 +133,6 @@ namespace BioCrowds
                     {
                         Value = quaternion.identity
                     });
-                    CommandBuffer.SetComponent(index, new CellName { Value = new int3(CellX, CellY, CellZ) });
                     CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
                     CommandBuffer.SetComponent(index, new Counter { Value = 0 });
                     CommandBuffer.SetComponent(index, new NormalLifeData
@@ -285,12 +284,10 @@ namespace BioCrowds
             AgentArchetype = entityManager.CreateArchetype(
                ComponentType.Create<Position>(),
                ComponentType.Create<Rotation>(),
-               ComponentType.Create<CellName>(),
                ComponentType.Create<AgentData>(),
                ComponentType.Create<AgentStep>(),
                ComponentType.Create<AgentGoal>(),
                ComponentType.Create<NormalLifeData>(),
-               ComponentType.Create<Animator>(),
                ComponentType.Create<Counter>(),
                ComponentType.Create<BioCrowdsAnchor>());
 

@@ -1,14 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using UnityEngine;
-using BioCrowds;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Rendering;
 using Unity.Transforms;
-using UnityEngine;
-using Unity.Jobs;
 
 [ExecuteInEditMode]
 public class WindowManager: MonoBehaviour
