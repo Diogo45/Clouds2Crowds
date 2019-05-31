@@ -113,6 +113,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &31758431 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1306471280117382, guid: 008ae5c67752e274da812237df40a6d4,
+    type: 2}
+  m_PrefabInternal: {fileID: 1109548827}
 --- !u!1 &115626320
 GameObject:
   m_ObjectHideFlags: 0
@@ -197,8 +202,8 @@ MonoBehaviour:
     IDToRecord: 0
     CellRegions: []
     AgentTypes: []
-  background: {fileID: 0}
-  densityQuad: {fileID: 0}
+  background: {fileID: 31758431}
+  densityQuad: {fileID: 1300543639}
   mainCamera: {fileID: 534669902}
 --- !u!1 &534669902
 GameObject:
@@ -488,9 +493,18 @@ Prefab:
       propertyPath: mainCamera
       value: 
       objectReference: {fileID: 534669902}
+    - target: {fileID: 1871597881226216, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
   m_IsPrefabAsset: 0
+--- !u!1 &1300543639 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1491475793968838, guid: 008ae5c67752e274da812237df40a6d4,
+    type: 2}
+  m_PrefabInternal: {fileID: 1109548827}
 --- !u!1001 &1501088152
 Prefab:
   m_ObjectHideFlags: 0
@@ -575,6 +589,10 @@ Prefab:
     - target: {fileID: 4182070476685430, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
       propertyPath: m_LocalScale.y
       value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 1320356715142610, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
@@ -661,7 +679,7 @@ Prefab:
     - target: {fileID: 114076060412145432, guid: 6369cc13a744b4c4c8a381171c2a1902,
         type: 2}
       propertyPath: treeHeight
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6369cc13a744b4c4c8a381171c2a1902, type: 2}

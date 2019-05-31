@@ -226,7 +226,8 @@ namespace BioCrowds
 
     }
 
-
+    [UpdateAfter(typeof(CellTagSystem))]
+    [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystemMk2 : JobComponentSystem
     {
         private bool createCells = true;
@@ -239,6 +240,7 @@ namespace BioCrowds
 
         public NativeMultiHashMap<int, float3> AgentMarkers;
         private Dictionary<int, float3[]> cellMarkers;
+        QuadTree qt;
 
         public struct MarkerGroup
         {
@@ -274,18 +276,18 @@ namespace BioCrowds
             }
         }
 
-        
+       
 
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-
+            qt = CellTagSystem.qt;
             if (createCells)
             {
-
+                CreateCells();
+                createCells = false;
             }
 
-            QuadTree qt = CellTagSystem.qt;
             //Get QuadTree quadrants that need to be schedueled
             var schedule = qt.GetScheduled();
             //list<quadrants> --> [[cell1, cell2, ..., celln], [celln+1, ...], ...]
@@ -297,6 +299,11 @@ namespace BioCrowds
 
 
             return base.OnUpdate(inputDeps);
+        }
+
+        private void CreateCells()
+        {
+            
         }
 
         protected override void OnStartRunning()

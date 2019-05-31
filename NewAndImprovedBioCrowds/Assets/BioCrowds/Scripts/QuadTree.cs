@@ -109,6 +109,12 @@ public class QuadTree
         }
     }
 
+    public void PrintQuadrants()
+    {
+        String print = "";
+
+    }
+
     public List<int> GetQuadrants()
     {
         

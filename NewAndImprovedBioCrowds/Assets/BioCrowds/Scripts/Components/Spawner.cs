@@ -122,16 +122,12 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed/Settings.experiment.FramesPerSecond,//Set sampling rate
+                        MaxSpeed = maxSpeed/Settings.experiment.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
                     {
                         delta = float3.zero
-                    });
-                    CommandBuffer.SetComponent(index, new Rotation
-                    {
-                        Value = quaternion.identity
                     });
                     CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
                     CommandBuffer.SetComponent(index, new Counter { Value = 0 });
@@ -286,6 +282,7 @@ namespace BioCrowds
                ComponentType.Create<Rotation>(),
                ComponentType.Create<AgentData>(),
                ComponentType.Create<AgentStep>(),
+               ComponentType.Create<AgentGoal>(),
                ComponentType.Create<AgentGoal>(),
                ComponentType.Create<NormalLifeData>(),
                ComponentType.Create<Counter>(),
