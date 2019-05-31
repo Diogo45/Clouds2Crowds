@@ -47,6 +47,7 @@ namespace BioClouds
             activeWorld.GetExistingManager<CloudRadiusUpdate>().Enabled = false;
             activeWorld.GetExistingManager<CloudRightPreferenceSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudTagDesiredQuantitySystem>().Enabled = false;
+            activeWorld.GetExistingManager<CloudSplitSystem>().Enabled = false;
             //activeWorld.GetExistingManager<ExperimentEndSystem>().Enabled = false;
         }
 
@@ -65,6 +66,8 @@ namespace BioClouds
         public GameObject densityQuad;
         public GameObject mainCamera;
 
+        public List<CloudLateSpawn> cloudLateSpawns = new List<CloudLateSpawn>();
+        public List<Entity> entitiesToDestroy = new List<Entity>();
         //Methods
         public void Init()
         {
@@ -135,7 +138,8 @@ namespace BioClouds
                                                               typeof(CloudData),
                                                               typeof(CloudGoal),
                                                               typeof(CloudMoveStep),
-                                                              typeof(SpawnedAgentsCounter));
+                                                              typeof(SpawnedAgentsCounter),
+                                                              typeof(CloudSplitData));
 
             city.CellArchetype = city.BioEntityManager.CreateArchetype(typeof(Position),
                                                   typeof(Rotation),
@@ -238,12 +242,12 @@ namespace BioClouds
             return CloudPreferredRadius(quantity, Parameters.Instance.MaxColorDensity);
         }
 
-        public void AddCloud(float3 position, int quantity, float3 goal, int cloudType, float preferredDensity, float radiusChangeSpeed)
+        public void AddCloud(float3 position, int quantity, float3 goal, int cloudType, float preferredDensity, float radiusChangeSpeed, int splitCout = 0, int fatherID = -1, float radiusMultiplier = 1.0f)
         {
 
             Entity newCloud = entityManager.CreateEntity(city.CloudArchetype);
 
-            float radius = CloudMinRadius(quantity);
+            float radius = CloudMinRadius(quantity) * radiusMultiplier;
 
             entityManager.SetComponentData<Position>(newCloud, new Position { Value = position });
             entityManager.SetComponentData<Rotation>(newCloud, new Rotation { Value = quaternion.identity });
@@ -252,10 +256,15 @@ namespace BioClouds
             entityManager.SetComponentData<CloudGoal>(newCloud, new CloudGoal { SubGoal = goal, EndGoal = goal });
             entityManager.SetComponentData<CloudMoveStep>(newCloud, new CloudMoveStep { Delta = float3.zero});
             entityManager.SetComponentData<SpawnedAgentsCounter>(newCloud, new SpawnedAgentsCounter { Quantity = 0 });
+            entityManager.SetComponentData<CloudSplitData>(newCloud, new CloudSplitData { splitCount = splitCout, fatherID = fatherID});
 
             if (Parameters.Instance.RenderClouds)
                 entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType % city.CloudMeshes.Count]);
 
+        }
+        public void DestroyCloud(Entity entity)
+        {
+            entityManager.DestroyEntity(entity);
         }
 
         public void SpawnClouds(int quantity, float minx, float maxx, float miny, float maxy, int cloudType, float3 goal, int cloudSize, float preferredDensity, float radiusChangeSpeed)
@@ -265,7 +274,6 @@ namespace BioClouds
             float3 maxPos = new float3(maxx, maxy, 0f);
 
             for (int i = 0; i < quantity; i++) {
-
                 
                 float3 position = r.NextFloat3(minPos, maxPos);
 
@@ -324,6 +332,35 @@ namespace BioClouds
 
             
 
+        }
+
+        public void Update()
+        {
+            if (cloudLateSpawns.Count > 0)
+            {
+                for (int i = 0; i < cloudLateSpawns.Count; i++)
+                {
+                    AddCloud(cloudLateSpawns[i].position,
+                            cloudLateSpawns[i].agentQuantity,
+                            cloudLateSpawns[i].goal,
+                            cloudLateSpawns[i].cloudType,
+                            cloudLateSpawns[i].preferredDensity,
+                            cloudLateSpawns[i].radiusChangeSpeed,
+                            cloudLateSpawns[i].splitCount,
+                            cloudLateSpawns[i].fatherID,
+                            cloudLateSpawns[i].radiusMultiplier);
+                }
+                cloudLateSpawns.Clear();
+            }
+
+            if (entitiesToDestroy.Count > 0)
+            {
+                for (int i = entitiesToDestroy.Count - 1; i >= 0; i--)
+                {
+                    entityManager.DestroyEntity(entitiesToDestroy[i]);
+                }
+                entitiesToDestroy.Clear();
+            }
         }
 
 
