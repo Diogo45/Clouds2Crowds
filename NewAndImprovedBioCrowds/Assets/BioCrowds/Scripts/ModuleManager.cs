@@ -68,9 +68,9 @@ namespace BioCrowds
             if (!modules.BioCloudsEnabled)
                 BioClouds.BioClouds.DeactivateBioclouds();
 
-
-            if (!TimeMachineSettings.experiment.Enabled && World.Active.GetExistingManager<AgentMovementTimeMachine>().Enabled)
-                DisableTimeMachine();
+            //TODO: Time Machine not in Scene
+            //if (!TimeMachineSettings.experiment.Enabled && World.Active.GetExistingManager<AgentMovementTimeMachine>().Enabled)
+            //    DisableTimeMachine();
         }
 
         public void SetupTimeMachine()

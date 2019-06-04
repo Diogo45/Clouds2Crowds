@@ -172,7 +172,7 @@ namespace BioCrowds
             
             //if (CellTagSystem.AgentIDToPos.IsCreated)
            // {
-                JobHandle takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, Settings.BatchSize, inputDeps);
+                JobHandle takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, 64, inputDeps);
                 takeMakersHandle.Complete();
 
 
@@ -230,7 +230,7 @@ namespace BioCrowds
     [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystemMk2 : JobComponentSystem
     {
-        private bool createCells = true;
+        private bool createDict;
 
         private int qtdMarkers = 0;
 
@@ -239,7 +239,7 @@ namespace BioCrowds
         [Inject] public CellTagSystem CellTagSystem;
 
         public NativeMultiHashMap<int, float3> AgentMarkers;
-        private Dictionary<int, float3[]> cellMarkers;
+        private Dictionary<int3, float3[]> cellMarkers;
         QuadTree qt;
 
         public struct MarkerGroup
@@ -248,6 +248,8 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<MarkerData> Data;
             [ReadOnly] public SharedComponentDataArray<MarkerCellName> MarkerCell;
             [ReadOnly] public readonly int Length;
+            [ReadOnly] public readonly int GroupIndex;
+
         }
         [Inject] MarkerGroup markerGroup;
 
@@ -263,8 +265,7 @@ namespace BioCrowds
         struct TakeMarkers : IJobParallelFor
         {
 
-            [ReadOnly] public Dictionary<int, float3[]> cellMarkers;
-            [ReadOnly] public List<int3> cells;
+            
             [WriteOnly] public NativeMultiHashMap<int, float3> AgentMarkers;
 
 
@@ -281,11 +282,11 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            qt = CellTagSystem.qt;
-            if (createCells)
+            
+            if (createDict)
             {
+                createDict = false;
                 CreateCells();
-                createCells = false;
             }
 
             //Get QuadTree quadrants that need to be schedueled
@@ -303,16 +304,39 @@ namespace BioCrowds
 
         private void CreateCells()
         {
-            
+            var MarkersGroup = ComponentGroups[markerGroup.GroupIndex];
+            Debug.Log(MarkersGroup.CalculateLength());
+            for(int index = 0; index < markerGroup.MarkerCell.Length; index++)
+            {
+                var cell = markerGroup.MarkerCell[index];
+                if (cellMarkers.ContainsKey(cell.Value)) continue;
+                MarkersGroup.SetFilter(cell);
+                var Markers = MarkersGroup.GetComponentDataArray<Position>();
+                List<float3> posList = new List<float3>();
+                for (int j = 0; j < Markers.Length; j++) {
+                    posList.Add(Markers[j].Value);
+                }
+
+                cellMarkers.Add(cell.Value, posList.ToArray());
+
+                MarkersGroup.ResetFilter();
+            }
+        }
+
+        protected override void OnCreateManager()
+        {
+            createDict = true;
         }
 
         protected override void OnStartRunning()
         {
+            qt = CellTagSystem.qt;
             UpdateInjectedComponentGroups();
             int qtdAgents = Settings.agentQuantity;
             float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
+            //createCells = true;
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
-
+            cellMarkers = new Dictionary<int3, float3[]>();
             AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
 
         }
