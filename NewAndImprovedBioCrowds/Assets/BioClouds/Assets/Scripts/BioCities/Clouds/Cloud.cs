@@ -60,6 +60,12 @@ namespace BioClouds
         public float3 EndGoal; //current cloud endgoal
     }
 
+    public struct CloudSplitData : IComponentData
+    {
+        public int splitCount;
+        public int fatherID;
+    }
+
     public struct CloudIDPosRadius
     {
         public float3 position;
@@ -68,6 +74,17 @@ namespace BioClouds
         public float MinRadius;
     }
     
+    public struct CloudLateSpawn
+    {
+        public float3 position;
+        public int agentQuantity;
+        public float3 goal;
+        public int cloudType;
+        public float preferredDensity;
+        public float radiusChangeSpeed;
+        public int splitCount;
+        public int fatherID;
+        public float radiusMultiplier;
+    }
     
 }
-

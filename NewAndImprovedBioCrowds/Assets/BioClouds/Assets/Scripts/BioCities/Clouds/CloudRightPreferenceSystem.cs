@@ -122,8 +122,6 @@ namespace BioClouds
 
         protected override void OnStartRunning()
         {
-            //base.OnCreateManager();
-
             sums = new NativeArray<float3>(m_CloudDataGroup.Length, Allocator.Persistent);
             dessums = new NativeArray<float3>(m_CloudDataGroup.Length, Allocator.Persistent);
             dotVector = new NativeArray<float>(m_CloudDataGroup.Length, Allocator.Persistent);
