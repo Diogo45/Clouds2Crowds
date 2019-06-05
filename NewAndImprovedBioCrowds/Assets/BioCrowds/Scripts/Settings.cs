@@ -77,7 +77,8 @@ namespace BioCrowds
         private static CrowdExperiment _experiment;
         public static CrowdExperiment experiment = new CrowdExperiment();//{ get { if (experiment == null) _experiment = new CrowdExperiment(); return _experiment; } }
         
-        public int treeHeight = 2;
+        public int treeHeight = 4;
+        public static bool QuadTreeActive = true; 
 
         public void Awake()
         {

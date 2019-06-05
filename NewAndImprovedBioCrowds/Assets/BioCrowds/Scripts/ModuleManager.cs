@@ -22,6 +22,7 @@ namespace BioCrowds
         
         [Inject] NormalLifeMarkerSystem normalLifeMarkerSystem;
         [Inject] MarkerSystem markerSystem;
+        [Inject] MarkerSystemMk2 markerSystemQuadTree;
         [Inject] MarkerCounter markerCounter;
         [Inject] StressSystem stressSystem;
         [Inject] NormaLifeAgentMovementVectors normaLifeAgentMovementVectors;
@@ -63,6 +64,17 @@ namespace BioCrowds
                 markerCounter.Enabled = true;
                 markerSystem.Enabled = false;
                 agentMovementVectors.Enabled = false;
+            }
+
+            if (Settings.QuadTreeActive)
+            {
+                markerSystem.Enabled = false;
+                markerSystemQuadTree.Enabled = true;
+            }
+            else
+            {
+                markerSystem.Enabled = true;
+                markerSystemQuadTree.Enabled = false;
             }
 
             if (!modules.BioCloudsEnabled)

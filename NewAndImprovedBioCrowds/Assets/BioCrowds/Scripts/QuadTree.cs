@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 using System;
+using System.Linq;
 
 public struct Rectangle
 {
@@ -202,8 +203,16 @@ public class QuadTree
         return this.heigth < BioCrowds.Settings.instance.treeHeight;
     }
 
-    public List<int3[]> GetScheduled()
+
+    public int3[] GetScheduled() {
+
+        var flattenedUniqueValues = GetScheduledAux().ToArray().SelectMany(x => x);
+        return flattenedUniqueValues.ToArray();
+    }
+
+    public List<int3[]> GetScheduledAux()
     {
+        
         List<int3[]> res = new List<int3[]>();
 
         if(!this.subDivided && this.schedule)
@@ -216,19 +225,19 @@ public class QuadTree
         {
             if (TopLeft.schedule)
             {
-                res.AddRange(TopLeft.GetScheduled());
+                res.AddRange(TopLeft.GetScheduledAux());
             }
             if (TopRight.schedule)
             {
-                res.AddRange(TopRight.GetScheduled());
+                res.AddRange(TopRight.GetScheduledAux());
             }
             if (BottomLeft.schedule)
             {
-                res.AddRange(BottomLeft.GetScheduled());
+                res.AddRange(BottomLeft.GetScheduledAux());
             }
             if (BottomRight.schedule)
             {
-                res.AddRange(BottomRight.GetScheduled());
+                res.AddRange(BottomRight.GetScheduledAux());
             }
         }
         return res;
@@ -263,7 +272,7 @@ public class QuadTree
         Debug.DrawLine(x2, x4, sc);
         Debug.DrawLine(x3, x4, sc);
 
-        if(heigth < max)
+        if(heigth < max )
         {
             TopRight.Draw(max);
             TopLeft.Draw(max);

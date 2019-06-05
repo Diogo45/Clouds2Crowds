@@ -133,7 +133,7 @@ namespace BioCrowds
                 //Debug.Log(bestAgent);
                 AgentMarkers.Add(bestAgent, MarkerPos[index].Value);
 
-                Densities.TryAdd(MarkerCell[index].Value, (float)agents / 36f);
+                Densities.TryAdd(MarkerCell[index].Value, (float) agents / 36f);
             }
 
         }
@@ -233,13 +233,22 @@ namespace BioCrowds
         private bool createDict;
 
         private int qtdMarkers = 0;
-
+        private static int frame = 0;
         [Inject] private m_SpawnerBarrier m_SpawnerBarrier;
 
         [Inject] public CellTagSystem CellTagSystem;
 
         public NativeMultiHashMap<int, float3> AgentMarkers;
-        private Dictionary<int3, float3[]> cellMarkers;
+        private static Dictionary<int3, float3[]> cellMarkers;
+        public NativeHashMap<int3, float> LocalDensities;
+
+
+        private static float3[] GetMarkers(int3 key)
+        {
+            return cellMarkers[key];
+        }
+
+
         QuadTree qt;
 
         public struct MarkerGroup
@@ -265,24 +274,113 @@ namespace BioCrowds
         struct TakeMarkers : IJobParallelFor
         {
 
-            
-            [WriteOnly] public NativeMultiHashMap<int, float3> AgentMarkers;
+            [WriteOnly] public NativeMultiHashMap<int, float3>.Concurrent AgentMarkers;
 
+            [WriteOnly] public NativeHashMap<int3, float>.Concurrent Densities;
 
-
+            [ReadOnly] public NativeHashMap<int, float3> AgentIDToPos;
+            [ReadOnly] public NativeMultiHashMap<int3, int> cellToAgent;
+            [ReadOnly] public NativeArray<int3> cells;
 
             public void Execute(int index)
             {
-                throw new System.NotImplementedException();
+                var markers = GetMarkers(cells[index]);
+                //Debug.Log(markers.Length);
+
+                for (int i = 0; i < markers.Length; i++)
+                {
+                    //Debug.Log(i + " " + frame );
+                    NativeMultiHashMapIterator<int3> iter;
+                    int agents = 0;
+                    //int3 currentCell;
+                    int currentAgent = -1;
+                    int bestAgent = -1;
+                    float agentRadius = 1f;
+                    float closestDistance = agentRadius + 1;
+
+                    bool keepgoing = cellToAgent.TryGetFirstValue(cells[index], out currentAgent, out iter);
+
+
+                    if (!keepgoing)
+                    {
+                        continue;
+                    }
+
+
+                    float3 agentPos;
+                    AgentIDToPos.TryGetValue(currentAgent, out agentPos);
+
+                    agents++;
+
+                    float dist = math.distance(markers[i], agentPos);
+
+                    if (dist < agentRadius)
+                    {
+                        closestDistance = dist;
+                        bestAgent = currentAgent;
+                    }
+
+                    while (cellToAgent.TryGetNextValue(out currentAgent, ref iter))
+                    {
+                        agents++;
+                        AgentIDToPos.TryGetValue(currentAgent, out agentPos);
+                        dist = math.distance(markers[i], agentPos);
+                        if (dist < agentRadius && dist <= closestDistance)
+                        {
+                            if (dist != closestDistance)
+                            {
+                                closestDistance = dist;
+                                bestAgent = currentAgent;
+                                //Debug.Log(MarkerCell[index].Value + " " + bestAgent);
+                            }
+                            else
+                            {
+                                if (bestAgent > currentAgent)
+                                {
+                                    bestAgent = currentAgent;
+                                    //Debug.Log(MarkerCell[index].Value + " " + bestAgent);
+
+                                    closestDistance = dist;
+                                }
+                            }
+                        }
+
+
+                    }
+
+                    if (bestAgent == -1) continue;
+                    //Debug.Log(bestAgent);
+                    AgentMarkers.Add(bestAgent, markers[i]);
+
+                    Densities.TryAdd(cells[index], (float)agents / 36f);
+                }
+
             }
         }
 
-       
+        
 
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            
+
+            if (AgentMarkers.Capacity < agentGroup.Agents.Length * qtdMarkers * 4)
+            {
+                AgentMarkers.Dispose();
+                AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
+            }
+            else
+                AgentMarkers.Clear();
+
+
+            if (!CellTagSystem.AgentIDToPos.IsCreated)
+            {
+                return inputDeps;
+            }
+
+
+
+
             if (createDict)
             {
                 createDict = false;
@@ -290,22 +388,33 @@ namespace BioCrowds
             }
 
             //Get QuadTree quadrants that need to be schedueled
-            var schedule = qt.GetScheduled();
+            var schedule = new NativeArray<int3>(qt.GetScheduled(), Allocator.Temp);
+            //Debug.Log(schedule.Length);
             //list<quadrants> --> [[cell1, cell2, ..., celln], [celln+1, ...], ...]
             //[cell1, cell2, ..., celln] --> ComponentDataArray<Position>
             //Job <-- Position, MarkedCells { markerCell --> checkAgents } 
-            
 
+            var job = new TakeMarkers
+            {
+                AgentMarkers = AgentMarkers.ToConcurrent(),
+                Densities = LocalDensities.ToConcurrent(),
+                cellToAgent = CellTagSystem.CellToMarkedAgents,
+                cells = schedule,
+                AgentIDToPos = CellTagSystem.AgentIDToPos
+              
+            };
 
+            var sq = job.Schedule(schedule.Length, Settings.BatchSize, inputDeps);
+            sq.Complete();
 
-
-            return base.OnUpdate(inputDeps);
+            schedule.Dispose();
+            frame++;
+            return sq;
         }
 
         private void CreateCells()
         {
             var MarkersGroup = ComponentGroups[markerGroup.GroupIndex];
-            Debug.Log(MarkersGroup.CalculateLength());
             for(int index = 0; index < markerGroup.MarkerCell.Length; index++)
             {
                 var cell = markerGroup.MarkerCell[index];
@@ -338,12 +447,13 @@ namespace BioCrowds
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
             cellMarkers = new Dictionary<int3, float3[]>();
             AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
-
+            LocalDensities = new NativeHashMap<int3, float>(markerGroup.Length, Allocator.Persistent);
         }
 
         protected override void OnStopRunning()
         {
             AgentMarkers.Dispose();
+            LocalDensities.Dispose();
         }
     }
 

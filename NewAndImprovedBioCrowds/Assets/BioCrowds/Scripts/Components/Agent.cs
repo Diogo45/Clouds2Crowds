@@ -178,7 +178,7 @@ namespace BioCrowds
     [UpdateAfter(typeof(MarkerSystemGroup))]
     public class MarkerSystemView : ComponentSystem
     {
-
+        [Inject] MarkerSystemMk2 mk2;
         [Inject] MarkerSystem mS;
         [Inject] NormalLifeMarkerSystem nlmS;
 
@@ -187,9 +187,9 @@ namespace BioCrowds
 
         protected override void OnUpdate()
         {
-
-            if (nlmS.Enabled) AgentMarkers = nlmS.AgentMarkers;
-            if (mS.Enabled) AgentMarkers = mS.AgentMarkers;
+            if (mk2.Enabled) AgentMarkers = mk2.AgentMarkers;
+            else if (nlmS.Enabled) AgentMarkers = nlmS.AgentMarkers;
+            else if (mS.Enabled) AgentMarkers = mS.AgentMarkers;
         }
     }
 
@@ -308,7 +308,7 @@ namespace BioCrowds
 
 
         [Inject] AgentGroup agentGroup;
-        [Inject] MarkerSystem markerSystem;
+        [Inject] MarkerSystemView markerSystem;
 
         [Inject] MarkerWeightSystem totalWeightSystem;
 
