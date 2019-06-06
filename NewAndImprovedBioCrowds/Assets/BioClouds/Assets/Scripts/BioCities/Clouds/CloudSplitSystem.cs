@@ -12,7 +12,7 @@ using UnityEditor;
 namespace BioClouds
 {
     [UpdateAfter(typeof(CloudRightPreferenceSystem))]
-    //[UpdateInGroup(typeof(PostMarkGroup))]
+    [DisableAutoCreation]
     public class CloudSplitSystem : ComponentSystem
     {
         public struct CloudGroup

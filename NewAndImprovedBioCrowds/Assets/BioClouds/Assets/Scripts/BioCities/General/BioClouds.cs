@@ -64,6 +64,7 @@ namespace BioClouds
 
 
         public GameObject background;
+        public GameObject collisionMask;
         public GameObject densityQuad;
         public GameObject mainCamera;
 
@@ -110,6 +111,8 @@ namespace BioClouds
             densityQuad.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1);
             background.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 10);
             background.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1);
+            collisionMask.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 10);
+            collisionMask.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1.01f);
 
             inst.IDToRecord = exp.IDToRecord;
 
@@ -181,6 +184,9 @@ namespace BioClouds
 
             if (!city.BioParameters.EnableRightPreference)
                 World.Active.GetExistingManager<CloudRightPreferenceSystem>().Enabled = false;
+
+            // Setup the Collision Mask
+            GetComponent<CollisionMaskSettings>().Init();
         }
 
 
