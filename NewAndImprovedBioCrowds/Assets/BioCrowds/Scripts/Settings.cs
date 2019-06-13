@@ -78,7 +78,9 @@ namespace BioCrowds
         public static CrowdExperiment experiment = new CrowdExperiment();//{ get { if (experiment == null) _experiment = new CrowdExperiment(); return _experiment; } }
         
         public int treeHeight = 4;
-        public static bool QuadTreeActive = true; 
+        public static bool QuadTreeActive = true;
+
+        public string LogPath = @"";
 
         public void Awake()
         {
@@ -109,7 +111,11 @@ namespace BioCrowds
             var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
 
             var bioCrowdsFolder = System.IO.Directory.CreateDirectory(folder +  "\\VHLAB\\BioCrowds");
+            var logsFolder = System.IO.Directory.CreateDirectory(folder +  "\\VHLAB\\BioCrowds\\Logs");
 
+            //TODO: FIX THIS PATHING SHIT, LOGPATH
+
+            LogPath = logsFolder.FullName;
 
             string settingsFile = bioCrowdsFolder.FullName + "\\BaseExperiment.json";
             bool basisCase = System.IO.File.Exists(settingsFile);

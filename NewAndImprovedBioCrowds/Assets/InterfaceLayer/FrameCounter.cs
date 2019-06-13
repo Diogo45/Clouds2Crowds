@@ -11,6 +11,7 @@ using BioCrowds;
 using System.IO;
 
 [UpdateBefore(typeof(BioClouds.CloudTagDesiredQuantitySystem))]
+[DisableAutoCreation]
 public class FrameCounter : ComponentSystem {
 
     public float currentTime;
@@ -43,7 +44,6 @@ public class EndFrameCounter : ComponentSystem
     {
         float t = Time.realtimeSinceStartup - m_frameCounterSystem.currentTime;
         frameTimes.Add(t);
-        filename = BioClouds.Parameters.Instance.LogFilePath + "FrameTimes.txt";
         //Debug.Log(t);
     }
 
@@ -57,7 +57,8 @@ public class EndFrameCounter : ComponentSystem
     protected override void OnDestroyManager()
     {
         base.OnDestroyManager();
-        
+
+        filename = BioClouds.Parameters.Instance.LogFilePath + "FrameTimes.txt";
         using (System.IO.StreamWriter file =
                 new System.IO.StreamWriter(filename))
         {

@@ -153,10 +153,10 @@ public class VisualizationSystem : ComponentSystem
             processing.records.Add(new AgentRecord
             {
                 AgentID = agentGroup.Data[i].ID,
-                Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
-                CloudID = agentGroup.OwnerCloud[i].CloudID
+                Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value)
+
             });
-            
+
         }
 
         FrameRecord aux = complete;
@@ -225,18 +225,7 @@ public class VisualizationSystem : ComponentSystem
         #endregion
 
 
-        #region BioCrowds DataRecording
 
-        //if (inst.MaxSimulationFrames == CurrentFrame - 1)
-        //{
-        using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", true))
-        {
-            file.Write(complete.ToString() + '\n');
-        }
-        //}
-
-        #endregion
 
     }
 

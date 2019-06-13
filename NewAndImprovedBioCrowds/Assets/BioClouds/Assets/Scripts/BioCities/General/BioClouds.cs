@@ -48,7 +48,7 @@ namespace BioClouds
             activeWorld.GetExistingManager<CloudRightPreferenceSystem>().Enabled = false;
             activeWorld.GetExistingManager<CloudTagDesiredQuantitySystem>().Enabled = false;
             activeWorld.GetExistingManager<Clouds2CrowdsSystem>().Enabled = false;
-            activeWorld.GetExistingManager<CloudSplitSystem>().Enabled = false;
+            activeWorld.GetOrCreateManager<CloudSplitSystem>().Enabled = false;
             //activeWorld.GetExistingManager<ExperimentEndSystem>().Enabled = false;
         }
 

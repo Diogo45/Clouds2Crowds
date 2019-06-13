@@ -82,7 +82,8 @@ namespace BioCrowds
 
 
         [Inject] AgentGroup agentGroup;
-        [Inject] MarkerSystem m_cellSystem;
+        [Inject] MarkerSystemMk2 m_cellSystem;
+
         TimeExperiment settings;
 
         int counter = 0;
@@ -191,6 +192,10 @@ namespace BioCrowds
         {
 
             settings = TimeMachineSettings.experiment;
+
+            if (!settings.Enabled)
+                this.Enabled = false;
+
             LoadDensityValues();
             counter = 0;
             random.InitState(324341);
@@ -230,7 +235,7 @@ namespace BioCrowds
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             settings = TimeMachineSettings.experiment;
-
+            
             counter++;
 
 
