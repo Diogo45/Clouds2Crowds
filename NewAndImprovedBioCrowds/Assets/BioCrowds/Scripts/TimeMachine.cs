@@ -191,6 +191,12 @@ namespace BioCrowds
         {
 
             settings = TimeMachineSettings.experiment;
+            
+            if (!settings.Enabled)
+            {
+                this.Enabled = false;
+                return;
+            }
             LoadDensityValues();
             counter = 0;
             random.InitState(324341);

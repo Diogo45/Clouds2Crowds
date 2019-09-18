@@ -3,7 +3,7 @@ using UnityEngine;
 using Unity.Entities;
 using Unity.Transforms;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 public class WindowManager: MonoBehaviour
 {
     public static Transform transform;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.Rendering;
 using UnityEngine;
-
+using UnityEngine.AI;
 
 namespace BioCrowds
 {
@@ -125,6 +125,13 @@ namespace BioCrowds
 
 
 
+        }
+
+        private void Update()
+        {
+            //NavMeshPath path = new NavMeshPath();
+            //bool b = NavMesh.CalculatePath(new Vector3(0, 0.25f, 5f), new Vector3(10f, 0.25f, 100f), NavMesh.AllAreas, path);
+            //Debug.Log("b " + b + " L:" + path.corners.Length);
         }
 
     }

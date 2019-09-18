@@ -6,6 +6,7 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using Unity.Jobs;
+using UnityEngine.AI;
 
 //FUTURE: Add a way simulate several scenarios with different parameters
 /* We are utilizing Unity's Entity Component System, the documentation is available in https://github.com/Unity-Technologies/EntityComponentSystemSamples/blob/master/Documentation/index.md
@@ -69,7 +70,12 @@ namespace BioCrowds
             //Just to have a nicer terrain
             var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
             ground.transform.localScale = new Vector3(size.x, 0.5f, size.y);
-            ground.transform.position = ground.transform.localScale / 2; 
+            ground.transform.position = ground.transform.localScale / 2;
+            ground.isStatic = true;
+            //var navmesh = ground.AddComponent<NavMeshSurface>();
+            //navmesh.BuildNavMesh();
+            
+            
 
             //The EntityManager is responsible for the creation of all Archetypes, Entities, ... and adding or removing Components from existing Entities 
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
@@ -103,7 +109,7 @@ namespace BioCrowds
 
             //Now for each Entity of CellArchetype we define the proper data to the Components int the archetype.  
 
-            int qtd = math.max(qtdX, qtdZ);
+            int qtd = qtdX;
 
             for (int i = 0; i < qtdX; i++)
             {
