@@ -27,7 +27,10 @@ public class GridConverter
 
     static Rect domain;
     static int rows;
+    public static int Rows { get { return rows; } } 
+
     static int cols;
+    public static int Cols { get { return cols; } }
 
     /// <summary>
     /// Returns the Cell ID of the cell which contains this position.

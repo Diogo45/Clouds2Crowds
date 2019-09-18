@@ -330,6 +330,13 @@ namespace BioClouds
 
             World.Active.GetExistingManager<CloudSplitSystem>().CreatedCellsMap = created_cell_ids;
 
+            //var native_existing_cells = new NativeHashMap<int, int>(GridConverter.Rows * GridConverter.Cols, Allocator.Persistent);
+
+            //foreach (int i in created_cell_ids)
+            //    native_existing_cells.TryAdd(i, 0);
+
+            //World.Active.GetExistingManager<CloudMoveSystem>().existing_cells = native_existing_cells;
+
 
             for (int i = 0; i < exp.AgentTypes.Length; i++)
             {

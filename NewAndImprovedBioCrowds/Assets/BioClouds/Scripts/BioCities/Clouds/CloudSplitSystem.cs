@@ -139,6 +139,8 @@ namespace BioClouds
         private void SplitCloud(int index)
         {
 
+            var cell_map = bioClouds.created_cell_ids;
+
             Debug.Log("Split cloud");
             CloudData data = m_CloudGroup.CloudData[index];
             CloudSplitData fatherData = m_CloudGroup.CloudSplitData[index];
@@ -164,13 +166,17 @@ namespace BioClouds
 
                 lateSpawn.agentQuantity = math.min(agents_slice, total_agents);
                 if (i == divisions)
-                {
                     lateSpawn.position = basePosition;
-                    lateSpawn.agentQuantity += data.AgentQuantity % (divisions + 1);
-
-                }
                 else
                     lateSpawn.position = basePosition + offset;
+
+
+                //if (!cell_map.Contains(GridConverter.Position2CellID(lateSpawn.position)))
+                //    continue;
+
+
+                if (i == divisions)
+                    lateSpawn.agentQuantity += data.AgentQuantity % (divisions + 1);
 
 
                 total_agents -= lateSpawn.agentQuantity;
@@ -182,6 +188,9 @@ namespace BioClouds
                 lateSpawn.splitCount = m_CloudGroup.CloudSplitData[index].splitCount + 1;
                 lateSpawn.fatherID = data.ID;
                 lateSpawn.radiusMultiplier = radiusMultiplier;
+
+                //if (total_agents != 0 && i == divisions)
+                //    lateSpawn.agentQuantity += total_agents;
 
                 bioClouds.cloudLateSpawns.Add(lateSpawn);
             }

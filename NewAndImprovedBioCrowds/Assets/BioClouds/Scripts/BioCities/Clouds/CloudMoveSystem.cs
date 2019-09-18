@@ -27,16 +27,21 @@ namespace BioClouds
         }
         [Inject] CellsGroup m_CellGroup;
 
+        //TODO Wtf? fix this
+        //public NativeHashMap<int, int> existing_cells;
+
         struct MoveCloudsJob : IJobParallelFor
         {
             public ComponentDataArray<Position> Positions;
             [ReadOnly] public ComponentDataArray<CloudMoveStep> Deltas;
+            //[ReadOnly] public NativeHashMap<int, int> existing_cells;
 
             public void Execute(int index)
             {
                 float3 old = Positions[index].Value;
 
-                Positions[index] = new Position { Value = old + Deltas[index].Delta };
+                //if (existing_cells.TryGetValue(GridConverter.Position2CellID(old + Deltas[index].Delta), out int whatever))
+                 Positions[index] = new Position { Value = old + Deltas[index].Delta };
             }
         }
         
@@ -45,7 +50,8 @@ namespace BioClouds
             MoveCloudsJob moveJob = new MoveCloudsJob()
             {
                 Positions = m_CellGroup.Position,
-                Deltas = m_CellGroup.CloudStep
+                Deltas = m_CellGroup.CloudStep//,
+                //existing_cells = existing_cells
             };
 
             var deps = moveJob.Schedule(m_CellGroup.Length, 64, inputDeps);
