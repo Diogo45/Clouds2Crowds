@@ -1,0 +1,75 @@
+{
+    "PartialParametersDirPath": "VHLAB\\BioClouds\\",
+    "CloudSpeed": 1.2999999523162842,
+    "CloudGoalThreshold": 0.0,
+    "CellWidth": 0.1,
+    "MaxColorDensity": 10.0,
+    "HeatMapColors": [
+        {
+            "r": 0.19389724731445313,
+            "g": 0.0,
+            "b": 1.0,
+            "a": 0.0
+        },
+        {
+            "r": 0.0,
+            "g": 0.3432126045227051,
+            "b": 1.0,
+            "a": 0.0
+        },
+        {
+            "r": 0.0,
+            "g": 1.0,
+            "b": 0.7578930854797363,
+            "a": 0.0
+        },
+        {
+            "r": 1.0,
+            "g": 0.8028249740600586,
+            "b": 0.0,
+            "a": 0.0
+        },
+        {
+            "r": 1.0,
+            "g": 0.8870788812637329,
+            "b": 0.0,
+            "a": 0.0
+        },
+        {
+            "r": 1.0,
+            "g": 0.2806868255138397,
+            "b": 0.0,
+            "a": 0.0
+        },
+        {
+            "r": 1.0,
+            "g": 0.10174526274204254,
+            "b": 0.0,
+            "a": 0.0
+        },
+        {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.0
+        }
+    ],
+    "HeatMapScaleSize": 512,
+    "PartialExperimentPath": "Experiments\\DefaultExperiment.json",
+    "ExperimentPath": "Experiments\\DefaultExperiment.json",
+    "DefaultDomainMinX": 0.0,
+    "DefaultDomainMaxX": 0.0,
+    "DefaultDomainMinY": 0.0,
+    "DefaultDomainMaxY": 0.0,
+    "DrawCloudToMarkerLines": false,
+    "EnableRightPreference": true,
+    "SimulationFramesPerSecond": 10,
+    "MaxSimulationFrames": 0,
+    "FramesForDataSave": 1,
+    "IDToRecord": -1.0,
+    "SaveSimulationData": false,
+    "PartialLogFilePath": "Experiments\\Logs\\output",
+    "LogFilePath": "",
+    "BioCloudsActive": true,
+    "RenderClouds" : true
+}

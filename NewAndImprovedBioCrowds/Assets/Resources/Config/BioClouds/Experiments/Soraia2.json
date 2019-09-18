@@ -1,0 +1,27 @@
+{
+  "SeedState": 1000,
+  
+  "Domain": [0.0, 0.0, 600.0, 600.0],
+
+  "CellRegions": [{"minX":0.0, "maxX":0.0, "minY":600.0, "maxY":600.0}],
+
+"AgentTypes": [
+  {
+    "Goal": [ 600.0, 300.0, 0.0 ],
+    "Type": 0,
+
+    "Region": [ 55.0, 200.0, 155.0, 400.0 ],
+    "Quantity": 25,
+    "CloudSize": 10,
+    "PreferredDensity": 2
+  },
+  {
+    "Goal": [ 0.0, 300.0, 0.0 ],
+    "Type": 1,
+    "Region": [ 445.0, 200.0, 495.0, 400.0 ],
+    "Quantity": 25,
+    "CloudSize": 10,
+    "PreferredDensity": 2
+  }
+]
+}

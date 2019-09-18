@@ -1,0 +1,30 @@
+{
+  "SeedState": 1000,
+  "RadiusUpdateType" : "Speed",
+
+  "Domain": [0.0, 0.0, 500.0, 500.0],
+
+  "CellRegions": [{"minX":0.0, "maxX":0.0, "minY":500.0, "maxY":500.0}],
+
+"AgentTypes": [
+  {
+    "Goal": [ 500.0, 250.0, 0.0 ],
+    "Type": 0,
+
+    "Region": [ 0.0, 50.0, 100.0, 450.0 ],
+    "Quantity": 100,
+    "CloudSize": 1000,
+    "PreferredDensity": 3,
+    "RadiusChangeSpeed": 0.05
+  },
+    {
+      "Goal": [ 0.0, 250.0, 0.0 ],
+      "Type": 1,
+  
+      "Region": [ 400.0, 50.0, 500, 450.0 ],
+      "Quantity": 100,
+      "CloudSize": 1000,
+      "PreferredDensity": 3,
+      "RadiusChangeSpeed": 0.05
+    }]
+}

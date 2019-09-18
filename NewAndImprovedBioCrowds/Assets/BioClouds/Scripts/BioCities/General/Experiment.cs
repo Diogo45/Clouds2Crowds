@@ -38,6 +38,8 @@ public class Experiment{
     public Region Domain;
     public int FramesToRecord;
     public int IDToRecord;
+    public int CloudDivisionLimit;
+    public int CloudSizeLimit;
     [SerializeField]
     public Region[] CellRegions;
     public AgentRegions[] AgentTypes;

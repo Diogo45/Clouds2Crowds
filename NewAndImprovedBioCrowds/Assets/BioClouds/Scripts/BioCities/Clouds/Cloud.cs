@@ -64,6 +64,8 @@ namespace BioClouds
     {
         public int splitCount;
         public int fatherID;
+        public int CloudSplitLimit;
+        public int CloudSizeLimit;
     }
 
     public struct CloudIDPosRadius

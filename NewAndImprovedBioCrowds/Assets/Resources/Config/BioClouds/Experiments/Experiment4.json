@@ -1,0 +1,43 @@
+{
+  "SeedState": 1000,
+  
+  "Domain": [0.0, 0.0, 300.0, 300.0],
+
+  "CellRegions": [{"minX":0.0, "maxX":0.0, "minY":300.0, "maxY":300.0}],
+
+"AgentTypes": [
+  {
+    "Goal": [ 300.0, 150.0, 0.0 ],
+    "Type": 0,
+
+    "Region": [ 0.0, 100.0, 50.0, 200.0 ],
+    "Quantity": 26,
+    "CloudSize": 100,
+    "PreferredDensity": 2
+  },
+  {
+    "Goal": [ 0.0, 150.0, 0.0 ],
+    "Type": 1,
+    "Region": [ 250.0, 100.0, 300.0, 200.0 ],
+    "Quantity": 26,
+    "CloudSize": 100,
+    "PreferredDensity": 2
+  },
+  {
+    "Goal": [ 150.0, 300.0, 0.0 ],
+    "Type": 2,
+    "Region": [ 100, 0.0, 200.0, 50.0 ],
+    "Quantity": 26,
+    "CloudSize": 100,
+    "PreferredDensity": 1
+  },
+  {
+    "Goal": [ 150.0, 0.0, 0.0 ],
+    "Type": 3,
+    "Region": [ 100, 250.0, 200.0, 300.0 ],
+    "Quantity": 26,
+    "CloudSize": 100,
+    "PreferredDensity": 1
+  }
+]
+}

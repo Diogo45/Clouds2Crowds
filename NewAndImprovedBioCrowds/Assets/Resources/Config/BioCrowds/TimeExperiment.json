@@ -1,0 +1,12 @@
+{
+    "Enabled": false,
+    "StartFrame": 100,
+    "FrameLeap": 350,
+    "EnvironmentalComplexity": 1.0,
+    "DensityFiles": "C:\\Users\\VHLAB\\Documents\\VHLAB\\BioCrowds\\Weibuls\\",
+    "agentArea": 0.36000001430511477,
+    "obstacleNumber": 15,
+    "obstacleWeight": 0.25,
+    "worldArea": 10000.0,
+    "obstacleArea": 500.0
+}

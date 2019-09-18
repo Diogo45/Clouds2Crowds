@@ -192,7 +192,7 @@ namespace BioClouds
 
 
         //Create BioClouds Cell Markers  on the defined region of space.
-        HashSet<int> created_cell_ids = new HashSet<int>();
+        public HashSet<int> created_cell_ids = new HashSet<int>();
         public void CreateCells(float x, float xf, float y, float yf)
         {
 
@@ -247,6 +247,7 @@ namespace BioClouds
             return (float)math.sqrt(quantity / (prefferedDensity * math.PI));
         }
 
+
         public float CloudMinRadius(int quantity)
         {
             return CloudPreferredRadius(quantity, Parameters.Instance.MaxColorDensity);
@@ -256,17 +257,26 @@ namespace BioClouds
         {
 
             Entity newCloud = entityManager.CreateEntity(city.CloudArchetype);
+            float radius;
 
-            float radius = CloudMinRadius(quantity) * radiusMultiplier;
+            //if(fatherID == -1)
+                radius = CloudMinRadius(quantity) * radiusMultiplier;
+            //else
+            //    radius = CloudPreferredRadius(quantity, preferredDensity) * radiusMultiplier;
 
             entityManager.SetComponentData<Position>(newCloud, new Position { Value = position });
             entityManager.SetComponentData<Rotation>(newCloud, new Rotation { Value = quaternion.identity });
-            entityManager.SetComponentData<CloudData>(newCloud, new CloudData { ID = city.CloudIDs++, AgentQuantity = quantity, Radius = radius, MaxSpeed = city.BioParameters.CloudSpeed / city.BioParameters.SimulationFramesPerSecond, Type = cloudType, PreferredDensity = preferredDensity,
+            int ID = city.CloudIDs++;
+            entityManager.SetComponentData<CloudData>(newCloud, new CloudData { ID = ID, AgentQuantity = quantity, Radius = radius, MaxSpeed = city.BioParameters.CloudSpeed / city.BioParameters.SimulationFramesPerSecond, Type = cloudType, PreferredDensity = preferredDensity,
                MinRadius = CloudMinRadius(quantity), RadiusChangeSpeed = radiusChangeSpeed});
             entityManager.SetComponentData<CloudGoal>(newCloud, new CloudGoal { SubGoal = goal, EndGoal = goal });
             entityManager.SetComponentData<CloudMoveStep>(newCloud, new CloudMoveStep { Delta = float3.zero});
             entityManager.SetComponentData<SpawnedAgentsCounter>(newCloud, new SpawnedAgentsCounter { Quantity = 0 });
-            entityManager.SetComponentData<CloudSplitData>(newCloud, new CloudSplitData { splitCount = splitCout, fatherID = fatherID});
+
+            if (fatherID == -1)
+                fatherID = ID;
+
+            entityManager.SetComponentData<CloudSplitData>(newCloud, new CloudSplitData { splitCount = splitCout, fatherID = fatherID, CloudSplitLimit = exp.CloudDivisionLimit, CloudSizeLimit = exp.CloudSizeLimit});
 
             if (Parameters.Instance.RenderClouds)
                 entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType % city.CloudMeshes.Count]);
@@ -315,6 +325,11 @@ namespace BioClouds
                             exp.CellRegions[i].minY,
                             exp.CellRegions[i].maxY);
             }
+
+            //TODO Move this to a system
+
+            World.Active.GetExistingManager<CloudSplitSystem>().CreatedCellsMap = created_cell_ids;
+
 
             for (int i = 0; i < exp.AgentTypes.Length; i++)
             {

@@ -34,3 +34,7 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+#BioCloud Logs
+
+NewAndImprovedBioCrowds/Assets/Resources/Config/BioClouds/Experiments/Logs/*.txt*
