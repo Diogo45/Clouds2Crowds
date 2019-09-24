@@ -167,12 +167,19 @@ namespace BioClouds {
 
             DensityRenderer.material.SetTexture("_DensityTex", tex);
 
+
+
             return calculateMatDeps;
         }
 
         protected override void OnDestroyManager()
         {
-            if(tex_mat.IsCreated)
+
+            //byte[] bytes = tex.EncodeToPNG();
+            //var dirPath = Application.dataPath + "/../TestDensityTex.png";
+            //System.IO.File.WriteAllBytes(dirPath, bytes);
+
+            if (tex_mat.IsCreated)
                 tex_mat.Dispose();
 
             if(cloudDensities.IsCreated)

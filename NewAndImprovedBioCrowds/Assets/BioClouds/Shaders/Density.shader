@@ -1,14 +1,14 @@
-﻿Shader "Custom/Density" {
+﻿Shader "BioClouds/Density" {
 	Properties{
 		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo (RGB)", 2D) = "white" {}
-	_DensityTex("DensityTexture", 2D) = "white"{}
-	_NoiseTex("NoiseTexture", 2D) = "white" {}
-	_Glossiness("Smoothness", Range(0,1)) = 0.5
+		_DensityTex("DensityTexture", 2D) = "white"{}
+		_NoiseTex("NoiseTexture", 2D) = "white" {}
+		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
 		_NoiseStrength("NoiseStrength", Range(0,1)) = 0.0
 		_HeatMapScaleTex("HeatMapScale", 2D) = "white" { }
-	_CellWidth("CellWidth", Float) = 2.0
+		_CellWidth("CellWidth", Float) = 2.0
 		_Rows("Rows", Int) = 500
 		_Cols("Cols", Int) = 500
 		//_NoiseWoo("NoiseWooo", Range(0,1000)) = 0.0
@@ -19,10 +19,10 @@
 
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types
-	#pragma surface surf Standard fullforwardshadows alpha
+	#pragma surface surf Standard fullforwardshadows alpha  
 	//#pragma alpha : fade
 		// Use shader model 3.0 target, to get nicer looking lighting
-	#pragma target 3.0
+	#pragma target 4.6
 
 		sampler2D _MainTex;
 		sampler2D _DensityTex;
