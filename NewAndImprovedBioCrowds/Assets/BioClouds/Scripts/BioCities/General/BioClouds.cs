@@ -66,6 +66,7 @@ namespace BioClouds
         public GameObject background;
         public GameObject collisionMask;
         public GameObject densityQuad;
+        public GameObject grassPeopleQuad;
         public GameObject mainCamera;
 
         public List<CloudLateSpawn> cloudLateSpawns = new List<CloudLateSpawn>();
@@ -109,6 +110,10 @@ namespace BioClouds
 
             densityQuad.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 5);
             densityQuad.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1);
+
+            grassPeopleQuad.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 5);
+            grassPeopleQuad.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1);
+
             background.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 10);
             background.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1);
             collisionMask.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 10);
@@ -176,6 +181,14 @@ namespace BioClouds
             CloudHeatMap.DensityRenderer.material.SetInt("_Cols", inst.Cols);
             CloudHeatMap.DensityRenderer.material.SetFloat("_CellWidth", inst.CellWidth);
             CloudHeatMap.DensityRenderer.material.SetTexture("_HeatMapScaleTex", inst.GetHeatScaleTexture());
+
+            CloudHeatMap.GrassPeopleRenderer = grassPeopleQuad.GetComponent<MeshRenderer>();
+            CloudHeatMap.GrassPeopleRenderer.material.SetTexture("_DensityTex", density);
+            CloudHeatMap.GrassPeopleRenderer.material.SetTexture("_NoiseTex", noise);
+            CloudHeatMap.GrassPeopleRenderer.material.SetInt("_Rows", inst.Rows);
+            CloudHeatMap.GrassPeopleRenderer.material.SetInt("_Cols", inst.Cols);
+            CloudHeatMap.GrassPeopleRenderer.material.SetFloat("_CellWidth", inst.CellWidth);
+            CloudHeatMap.GrassPeopleRenderer.material.SetTexture("_HeatMapScaleTex", inst.GetHeatScaleTexture());
 
             
             

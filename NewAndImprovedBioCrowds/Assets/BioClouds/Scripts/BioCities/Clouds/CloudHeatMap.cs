@@ -40,6 +40,7 @@ namespace BioClouds {
         public NativeHashMap<int, float> cloudDensities;
 
         public static MeshRenderer DensityRenderer;
+        public static MeshRenderer GrassPeopleRenderer;
 
         public struct CloudDataGroup
         {
@@ -166,6 +167,7 @@ namespace BioClouds {
             tex.wrapMode = TextureWrapMode.Clamp;
 
             DensityRenderer.material.SetTexture("_DensityTex", tex);
+            //GrassPeopleRenderer.material.SetTexture("_DensityTex", tex);
 
 
 

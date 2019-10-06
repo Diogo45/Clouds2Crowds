@@ -23,7 +23,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DensityTex:
-        m_Texture: {fileID: 2800000, guid: 755aa7b263a10d74e8aaeaf6055be5fc, type: 3}
+        m_Texture: {fileID: 2800000, guid: d7bcb821b21d53c439b164bceae6cfbd, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -46,6 +46,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ImpostorSpeedMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ImpostorTexture:
+        m_Texture: {fileID: 2800000, guid: 073e7db4a4e80554fa167db584f0a7bc, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -66,7 +74,12 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _PeopleTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
+    - _AnimationFrame: 0
     - _BumpScale: 1
     - _CellWidth: 2
     - _Cols: 500
@@ -74,8 +87,11 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 1
     - _GlossyReflections: 1
+    - _ImpostorScale: 1
+    - _ImpostorSlices: 18
+    - _MaxDensity: 10
     - _Metallic: 0
     - _Mode: 0
     - _NoiseStrength: 0
@@ -85,8 +101,11 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _TessUniform: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GrassDim: {r: 0.05, g: 0.3, b: 0, a: 0}
+    - _ImpostorView: {r: 0, g: 0, b: 0, a: 0}
