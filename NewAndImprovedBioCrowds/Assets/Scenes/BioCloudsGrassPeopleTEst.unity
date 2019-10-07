@@ -454,8 +454,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ySize: 10
   xSize: 10
-  yVertices: 20
-  xVertices: 20
+  yVertices: 256
+  xVertices: 256
   Origin: {x: -5, y: 0, z: -5}
 --- !u!1 &2141522714
 GameObject:
