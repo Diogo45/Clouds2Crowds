@@ -327,7 +327,13 @@ namespace BioClouds
 
         public void Start()
         {
-
+            Parameters inst = Parameters.Instance;
+            
+            if (!inst.BioCloudsActive)
+            {
+                DeactivateBioclouds();
+                return;
+            }
             Init();
             StartExperiment();
 
@@ -337,6 +343,14 @@ namespace BioClouds
 
         public void Update()
         {
+            Parameters inst = Parameters.Instance;
+
+            if (!inst.BioCloudsActive)
+            {
+                DeactivateBioclouds();
+                return;
+            }
+
             if (cloudLateSpawns.Count > 0)
             {
                 for (int i = 0; i < cloudLateSpawns.Count; i++)

@@ -15,16 +15,6 @@ using UnityEngine.AI;
  */
 namespace BioCrowds
 {
-    [System.Obsolete("Contains the data for the deprecated agent spawn method")]
-    public struct Group
-    {
-        public List<GameObject> goals;
-        public int qtdAgents;
-        public string name;
-        public int maxX, minX, maxZ, minZ;
-        public float maxSpeed;
-        public const float agentRadius = 1f;
-    }
 
     public class BioCrowdsBootStrap
     {
@@ -294,5 +284,15 @@ namespace BioCrowds
 
     }
 
+    [System.Obsolete("Contains the data for the deprecated agent spawn method")]
+    public struct Group
+    {
+        public List<GameObject> goals;
+        public int qtdAgents;
+        public string name;
+        public int maxX, minX, maxZ, minZ;
+        public float maxSpeed;
+        public const float agentRadius = 1f;
+    }
 
 }

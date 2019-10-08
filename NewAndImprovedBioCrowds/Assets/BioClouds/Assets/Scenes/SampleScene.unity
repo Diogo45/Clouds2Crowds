@@ -113,11 +113,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &31758431 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1306471280117382, guid: 008ae5c67752e274da812237df40a6d4,
-    type: 2}
-  m_PrefabInternal: {fileID: 1109548827}
 --- !u!1 &115626320
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,52 +154,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxShowHeigth: 1
---- !u!1 &207778063 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1852189815542098, guid: 008ae5c67752e274da812237df40a6d4,
-    type: 2}
-  m_PrefabInternal: {fileID: 1109548827}
---- !u!114 &207778065
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 207778063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b50e185e2f223946bc307cb730b319b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CloudRendererData:
-  - mesh: {fileID: 4300006, guid: 7d3e167d9761a744b8c751bb0c1bd2a5, type: 3}
-    mat: {fileID: 2100000, guid: a568da71e8b5b03448d43b0c1cfb6747, type: 2}
-  HeatQuadRendererData: []
-  HeatMapTexture: {fileID: 0}
---- !u!114 &207778066
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 207778063}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3355483e159158c458b31c41b659f4d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  exp:
-    SeedState: 0
-    Domain:
-      minX: 0
-      maxX: 0
-      minY: 0
-      maxY: 0
-    FramesToRecord: 0
-    IDToRecord: 0
-    CellRegions: []
-    AgentTypes: []
-  background: {fileID: 31758431}
-  densityQuad: {fileID: 1300543639}
-  mainCamera: {fileID: 534669902}
 --- !u!1 &503337597
 GameObject:
   m_ObjectHideFlags: 0
@@ -280,7 +229,7 @@ GameObject:
   - component: {fileID: 534669906}
   m_Layer: 0
   m_Name: Main Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -338,26 +287,26 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 534669902}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 249, y: 249, z: -95.9}
+  m_LocalRotation: {x: 0.57219684, y: -0, z: -0, w: 0.82011634}
+  m_LocalPosition: {x: 170.28, y: 285.5, z: 40.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 69.80701, y: 0, z: 0}
 --- !u!114 &534669906
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 534669902}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf275cd37f16ba941a6e4ecc0937a7b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 534669904}
-  center: {x: 0, y: 0, z: 0}
+  center: {x: 170.28, y: 285.5, z: 40.9}
   zoomSpeed: 0.05
   arcSpeed: 1
   textComponent: {fileID: 847384059}
@@ -637,14 +586,14 @@ Prefab:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114879114376412670, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: RenderClouds
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
   m_IsPrefabAsset: 0
---- !u!1 &1300543639 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1491475793968838, guid: 008ae5c67752e274da812237df40a6d4,
-    type: 2}
-  m_PrefabInternal: {fileID: 1109548827}
 --- !u!1001 &1501088152
 Prefab:
   m_ObjectHideFlags: 0
@@ -745,6 +694,11 @@ Prefab:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 64518687092754652, guid: d30a199632d608d4da4c906ea9f76b6e,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114739369977578050, guid: d30a199632d608d4da4c906ea9f76b6e,
         type: 2}
       propertyPath: m_Enabled
       value: 0

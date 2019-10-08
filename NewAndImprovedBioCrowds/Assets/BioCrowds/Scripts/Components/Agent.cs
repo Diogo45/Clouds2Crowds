@@ -159,7 +159,7 @@ namespace BioCrowds
             qt = new QuadTree(size, 0);
             ShowQuadTree.qt = qt;
             int qtdAgts = Settings.agentQuantity;
-            //TODO dynamize
+            //TODO Dynamize hash map size so there are less collisions
             CellToMarkedAgents = new NativeMultiHashMap<int3, int>(160000, Allocator.Persistent);
             //Debug.Log(CellToMarkedAgents.IsCreated);
             AgentIDToPos = new NativeHashMap<int, float3>(qtdAgts * 2, Allocator.Persistent);
@@ -254,7 +254,7 @@ namespace BioCrowds
             }
             else
                 AgentTotalMarkerWeight.Clear();
-
+            //HACK: Solve marker system not created
             if (!MarkerSystem.AgentMarkers.IsCreated) return inputDeps;
 
             ComputeTotalMarkerWeight computeJob = new ComputeTotalMarkerWeight()

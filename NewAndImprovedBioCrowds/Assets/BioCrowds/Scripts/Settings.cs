@@ -55,7 +55,7 @@ namespace BioCrowds
 
 
 
-
+        public string FluidSimPath = "out.bin";
         public bool WayPointOn = false;
         public float agentRadius = 1f;
         public float markerRadius = 0.1f;
@@ -74,11 +74,11 @@ namespace BioCrowds
         public static int BatchSize = 1;
         //Real value is the sum of all groups instantiated in the bootstrap
         public static int agentQuantity = 0;
-        private static CrowdExperiment _experiment;
-        public static CrowdExperiment experiment = new CrowdExperiment();//{ get { if (experiment == null) _experiment = new CrowdExperiment(); return _experiment; } }
+        public static CrowdExperiment experiment = new CrowdExperiment();
         
         public int treeHeight = 4;
         public static bool QuadTreeActive = true; 
+
 
         public void Awake()
         {
@@ -132,6 +132,11 @@ namespace BioCrowds
             //NavMeshPath path = new NavMeshPath();
             //bool b = NavMesh.CalculatePath(new Vector3(0, 0.25f, 5f), new Vector3(10f, 0.25f, 100f), NavMesh.AllAreas, path);
             //Debug.Log("b " + b + " L:" + path.corners.Length);
+
+            //TODO: descobrir os 500 lugares que o andre seta a pos da camera
+            //Camera.main.transform.position = new Vector3(22.6f, 62.7f, 9.6f);
+
+
         }
 
     }
