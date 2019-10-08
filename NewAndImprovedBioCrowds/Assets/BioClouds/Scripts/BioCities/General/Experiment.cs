@@ -40,6 +40,7 @@ public class Experiment{
     public int IDToRecord;
     public int CloudDivisionLimit;
     public int CloudSizeLimit;
+    public int CloudSplitTimer;
     [SerializeField]
     public Region[] CellRegions;
     public AgentRegions[] AgentTypes;

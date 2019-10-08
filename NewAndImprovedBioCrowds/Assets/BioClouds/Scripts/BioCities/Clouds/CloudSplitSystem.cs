@@ -19,7 +19,7 @@ namespace BioClouds
         {
             [ReadOnly] public ComponentDataArray<CloudData> CloudData;
             [ReadOnly] public ComponentDataArray<CloudGoal> CloudGoal;
-            [ReadOnly] public ComponentDataArray<CloudSplitData> CloudSplitData;
+            public ComponentDataArray<CloudSplitData> CloudSplitData;
             [ReadOnly] public ComponentDataArray<CloudMoveStep> CloudStep;
             [ReadOnly] public ComponentDataArray<Position> Position;
             [ReadOnly] public EntityArray Entities;
@@ -35,7 +35,6 @@ namespace BioClouds
 
         public int divisions = 6;
         public float spawnDistanceFromRadius = 0.3f;
-        public float radiusMultiplier = 3.0f;
         public float angleThreshold = 120.0f;
         public float magnitudeRadiusThreshold = 3.0f;
         public float squishiness_threshold = 0.7f;
@@ -56,14 +55,21 @@ namespace BioClouds
             //float desired_sumMagnitude = 0;
             for (int i = 0; i < m_CloudGroup.Length; i ++)
             {
-                Debug.DrawLine(m_CloudGroup.Position[i].Value,
-                    m_CloudGroup.Position[i].Value + m_RightPreference.dessums[i],
-                    Color.green);
-                Debug.DrawLine(m_CloudGroup.Position[i].Value,
-                    m_CloudGroup.Position[i].Value + m_RightPreference.sums[i],
-                    Color.yellow);
+                //Debug.DrawLine(m_CloudGroup.Position[i].Value,
+                //    m_CloudGroup.Position[i].Value + m_RightPreference.dessums[i],
+                //    Color.green);
+                //Debug.DrawLine(m_CloudGroup.Position[i].Value,
+                //    m_CloudGroup.Position[i].Value + m_RightPreference.sums[i],
+                //    Color.yellow);
 
-                if (m_CloudGroup.CloudSplitData[i].splitCount < m_CloudGroup.CloudSplitData[i].CloudSplitLimit &&
+                var split_data = m_CloudGroup.CloudSplitData[i];
+                split_data.CloudSplitTimer -= 1;
+                m_CloudGroup.CloudSplitData[i] = split_data;
+
+
+
+                if (m_CloudGroup.CloudSplitData[i].CloudSplitTimer <= 0 &&
+                    m_CloudGroup.CloudSplitData[i].splitCount < m_CloudGroup.CloudSplitData[i].CloudSplitLimit &&
                     m_CloudGroup.CloudData[i].AgentQuantity > m_CloudGroup.CloudSplitData[i].CloudSizeLimit)
                 {
                     //angleBetweenSums = Vector3.Angle(m_RightPreference.sums[i], m_RightPreference.dessums[i]);
@@ -186,8 +192,7 @@ namespace BioClouds
                 lateSpawn.preferredDensity = data.PreferredDensity;
                 lateSpawn.radiusChangeSpeed = data.RadiusChangeSpeed;
                 lateSpawn.splitCount = m_CloudGroup.CloudSplitData[index].splitCount + 1;
-                lateSpawn.fatherID = data.ID;
-                lateSpawn.radiusMultiplier = radiusMultiplier;
+                lateSpawn.fatherID = fatherData.fatherID;
 
                 //if (total_agents != 0 && i == divisions)
                 //    lateSpawn.agentQuantity += total_agents;

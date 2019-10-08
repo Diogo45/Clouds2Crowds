@@ -74,6 +74,8 @@ namespace BioClouds
         public void Init()
         {
 
+
+
             Parameters inst = Parameters.Instance;
             entityManager = World.Active.GetOrCreateManager<EntityManager>();
             city = new BioCity();
@@ -81,7 +83,22 @@ namespace BioClouds
             city.AgentMeshes = new List<MeshInstanceRenderer>();
             city.CloudMeshes = new List<MeshInstanceRenderer>();
 
-            if(!inst.BioCloudsActive){
+
+
+            #region hack
+
+            split_system = World.Active.GetExistingManager<CloudSplitSystem>();
+            merge_system = World.Active.GetExistingManager<CloudMergeSystem>();
+
+            split_system.Enabled = false;
+
+
+            #endregion 
+
+
+
+
+            if (!inst.BioCloudsActive){
                 DeactivateBioclouds();
                 return;
             }
@@ -242,25 +259,25 @@ namespace BioClouds
 
         }
 
-        public float CloudPreferredRadius(int quantity, float prefferedDensity)
+        public static float CloudPreferredRadius(int quantity, float prefferedDensity)
         {
-            return (float)math.sqrt(quantity / (prefferedDensity * math.PI));
+            return (float)math.sqrt(quantity  / (prefferedDensity * math.PI / 2f));
         }
 
 
-        public float CloudMinRadius(int quantity)
+        public static float CloudMinRadius(int quantity)
         {
             return CloudPreferredRadius(quantity, Parameters.Instance.MaxColorDensity);
         }
 
-        public void AddCloud(float3 position, int quantity, float3 goal, int cloudType, float preferredDensity, float radiusChangeSpeed, int splitCout = 0, int fatherID = -1, float radiusMultiplier = 1.0f)
+        public void AddCloud(float3 position, int quantity, float3 goal, int cloudType, float preferredDensity, float radiusChangeSpeed, int splitCout = 0, int fatherID = -1)
         {
 
             Entity newCloud = entityManager.CreateEntity(city.CloudArchetype);
             float radius;
 
             //if(fatherID == -1)
-                radius = CloudMinRadius(quantity) * radiusMultiplier;
+                radius = CloudPreferredRadius(quantity, preferredDensity);
             //else
             //    radius = CloudPreferredRadius(quantity, preferredDensity) * radiusMultiplier;
 
@@ -276,7 +293,7 @@ namespace BioClouds
             if (fatherID == -1)
                 fatherID = ID;
 
-            entityManager.SetComponentData<CloudSplitData>(newCloud, new CloudSplitData { splitCount = splitCout, fatherID = fatherID, CloudSplitLimit = exp.CloudDivisionLimit, CloudSizeLimit = exp.CloudSizeLimit});
+            entityManager.SetComponentData<CloudSplitData>(newCloud, new CloudSplitData { splitCount = splitCout, fatherID = fatherID, CloudSplitLimit = exp.CloudDivisionLimit, CloudSizeLimit = exp.CloudSizeLimit, CloudSplitTimer=exp.CloudSplitTimer});
 
             if (Parameters.Instance.RenderClouds)
                 entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType % city.CloudMeshes.Count]);
@@ -367,12 +384,22 @@ namespace BioClouds
 
         }
 
+
+        #region hack
+
+        CloudMergeSystem merge_system;
+        CloudSplitSystem split_system;
+
+
+        #endregion
+
         public void Update()
         {
             if (cloudLateSpawns.Count > 0)
             {
                 for (int i = 0; i < cloudLateSpawns.Count; i++)
                 {
+                    Debug.Log("LateSpawn");
                     AddCloud(cloudLateSpawns[i].position,
                             cloudLateSpawns[i].agentQuantity,
                             cloudLateSpawns[i].goal,
@@ -380,8 +407,7 @@ namespace BioClouds
                             cloudLateSpawns[i].preferredDensity,
                             cloudLateSpawns[i].radiusChangeSpeed,
                             cloudLateSpawns[i].splitCount,
-                            cloudLateSpawns[i].fatherID,
-                            cloudLateSpawns[i].radiusMultiplier);
+                            cloudLateSpawns[i].fatherID);
                 }
                 cloudLateSpawns.Clear();
             }
@@ -394,6 +420,10 @@ namespace BioClouds
                 }
                 entitiesToDestroy.Clear();
             }
+
+            split_system.Enabled = !split_system.Enabled;
+            merge_system.Enabled = !merge_system.Enabled;
+
         }
 
 

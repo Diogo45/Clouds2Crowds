@@ -66,6 +66,7 @@ namespace BioClouds
         public int fatherID;
         public int CloudSplitLimit;
         public int CloudSizeLimit;
+        public int CloudSplitTimer;
     }
 
     public struct CloudIDPosRadius
@@ -86,7 +87,6 @@ namespace BioClouds
         public float radiusChangeSpeed;
         public int splitCount;
         public int fatherID;
-        public float radiusMultiplier;
     }
     
 }

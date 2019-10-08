@@ -113,6 +113,60 @@ public class GridConverter
 
         return auxList.ToArray();
     }
+
+
+    //By breshenham's line algorithm
+    public static int[] LineInGrid(float3 pos1, float3 pos2)
+    {
+        var auxSet = new HashSet<int>();
+
+        var cell1 = GridConverter.PositionToGridCell(pos1);
+        var cell2 = GridConverter.PositionToGridCell(pos2);
+
+        int x0 = cell1.x;
+        int y0 = cell1.y;
+
+        int x1 = cell2.x;
+        int y1 = cell2.y;
+
+
+        int dx = (int)math.abs(x1 - x0);
+        int sx = x0 < x1 ? 1 : -1;
+        int dy = (int)-math.abs(y1 - y0);
+        int sy = y0 < y1 ? 1 : -1;
+
+        int err = dx + dy;
+
+        while (true)
+        {
+            auxSet.Add(GridConverter.GridCell2CellID(new int2(x0, y0)));
+
+            if (x0 == x1 && y0 == y1) break;
+
+            int e2 = 2 * err;
+
+            if(e2 >= dy)
+            {
+                err += dy; 
+                x0 += sx;
+            }
+
+            if (e2 <= dx)
+            {
+                err += dx;
+                y0 += sy;
+            } 
+
+        }
+
+        int[] list = new int[auxSet.Count];
+        auxSet.CopyTo(list);
+
+
+        return list;
+    }
+
+
     public static int CellQuantity { get; private set; } = 0;
 
     public static float Width { get; set; }
@@ -136,6 +190,8 @@ public class GridConverter
         Debug.Log("rows : " + rows + " cols : " + cols);
     }
 
+
+    
 
 
 }
