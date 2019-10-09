@@ -201,7 +201,7 @@ namespace BioCrowds
                 int3 cell = cellGroup.CellName[i].Value;
                 float3 particleVel;
                 CellMomenta.TryGetValue(cell, out particleVel);
-                Debug.DrawLine(new float3(cell), new float3(cell) + particleVel);
+                Debug.DrawLine(new float3(cell), new float3(cell) + particleVel,Color.red);
 
             }
         }
@@ -219,7 +219,7 @@ namespace BioCrowds
         public NativeMultiHashMap<int3, int> CellToParticles;
 
         public int frameSize = 100000;//particles
-        public int bufferSize;// number of particles times the number of floats of data of each particle, for now 3 for position + 3 for velocity 
+        public int bufferSize;// number of particles times the number of floats of data of each particle, for now 3 for 3 floats
 
         public int frame = 0;
         private int last = 0;
@@ -227,7 +227,6 @@ namespace BioCrowds
         private static float thresholdHeigth = 1000f;
         private const string memMapName = "unityMemMap";
         private const string memMapNameVel = "unityMemMapVel";
-
 
         public struct AgentGroup
         {
@@ -268,48 +267,79 @@ namespace BioCrowds
             CellToParticles = new NativeMultiHashMap<int3, int>(frameSize * (Settings.experiment.TerrainX * Settings.experiment.TerrainZ)/4, Allocator.Persistent);
             FluidPos = new NativeList<float3>(frameSize, Allocator.Persistent);
             FluidVel = new NativeList<float3>(frameSize, Allocator.Persistent);
-            bufferSize = frameSize * 3;
 
         }
 
 
         protected override void OnCreateManager()
         {
-         
+
             //BinParser(simFile);
+            bufferSize = frameSize * 3;
 
             //TODO: Get frameSize from FluidSimulator
             //frameSize * 3 as there are 3 floats for every particle
-            int map = AcessDLL.OpenMemoryShare(memMapName, frameSize * 3);
+            int map = AcessDLL.OpenMemoryShare(memMapName, bufferSize);
             switch (map)
             {
                 case 0:
-                    Debug.Log("Memory Map Created");
+                    Debug.Log("Memory Map " + memMapName + " Created");
                     break;
                 case -1:
-                    Debug.Log("Memory Map Array too large");
+                    Debug.Log("Memory Map " + memMapName + " Array too large");
                     this.Enabled = false;
                     World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
                     //TODO: disable every fluid sim system
                     return;
                     
                 case -2:
-                    Debug.Log("Memory Map could not create file mapping object");
+                    Debug.Log("Memory Map " + memMapName + " could not create file mapping object");
                     this.Enabled = false;
                     World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
                     //TODO: disable every fluid sim system
                     return;
                 case -3:
-                    Debug.Log("Memory Map could not create map view of the file");
+                    Debug.Log("Memory Map " + memMapName + " could not create map view of the file");
                     this.Enabled = false;
                     World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
                     //TODO: disable every fluid sim system
                     return;
                 default:
-                    Debug.Log("A Memory Map Already Exists");
+                    Debug.Log("A Memory Map " + memMapName + " Already Exists");
                     break;
             }
-           
+
+            map = AcessDLL.OpenMemoryShare(memMapNameVel, bufferSize);
+            switch (map)
+            {
+                case 0:
+                    Debug.Log("Memory Map "+ memMapNameVel +" Created");
+                    break;
+                case -1:
+                    Debug.Log("Memory Map " + memMapNameVel + " Array too large");
+                    this.Enabled = false;
+                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                    //TODO: disable every fluid sim system
+                    return;
+
+                case -2:
+                    Debug.Log("Memory Map " + memMapNameVel + " could not create file mapping object");
+                    this.Enabled = false;
+                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                    //TODO: disable every fluid sim system
+                    return;
+                case -3:
+                    Debug.Log("Memory Map " + memMapNameVel + " could not create map view of the file");
+                    this.Enabled = false;
+                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                    //TODO: disable every fluid sim system
+                    return;
+                default:
+                    Debug.Log("A Memory Map " + memMapNameVel + " Already Exists");
+                    break;
+            }
+
+
             Debug.Log("Fluid Simulation Initialized");
         }
 
@@ -356,7 +386,7 @@ namespace BioCrowds
             {
                 float x = floatStream[i];
                 float y = floatStream[i + 1];
-                float z = floatStream[i + 2];
+                float z = -floatStream[i + 2];
                 //TODO: Parametrize the translation and scale]
                 float3 pos = new float3(x, y, z) * scale + translate;
                 FluidPos.Add(pos);
@@ -370,9 +400,9 @@ namespace BioCrowds
             {
                 float x = floatStreamVel[i];
                 float y = floatStreamVel[i + 1];
-                float z = floatStreamVel[i + 2];
+                float z = -floatStreamVel[i + 2];
                 //TODO: Parametrize the translation and scale]
-                float3 vel = new float3(x, y, z) * scale + translate;
+                float3 vel = new float3(x, y, z) * scale;
                 FluidVel.Add(vel);
 
 
@@ -425,7 +455,7 @@ namespace BioCrowds
         {
             for (int i = 0; i < frameSize; i++)
             {
-                Debug.DrawLine(FluidPos[i], FluidPos[i] + new float3(0f, 0.01f, 0f),Color.blue);
+                Debug.DrawLine(FluidPos[i], FluidPos[i]+FluidVel[i]/100f );
             }
 
         }
