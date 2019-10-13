@@ -56,6 +56,9 @@ namespace BioClouds
 
     public struct CloudGoal : IComponentData
     {
+        public int EndObjectiveID;
+        public int CurrentObjectiveID;
+        public int MovelessFrames;
         public float3 SubGoal; //current cloud subgoal
         public float3 EndGoal; //current cloud endgoal
     }
@@ -81,7 +84,8 @@ namespace BioClouds
     {
         public float3 position;
         public int agentQuantity;
-        public float3 goal;
+        public int current_goal_id;
+        public int end_goal_id;
         public int cloudType;
         public float preferredDensity;
         public float radiusChangeSpeed;

@@ -2,15 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 /// <summary>
 /// Experiment definition class.
 /// </summary>
 [System.Serializable]
 public class Experiment{
 
+    
+    //[System.Serializable]
+    //public struct WayPoint
+    //{
+    //    public int WayPointID;
+    //    public float x;
+    //    public float y;
+    //    public int[] Neighbours;
+    //}
+
+
     [System.Serializable]
     public struct AgentRegions
     {
+        public int GoalWayPointID;
         public float[] Goal;
         public int Type;
         public Region Region;
@@ -44,5 +57,7 @@ public class Experiment{
     [SerializeField]
     public Region[] CellRegions;
     public AgentRegions[] AgentTypes;
- 
+
+    public PathManager.WayPoint[] WayPoints;
+
 }

@@ -25,6 +25,11 @@ public class GridConverter
         }
     }
 
+
+    public static int CellQuantity { get; private set; } = 0;
+
+    public static float Width { get; set; }
+
     static Rect domain;
     static int rows;
     public static int Rows { get { return rows; } } 
@@ -65,6 +70,17 @@ public class GridConverter
         var y = (int)((position.y - domain.miny) / Width);
         //Debug.Log("x y " + x + " " + y + " pos " + position);
         return new int2(x, y);
+    }
+
+    public static float3 GridCell2EstimatePosition(int2 gridCell)
+    {
+
+        float x = gridCell.x * Width + domain.minx;
+        float y = gridCell.y * Width + domain.miny;
+
+
+        return new float3(x, y, 0);
+
     }
     
     /// <summary>
@@ -108,7 +124,8 @@ public class GridConverter
         for (int i = startCell.x; i <= endCell.x; i++)
             for (int j = startCell.y; j <= endCell.y; j++)
                 if(!(i < 0 || i > rows ||
-                   j < 0 || j > cols))
+                   j < 0 || j > cols ) &&
+                   math.distance(position, GridCell2EstimatePosition(new int2(i,j))) < radius)
                     auxList.Add(GridCell2CellID(new int2(i, j)));
 
         return auxList.ToArray();
@@ -165,11 +182,6 @@ public class GridConverter
 
         return list;
     }
-
-
-    public static int CellQuantity { get; private set; } = 0;
-
-    public static float Width { get; set; }
 
     /// <summary>
     /// Sets the simulation restricted Domain.

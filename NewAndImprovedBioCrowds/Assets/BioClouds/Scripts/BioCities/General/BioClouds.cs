@@ -115,6 +115,10 @@ namespace BioClouds
 
             exp = LoadExperiment(city.BioParameters.ExperimentPath);
 
+            //Load waypoints
+            PathManager.LoadWayPoints(exp.WayPoints);
+
+
             r.InitState((uint)exp.SeedState);
 
             Debug.Log("domain: " + exp.Domain);
@@ -261,7 +265,7 @@ namespace BioClouds
 
         public static float CloudPreferredRadius(int quantity, float prefferedDensity)
         {
-            return (float)math.sqrt(quantity  / (prefferedDensity * math.PI / 2f));
+            return (float)math.sqrt(quantity  / (prefferedDensity * math.PI));
         }
 
 
@@ -270,11 +274,27 @@ namespace BioClouds
             return CloudPreferredRadius(quantity, Parameters.Instance.MaxColorDensity);
         }
 
-        public void AddCloud(float3 position, int quantity, float3 goal, int cloudType, float preferredDensity, float radiusChangeSpeed, int splitCout = 0, int fatherID = -1)
+        public void AddCloud(float3 position,
+            int quantity,
+            int endGoalID,
+            int currentGoalID,
+            int cloudType,
+            float preferredDensity,
+            float radiusChangeSpeed,
+            int splitCout = 0,
+            int fatherID = -1)
         {
 
             Entity newCloud = entityManager.CreateEntity(city.CloudArchetype);
             float radius;
+
+            PathManager.WayPoint currentWayPoint = PathManager.GetWayPointByID(currentGoalID);
+            float3 current_goal_pos = new float3(currentWayPoint.x, currentWayPoint.y, 0f);
+
+            PathManager.WayPoint endWayPoint = PathManager.GetWayPointByID(endGoalID);
+            float3 end_goal_pos = new float3(endWayPoint.x, endWayPoint.y, 0f);
+
+
 
             //if(fatherID == -1)
                 radius = CloudPreferredRadius(quantity, preferredDensity);
@@ -286,7 +306,7 @@ namespace BioClouds
             int ID = city.CloudIDs++;
             entityManager.SetComponentData<CloudData>(newCloud, new CloudData { ID = ID, AgentQuantity = quantity, Radius = radius, MaxSpeed = city.BioParameters.CloudSpeed / city.BioParameters.SimulationFramesPerSecond, Type = cloudType, PreferredDensity = preferredDensity,
                MinRadius = CloudMinRadius(quantity), RadiusChangeSpeed = radiusChangeSpeed});
-            entityManager.SetComponentData<CloudGoal>(newCloud, new CloudGoal { SubGoal = goal, EndGoal = goal });
+            entityManager.SetComponentData<CloudGoal>(newCloud, new CloudGoal { SubGoal = current_goal_pos, EndGoal = end_goal_pos, CurrentObjectiveID = currentGoalID, EndObjectiveID = endGoalID, MovelessFrames = 0 }) ;
             entityManager.SetComponentData<CloudMoveStep>(newCloud, new CloudMoveStep { Delta = float3.zero});
             entityManager.SetComponentData<SpawnedAgentsCounter>(newCloud, new SpawnedAgentsCounter { Quantity = 0 });
 
@@ -304,17 +324,19 @@ namespace BioClouds
             entityManager.DestroyEntity(entity);
         }
 
-        public void SpawnClouds(int quantity, float minx, float maxx, float miny, float maxy, int cloudType, float3 goal, int cloudSize, float preferredDensity, float radiusChangeSpeed)
+        public void SpawnClouds(int quantity, float minx, float maxx, float miny, float maxy, int cloudType, int goal_id, int cloudSize, float preferredDensity, float radiusChangeSpeed)
         {
 
             float3 minPos = new float3(minx, miny, 0f);
             float3 maxPos = new float3(maxx, maxy, 0f);
 
+            Debug.Log("Cloud with goal: " + goal_id + " with position :" + PathManager.GetWayPointByID(goal_id));
+
             for (int i = 0; i < quantity; i++) {
                 
                 float3 position = r.NextFloat3(minPos, maxPos);
 
-                AddCloud(position, cloudSize, goal, cloudType, preferredDensity, radiusChangeSpeed);
+                AddCloud(position, cloudSize, goal_id, goal_id, cloudType, preferredDensity, radiusChangeSpeed);
 
             }
             
@@ -333,10 +355,12 @@ namespace BioClouds
         public void StartExperiment()
         {
 
+            
+
             for(int i = 0; i < exp.CellRegions.Length; i++)
             {
                 //Debug.Log("Make Cells!");
-                Debug.Log(i + " " + exp.CellRegions[i].minX + " " + exp.CellRegions[i].maxX);
+                Debug.Log("Cell Region Created: id"+ i + " x" + exp.CellRegions[i].minX + " y" + exp.CellRegions[i].maxX);
                 CreateCells(exp.CellRegions[i].minX,
                             exp.CellRegions[i].maxX,
                             exp.CellRegions[i].minY,
@@ -363,7 +387,7 @@ namespace BioClouds
                             exp.AgentTypes[i].Region.minY,
                             exp.AgentTypes[i].Region.maxY,
                             exp.AgentTypes[i].Type,
-                            new float3(exp.AgentTypes[i].Goal[0], exp.AgentTypes[i].Goal[1], exp.AgentTypes[i].Goal[2]),
+                            exp.AgentTypes[i].GoalWayPointID,
                             exp.AgentTypes[i].CloudSize,
                             exp.AgentTypes[i].PreferredDensity,
                             exp.AgentTypes[i].RadiusChangeSpeed);
@@ -402,7 +426,8 @@ namespace BioClouds
                     Debug.Log("LateSpawn");
                     AddCloud(cloudLateSpawns[i].position,
                             cloudLateSpawns[i].agentQuantity,
-                            cloudLateSpawns[i].goal,
+                            cloudLateSpawns[i].end_goal_id,
+                            cloudLateSpawns[i].current_goal_id,
                             cloudLateSpawns[i].cloudType,
                             cloudLateSpawns[i].preferredDensity,
                             cloudLateSpawns[i].radiusChangeSpeed,

@@ -57,8 +57,12 @@ namespace BioClouds
 
                 bool keepgoing = CloudMarkersMap.TryGetFirstValue(CloudData[index].ID, out currentCellPosition, out it);
 
-                if (!keepgoing)
+                if (!keepgoing) // if cloud has no markers
+                {
+                    CloudStep[index] = new CloudMoveStep() { Delta = float3.zero };
                     return;
+                }
+
 
                 float F = CloudCalculations.GetF(currentCellPosition, CloudPositions[index].Value, CloudGoals[index].SubGoal - CloudPositions[index].Value);
                 var auxinWeight = CloudCalculations.PartialW(totalW, F) * CloudData[index].MaxSpeed * (currentCellPosition - CloudPositions[index].Value);
@@ -119,6 +123,7 @@ namespace BioClouds
                 CellMap = m_cellIdMap.cellId2Cellfloat3,
                 ExtraWeightCell = m_CloudSplit.extraWeightCellId,
                 useSplit = Parameters.Instance.EnableRightPreference
+
 
             };
 

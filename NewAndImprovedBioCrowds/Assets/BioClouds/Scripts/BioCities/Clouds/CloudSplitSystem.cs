@@ -38,9 +38,9 @@ namespace BioClouds
         public float angleThreshold = 120.0f;
         public float magnitudeRadiusThreshold = 3.0f;
         public float squishiness_threshold = 0.7f;
-        public float split_threshold = 0.5f;
+        public float split_threshold = 0.9f;
         public bool rotateHalfSlice = true;
-        public float framesForward = 5f;
+        public float framesForward = 15f;
 
         protected override void OnStartRunning()
         {
@@ -50,9 +50,7 @@ namespace BioClouds
         }
         protected override void OnUpdate()
         {
-            //float angleBetweenSums = 0f;
-            //float sumMagnitude = 0f;
-            //float desired_sumMagnitude = 0;
+
             for (int i = 0; i < m_CloudGroup.Length; i ++)
             {
                 //Debug.DrawLine(m_CloudGroup.Position[i].Value,
@@ -72,23 +70,7 @@ namespace BioClouds
                     m_CloudGroup.CloudSplitData[i].splitCount < m_CloudGroup.CloudSplitData[i].CloudSplitLimit &&
                     m_CloudGroup.CloudData[i].AgentQuantity > m_CloudGroup.CloudSplitData[i].CloudSizeLimit)
                 {
-                    //angleBetweenSums = Vector3.Angle(m_RightPreference.sums[i], m_RightPreference.dessums[i]);
-                    //sumMagnitude = math.length(m_RightPreference.sums[i]);
-                    //desired_sumMagnitude = math.length(m_RightPreference.dessums[i]);
-                    /*Debug.Log("------------");
-                    Debug.Log("ID: " + m_CloudGroup.CloudData[i].ID);
-                    Debug.Log("Pos: " + m_CloudGroup.Position[i].Value);
-                    Debug.Log("Sums: " + m_RightPreference.sums[i]);
-                    Debug.Log("DesSums: " + m_RightPreference.dessums[i]);
 
-                    //Check angle between Vectors
-                    Debug.Log("Angle: " + angleBetweenSums);
-                    Debug.Log("Magnitude: " + sumMagnitude);
-                    Debug.Log("Radius: " + m_CloudGroup.CloudData[i].Radius);*/
-                    ///if (math.abs(angleBetweenSums) >= angleThreshold ||
-                    //   sumMagnitude > m_CloudGroup.CloudData[i].Radius * magnitudeRadiusThreshold ||
-                    //   sumMagnitude / desired_sumMagnitude < squishiness_threshold)
-                    //    SplitCloud(i);
                     if (DecideSplit(i))
                         SplitCloud(i);
 
@@ -123,7 +105,7 @@ namespace BioClouds
             foreach (int cell_id in current_cells)
             {
                 //if avaiable, test if id is different.
-                if (!(cell_map.TryGetValue(cell_id, out int result) && result == m_CloudGroup.CloudData[index].ID) && bioClouds.created_cell_ids.Contains(cell_id))
+                if ((!cell_map.TryGetValue(cell_id, out int result) || result == m_CloudGroup.CloudData[index].ID) && bioClouds.created_cell_ids.Contains(cell_id))
                 {
                     avaiable_current_cells++;
 
@@ -133,13 +115,14 @@ namespace BioClouds
             foreach (int cell_id in future_cells)
             {
                 //if avaiable, test if id is different.
-                if(!(cell_map.TryGetValue(cell_id, out int result) && result == m_CloudGroup.CloudData[index].ID) && bioClouds.created_cell_ids.Contains(cell_id))
+                if((!cell_map.TryGetValue(cell_id, out int result) || result == m_CloudGroup.CloudData[index].ID) && bioClouds.created_cell_ids.Contains(cell_id))
                 {
                     avaiable_future_cells++;
                 }
             }
-
-            return (avaiable_future_cells / avaiable_current_cells) < split_threshold;
+            float split_value = ((float)avaiable_future_cells / (float)avaiable_current_cells);
+            //Debug.Log(avaiable_future_cells + " " + avaiable_current_cells + " " + split_value + " " + (split_value < split_threshold));
+            return split_value < split_threshold;
         }
 
         private void SplitCloud(int index)
@@ -164,10 +147,12 @@ namespace BioClouds
                 if (total_agents <= 0)
                     break;
 
+                float lolcalSpawnDistanceFromRadius = m_CloudGroup.CloudData[index].Radius * 0.5f;
+
                 offset.x = math.cos(math.radians(((slice * (i)) + (slice / 2f))));
                 offset.y = math.sin(math.radians(((slice * (i)) + (slice / 2f))));
                 offset.z = 0f;
-                offset *= (m_CloudGroup.CloudData[index].Radius * spawnDistanceFromRadius);
+                offset *= ( lolcalSpawnDistanceFromRadius);
                 CloudLateSpawn lateSpawn = new CloudLateSpawn();
 
                 lateSpawn.agentQuantity = math.min(agents_slice, total_agents);
@@ -177,17 +162,18 @@ namespace BioClouds
                     lateSpawn.position = basePosition + offset;
 
 
-                //if (!cell_map.Contains(GridConverter.Position2CellID(lateSpawn.position)))
-                //    continue;
-
-
-                if (i == divisions)
-                    lateSpawn.agentQuantity += data.AgentQuantity % (divisions + 1);
+                if (!cell_map.Contains(GridConverter.Position2CellID(lateSpawn.position)))
+                    continue;
 
 
                 total_agents -= lateSpawn.agentQuantity;
+
+                if (i == divisions)
+                    lateSpawn.agentQuantity += total_agents;
+
                 
-                lateSpawn.goal = m_CloudGroup.CloudGoal[index].EndGoal;
+                lateSpawn.end_goal_id = m_CloudGroup.CloudGoal[index].EndObjectiveID;
+                lateSpawn.current_goal_id = m_CloudGroup.CloudGoal[index].CurrentObjectiveID;
                 lateSpawn.cloudType = data.Type;
                 lateSpawn.preferredDensity = data.PreferredDensity;
                 lateSpawn.radiusChangeSpeed = data.RadiusChangeSpeed;

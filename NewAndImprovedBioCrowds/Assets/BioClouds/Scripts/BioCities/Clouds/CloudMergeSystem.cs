@@ -127,11 +127,11 @@ namespace BioClouds
             
             foreach (int cell_id in line_cells)
             {
-                if (m_CellIdMapSystem.cellId2Cellfloat3.TryGetValue(cell_id, out float3 cellPos))
-                {
-                    //Debug.Log("Line " + cell_id + " " + cellPos);
-                    Debug.DrawLine(smallerIdPosition, cellPos);
-                }
+                //if (m_CellIdMapSystem.cellId2Cellfloat3.TryGetValue(cell_id, out float3 cellPos))
+                //{
+                //    //Debug.Log("Line " + cell_id + " " + cellPos);
+                //    Debug.DrawLine(smallerIdPosition, cellPos);
+                //}
                 //if avaiable, test if id is different.
 
 
@@ -164,9 +164,6 @@ namespace BioClouds
 
             float3 resultingPosiion = (smallerIdPosition * smallerIdCloudData.AgentQuantity + largerIdPosition * largerIdCloudData.AgentQuantity) / total_agents;
 
-            
-
-
             //float density = (smallerIdCloudData.PreferredDensity * smallerIdCloudData.AgentQuantity) + (largerIdCloudData.PreferredDensity * largerIdCloudData.AgentQuantity);
             //density /= total_agents;
 
@@ -176,10 +173,10 @@ namespace BioClouds
 
             int split_count = Mathf.Max(smallerIdfatherData.splitCount, largerIdfatherData.splitCount) - 1;
 
-
             CloudLateSpawn lateSpawn = new CloudLateSpawn();
    
-            lateSpawn.goal = m_CloudGroup.CloudGoal[smallerIdCloud].EndGoal;
+            lateSpawn.end_goal_id = m_CloudGroup.CloudGoal[smallerIdCloud].EndObjectiveID;
+            lateSpawn.current_goal_id = m_CloudGroup.CloudGoal[smallerIdCloud].CurrentObjectiveID;
             lateSpawn.cloudType = smallerIdCloudData.Type;
             lateSpawn.preferredDensity = density;
             lateSpawn.radiusChangeSpeed = smallerIdCloudData.RadiusChangeSpeed;

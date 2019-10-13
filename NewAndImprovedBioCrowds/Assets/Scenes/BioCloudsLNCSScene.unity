@@ -171,7 +171,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &166776400
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -651,6 +651,16 @@ Prefab:
       propertyPath: collisionMask
       value: 
       objectReference: {fileID: 599425328}
+    - target: {fileID: 23121536015469916, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: f1cd822f9d232114f908ba11f98ab414, type: 2}
+    - target: {fileID: 114879114376412670, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: PartialExperimentPath
+      value: Experiments\DefaultExperiment-felix.json
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
   m_IsPrefabAsset: 0
