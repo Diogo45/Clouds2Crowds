@@ -1,0 +1,32 @@
+{
+  "SeedState": 1000,
+  "CloudDivisionLimit": 1,
+  "CloudSizeLimit" : 7,
+  "CloudSplitTimer" : 20,
+  "Domain":{"minX":0.0, "maxX":50.0, "minY":0.0, "maxY": 50.0},
+
+  "CellRegions": [{"minX":0.0, "maxX":22.5, "minY":0.0, "maxY":50.0},
+                  {"minX":27.5, "maxX":50.0, "minY":0.0, "maxY":50.0},
+                  {"minX":22.5, "maxX":27.5, "minY":27.5, "maxY":50.0},
+                  {"minX":22.5, "maxX":27.5, "minY":0.0, "maxY": 22.5}],
+
+"AgentTypes": [
+  {
+    "GoalWayPointID" : 4,
+    "Goal": [ 50.0, 25.0, 0.0 ],
+    "Type": 0,
+    
+    "Region": {"minX":5.0, "maxX":5.0, "minY":25.0, "maxY": 25.0},
+    "Quantity": 1,
+    "CloudSize": 50,
+    "PreferredDensity": 0.75,
+    "RadiusChangeSpeed": 0.01
+  }],
+
+  "WayPoints":[{"ID":0, "x":23.0, "y":23.0, "Neighbours":[3, 2]},
+               {"ID":1, "x":29.5, "y":29.5, "Neighbours":[4, 2, 3]},
+               {"ID":2, "x":23.0, "y":29.5, "Neighbours":[0, 1]},
+               {"ID":3, "x":29.5, "y":23.0, "Neighbours":[4, 1, 0]},
+               {"ID":4, "x":50.0, "y":25.0, "Neighbours":[3, 1]}]
+  
+}
