@@ -1,1 +1,0 @@
-#This file stores the processing time for each frame. Measured in Seconds.

@@ -1347,30 +1347,10 @@
     "Type": 0,
     "Region": {"minX":20.0, "maxX":20.0, "minY":20.0, "maxY": 20.0},
     "Quantity": 1,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
     "RadiusChangeSpeed": 0.01
   },
-  {
-    "GoalWayPointID" : 11,
-    "Goal": [ 0.0, 0.0, 0.0 ],
-    "Type": 0,
-    "Region": {"minX":40.0, "maxX":40.0, "minY":40.0, "maxY": 40.0},
-    "Quantity": 1,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
-    "RadiusChangeSpeed": 0.01
-  },   
-  {
-    "GoalWayPointID" : 11,
-    "Goal": [ 0.0, 0.0, 0.0 ],
-    "Type": 0,
-    "Region": {"minX":60.0, "maxX":60.0, "minY":60.0, "maxY": 60.0},
-    "Quantity": 1,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
-    "RadiusChangeSpeed": 0.01
-  },  
   
   
 
@@ -1383,60 +1363,55 @@
     "Type": 0,
     "Region": {"minX":980.0, "maxX":980.0, "minY":20.0, "maxY": 20.0},
     "Quantity": 1,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
+    "RadiusChangeSpeed": 0.01
+  },
+
+
+
+
+
+
+
+  {
+    "GoalWayPointID" : 11,
+    "Goal": [ 0.0, 0.0, 0.0 ],
+    "Type": 0,
+    "Region": {"minX":980.0, "maxX":980.0, "minY":900.0, "maxY":980.0},
+    "Quantity": 1,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
     "RadiusChangeSpeed": 0.01
   },
   {
     "GoalWayPointID" : 11,
     "Goal": [ 0.0, 0.0, 0.0 ],
     "Type": 0,
-    "Region": {"minX":960.0, "maxX":960.0, "minY":40.0, "maxY": 40.0},
+    "Region": {"minX":940.0, "maxX":940.0, "minY":850.0, "maxY":930.0},
     "Quantity": 1,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
     "RadiusChangeSpeed": 0.01
   },   
   {
     "GoalWayPointID" : 11,
     "Goal": [ 0.0, 0.0, 0.0 ],
     "Type": 0,
-    "Region": {"minX":940.0, "maxX":940.0, "minY":60.0, "maxY": 60.0},
+    "Region": {"minX":900.0, "maxX":900.0, "minY":800.0, "maxY":880.0},
     "Quantity": 1,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
     "RadiusChangeSpeed": 0.01
   },  
-
-
-
-  
-  
-  
   {
     "GoalWayPointID" : 11,
     "Goal": [ 0.0, 0.0, 0.0 ],
     "Type": 0,
-    "Region": {"minX":50.0, "maxX":150.0, "minY":470.0, "maxY": 530.0},
-    "Quantity": 10,
+    "Region": {"minX":860.0, "maxX":860.0, "minY":850.0, "maxY":850.0},
+    "Quantity": 1,
     "CloudSize": 200,
-    "PreferredDensity": 0.75,
-    "RadiusChangeSpeed": 0.01
-  },
- 
-  
-
-
-
-
-  {
-    "GoalWayPointID" : 11,
-    "Goal": [ 0.0, 0.0, 0.0 ],
-    "Type": 0,
-    "Region": {"minX":450.0, "maxX":550.0, "minY":840.0, "maxY": 940.0},
-    "Quantity": 10,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
+    "PreferredDensity": 0.25,
     "RadiusChangeSpeed": 0.01
   },
  
@@ -1449,27 +1424,80 @@
     "Goal": [ 0.0, 0.0, 0.0 ],
     "Type": 0,
     "Region": {"minX":850.0, "maxX":950.0, "minY":470.0, "maxY": 530.0},
-    "Quantity": 10,
-    "CloudSize": 200,
-    "PreferredDensity": 0.75,
+    "Quantity": 1,
+    "CloudSize": 2000,
+    "PreferredDensity": 0.25,
     "RadiusChangeSpeed": 0.01
-  },
-
-
+  },  
 
   {
     "GoalWayPointID" : 11,
     "Goal": [ 0.0, 0.0, 0.0 ],
     "Type": 0,
-    "Region": {"minX":20.0, "maxX":20.0, "minY":20.0, "maxY": 20.0},
+    "Region": {"minX":20.0, "maxX":20.0, "minY":900.0, "maxY":980.0},
+    "Quantity": 1,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
+    "RadiusChangeSpeed": 0.01
+  },
+  {
+    "GoalWayPointID" : 11,
+    "Goal": [ 0.0, 0.0, 0.0 ],
+    "Type": 0,
+    "Region": {"minX":60.0, "maxX":60.0, "minY":850.0, "maxY":930.0},
+    "Quantity": 1,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
+    "RadiusChangeSpeed": 0.01
+  },   
+  {
+    "GoalWayPointID" : 11,
+    "Goal": [ 0.0, 0.0, 0.0 ],
+    "Type": 0,
+    "Region": {"minX":100.0, "maxX":100.0, "minY":800.0, "maxY":880.0},
+    "Quantity": 1,
+    "CloudSize": 600,
+    "PreferredDensity": 0.25,
+    "RadiusChangeSpeed": 0.01
+  },  
+  {
+    "GoalWayPointID" : 11,
+    "Goal": [ 0.0, 0.0, 0.0 ],
+    "Type": 0,
+    "Region": {"minX":140.0, "maxX":140.0, "minY":850.0, "maxY":850.0},
     "Quantity": 1,
     "CloudSize": 200,
-    "PreferredDensity": 0.75,
+    "PreferredDensity": 0.25,
+    "RadiusChangeSpeed": 0.01
+  }, 
+
+  
+  {
+    "GoalWayPointID" : 11,
+    "Goal": [ 0.0, 0.0, 0.0 ],
+    "Type": 0,
+    "Region": {"minX":50.0, "maxX":150.0, "minY":470.0, "maxY": 530.0},
+    "Quantity": 1,
+    "CloudSize": 2000,
+    "PreferredDensity": 0.25,
+    "RadiusChangeSpeed": 0.01
+  },
+ 
+
+  {
+    "GoalWayPointID" : 11,
+    "Goal": [ 0.0, 0.0, 0.0 ],
+    "Type": 0,
+    "Region": {"minX":450.0, "maxX":550.0, "minY":840.0, "maxY": 940.0},
+    "Quantity": 1,
+    "CloudSize": 2000,
+    "PreferredDensity": 0.25,
     "RadiusChangeSpeed": 0.01
   }],
   
 
-  "WayPoints":[{"ID":0, "x":30.0, "y":30.0, "Neighbours":[1]},
+  "WayPoints":[
+  {"ID":0, "x":30.0, "y":30.0, "Neighbours":[1]},
   {"ID":1, "x":350.0, "y":340.0, "Neighbours":[2]},
   {"ID":2, "x":500.0, "y":270.0, "Neighbours":[11]},
   {"ID":3, "x":50.0, "y":950.0, "Neighbours":[2]},

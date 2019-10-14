@@ -2,7 +2,7 @@
     "PartialParametersDirPath": "VHLAB\\BioClouds\\",
     "CloudSpeed": 1.2999999523162842,
     "CloudGoalThreshold": 0.0,
-    "CellWidth": 0.1,
+    "CellWidth": 0.125,
     "MaxColorDensity": 10.0,
     "HeatMapColors": [
         {
