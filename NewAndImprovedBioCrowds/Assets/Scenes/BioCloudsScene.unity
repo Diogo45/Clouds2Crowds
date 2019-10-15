@@ -566,6 +566,11 @@ Prefab:
       propertyPath: collisionMask
       value: 
       objectReference: {fileID: 599425328}
+    - target: {fileID: 114417955130599368, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: EnvironmentTexture
+      value: 
+      objectReference: {fileID: 2800000, guid: 18d245ffbdb2c6a42a65cfb5d4031ec1, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
   m_IsPrefabAsset: 0

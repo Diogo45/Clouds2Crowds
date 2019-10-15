@@ -150,6 +150,7 @@ namespace BioClouds
 
             var cell_map = bioClouds.created_cell_ids;
 
+            Debug.Log("Merge Clouds");
             CloudData smallerIdCloudData = m_CloudGroup.CloudData[smallerIdCloud];
             CloudData largerIdCloudData = m_CloudGroup.CloudData[largerIdCloud];
 

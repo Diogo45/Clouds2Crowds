@@ -119,6 +119,7 @@ public class VisualizationSystem : ComponentSystem
 
     public int frames = 0;
 
+    public string cloud_file_path;
 
     public List<BioClouds.Record> bioCloudsRecords = new List<BioClouds.Record>();
 
@@ -148,16 +149,16 @@ public class VisualizationSystem : ComponentSystem
         processing.records.Clear();
         processing.frame = frames++;
 
-        for (int i = 0; i < agentGroup.Length; i++)
-        {
-            processing.records.Add(new AgentRecord
-            {
-                AgentID = agentGroup.Data[i].ID,
-                Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
-                CloudID = agentGroup.OwnerCloud[i].CloudID
-            });
+        //for (int i = 0; i < agentGroup.Length; i++)
+        //{
+        //    processing.records.Add(new AgentRecord
+        //    {
+        //        AgentID = agentGroup.Data[i].ID,
+        //        Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
+        //        CloudID = agentGroup.OwnerCloud[i].CloudID
+        //    });
             
-        }
+        //}
 
         FrameRecord aux = complete;
         complete = processing;
@@ -177,8 +178,8 @@ public class VisualizationSystem : ComponentSystem
         
         //if ((inst.SaveDenstiies || inst.SavePositions))
         //{
-            if (inst.MaxSimulationFrames > CurrentFrame && CurrentFrame % inst.FramesForDataSave == 0)
-            {
+            //if (inst.MaxSimulationFrames > CurrentFrame && CurrentFrame % inst.FramesForDataSave == 0)
+            //{
                 for (int i = 0; i < m_CloudDataGroup.Length; i++)
                 {
                     List<int> cellIDs = new List<int>();
@@ -194,8 +195,8 @@ public class VisualizationSystem : ComponentSystem
                         cellIDs.Add(GridConverter.GridCell2CellID(grid_cell));
                     }
 
-                    if(inst.IDToRecord == -1 || m_CloudDataGroup.CloudData[i].ID == inst.IDToRecord)
-                    {
+                    //if(inst.IDToRecord == -1 || m_CloudDataGroup.CloudData[i].ID == inst.IDToRecord)
+                    //{
                         BioClouds.Record record = new BioClouds.Record(frames,
                                                                        m_CloudDataGroup.CloudData[i].ID,
                                                                        m_CloudDataGroup.CloudData[i].AgentQuantity,
@@ -204,22 +205,16 @@ public class VisualizationSystem : ComponentSystem
                                                                        m_CloudDataGroup.Position[i].Value,
                                                                        m_CloudDataGroup.CloudData[i].Radius
                                                 );
-
+            //Debug.Log(record);
                         bioCloudsRecords.Add(record);
-                    }
+                    //}
                     
                 }
-            }
+            //}
 
             //if (inst.MaxSimulationFrames == CurrentFrame - 1)
             //{
-            using (System.IO.StreamWriter file =
-            new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", true))
-            {
-                foreach (BioClouds.Record record in bioCloudsRecords)
-                    file.Write(record.ToString() + '\n');
-            }
-            bioCloudsRecords.Clear();
+
             //}
         //}
         #endregion
@@ -227,33 +222,46 @@ public class VisualizationSystem : ComponentSystem
 
         #region BioCrowds DataRecording
 
-        //if (inst.MaxSimulationFrames == CurrentFrame - 1)
+        ////if (inst.MaxSimulationFrames == CurrentFrame - 1)
+        ////{
+        //using (System.IO.StreamWriter file =
+        //new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", true))
         //{
-        using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", true))
-        {
-            file.Write(complete.ToString() + '\n');
-        }
+        //    file.Write(complete.ToString() + '\n');
         //}
+        ////}
 
         #endregion
 
     }
 
-
-    protected override void OnCreateManager()
+    protected override void OnStopRunning()
     {
-
-
-        base.OnCreateManager();
         var inst = BioClouds.Parameters.Instance;
 
+        Debug.Log("Recorded clouds into: " + cloud_file_path);
+        base.OnStopRunning();
         using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", false))
+        new System.IO.StreamWriter(cloud_file_path, true))
         {
-            file.Write("#This file stores the Agent Data for each Agent." + '\n' +
-            "#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;" + '\n');
+            foreach (BioClouds.Record record in bioCloudsRecords)
+                file.Write(record.ToString() + '\n');
         }
+        bioCloudsRecords.Clear();
+    }
+
+    protected override void OnStartRunning()
+    {
+
+        var inst = BioClouds.Parameters.Instance;
+        cloud_file_path = inst.LogFilePath + "Clouds.txt";
+
+        //using (System.IO.StreamWriter file =
+        //new System.IO.StreamWriter(inst.LogFilePath + "Agents.txt", false))
+        //{
+        //    file.Write("#This file stores the Agent Data for each Agent." + '\n' +
+        //    "#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;" + '\n');
+        //}
 
         using (System.IO.StreamWriter file =
         new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", false))
@@ -262,11 +270,11 @@ public class VisualizationSystem : ComponentSystem
                        "#CurrentFrame;CloudID;RadiusSize;AgentsInCloud;CloudPositionX;CloudPositionY;CapturedCellsQuantity;CellIDs;" + '\n');
         }
 
-        using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter(inst.LogFilePath + "FrameTimes.txt", false))
-        {
-            file.Write("#This file stores the processing time for each frame. Measured in Seconds." + '\n');
-        }
+        //using (System.IO.StreamWriter file =
+        //new System.IO.StreamWriter(inst.LogFilePath + "FrameTimes.txt", false))
+        //{
+        //    file.Write("#This file stores the processing time for each frame. Measured in Seconds." + '\n');
+        //}
 
     }
 

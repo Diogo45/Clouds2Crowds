@@ -1,5 +1,3 @@
-import numpy as np
-import cv2
 import sys
 from math  import sqrt
 
@@ -51,13 +49,14 @@ for line in cloudsFile:
     if(line.startswith("#")):
         continue
     s_line = line.split(";")
-
+    print(s_line[-1])
     frame = int(s_line[0])
     c_id = int(s_line[1])
-    c_qnt = int(s_line[2])
-    c_x = float(s_line[3])
-    c_y = float(s_line[4])
-    capturedCells = [int(x) for x in s_line[6:]]
+    c_radius_size = float(s_line[2])
+    c_qnt = int(s_line[3])
+    c_x = float(s_line[4])
+    c_y = float(s_line[5])
+    capturedCells = [int(x) for x in s_line[7:]]
 
     if(c_id not in cloudDict):
         cloudDict[c_id] = CloudData(c_id, c_qnt)
@@ -74,113 +73,113 @@ for cloudid, cloud in cloudDict.items():
 
 cloudEstimated.close()
 
-# Parse Agents
-agentsInFrame = {}
+# # Parse Agents
+# agentsInFrame = {}
 
-agentDict = {}
-agentsFileName = sys.argv[3]
-agentsFile = open(agentsFileName)
+# agentDict = {}
+# agentsFileName = sys.argv[3]
+# agentsFile = open(agentsFileName)
 
-for line in agentsFile:
-    if(line.startswith("#")):
-        continue
-    s_line = line.split(";")
-    frame = int(s_line[0])
-    count = int(s_line[1])
+# for line in agentsFile:
+#     if(line.startswith("#")):
+#         continue
+#     s_line = line.split(";")
+#     frame = int(s_line[0])
+#     count = int(s_line[1])
 
-    agentsInFrame[frame] = []
+#     agentsInFrame[frame] = []
 
-    for i in range(count):
-        idx = i*4 + 2
-        a_id = int(s_line[idx])
-        cloud_id = int(s_line[idx+1])
+#     for i in range(count):
+#         idx = i*4 + 2
+#         a_id = int(s_line[idx])
+#         cloud_id = int(s_line[idx+1])
 
-        #print(frame, count, idx, a_id, cloud_id)
+#         #print(frame, count, idx, a_id, cloud_id)
 
-        if(a_id not in agentDict):
-            agentDict[a_id] = AgentData(a_id, cloud_id,  frame)
+#         if(a_id not in agentDict):
+#             agentDict[a_id] = AgentData(a_id, cloud_id,  frame)
 
-        agentDict[a_id].positions[frame] = (float(s_line[idx+2]), float(s_line[idx+3]))
+#         agentDict[a_id].positions[frame] = (float(s_line[idx+2]), float(s_line[idx+3]))
 
-        if(frame not in cloudDict[cloud_id].agentsPerFrame):
-            cloudDict[cloud_id].agentsPerFrame[frame] = []
+#         if(frame not in cloudDict[cloud_id].agentsPerFrame):
+#             cloudDict[cloud_id].agentsPerFrame[frame] = []
 
-        cloudDict[cloud_id].agentsPerFrame[frame].append(a_id)
-        agentsInFrame[frame].append(a_id)
+#         cloudDict[cloud_id].agentsPerFrame[frame].append(a_id)
+#         agentsInFrame[frame].append(a_id)
 
-# Calculate Agent Densities
-cloudDensOutput = open("cloudSoloAgentDensities.txt", 'w')
+# # Calculate Agent Densities
+# cloudDensOutput = open("cloudSoloAgentDensities.txt", 'w')
 
-cloudSoloAgentDensities = {}
+# cloudSoloAgentDensities = {}
 
-for k in cloudDict.keys():
-    cloudSoloAgentDensities[k] = {}
-    agentPositions = []
+# for k in cloudDict.keys():
+#     cloudSoloAgentDensities[k] = {}
+#     agentPositions = []
 
-    cloudDensOutput.write("Cloud " + str(k) + '\n')
+#     cloudDensOutput.write("Cloud " + str(k) + '\n')
 
-    for f in cloudDict[k].agentsPerFrame.keys():
-        agents = cloudDict[k].agentsPerFrame[f]
+#     for f in cloudDict[k].agentsPerFrame.keys():
+#         agents = cloudDict[k].agentsPerFrame[f]
 
-        agentPositions = []
-        for x in agents:
-            agentPositions.append((agentDict[x].positions[f]))
+#         agentPositions = []
+#         for x in agents:
+#             agentPositions.append((agentDict[x].positions[f]))
 
-        array = np.array(agentPositions, dtype="float32")
-        hull = cv2.convexHull(array)
+#         array = np.array(agentPositions, dtype="float32")
+#         hull = cv2.convexHull(array)
 
-        agentArea = cv2.contourArea(hull)
-        if(agentArea != 0):
-            cloudSoloAgentDensities[k][f] = float(len(agentPositions))/agentArea
-            cloudDensOutput.write(str(f) + ";" + str(cloudSoloAgentDensities[k][f]) + '\n')
-            print("cloud", k, "frame", f, "density", cloudSoloAgentDensities[k][f])
-        else:
-            cloudSoloAgentDensities[k][f] = 0.0
+#         agentArea = cv2.contourArea(hull)
+#         if(agentArea != 0):
+#             cloudSoloAgentDensities[k][f] = float(len(agentPositions))/agentArea
+#             cloudDensOutput.write(str(f) + ";" + str(cloudSoloAgentDensities[k][f]) + '\n')
+#             print("cloud", k, "frame", f, "density", cloudSoloAgentDensities[k][f])
+#         else:
+#             cloudSoloAgentDensities[k][f] = 0.0
 
-cloudDensOutput.close()
+# cloudDensOutput.close()
 
-cloudMultiDensOutput = open("cloudMultiAgentDensities.txt", 'w')
-cloudMultiAgentDensity = {}
-# for each cloud
-for k in cloudDict.keys():
-    cloudMultiAgentDensity[k] = {}
-    agentPositions = []
+# cloudMultiDensOutput = open("cloudMultiAgentDensities.txt", 'w')
+# cloudMultiAgentDensity = {}
+# # for each cloud
+# for k in cloudDict.keys():
+#     cloudMultiAgentDensity[k] = {}
+#     agentPositions = []
 
-    cloudMultiDensOutput.write("Cloud " + str(k) + '\n')
+#     cloudMultiDensOutput.write("Cloud " + str(k) + '\n')
 
-    #for each frame
-    for f in cloudDict[k].agentsPerFrame.keys():
-        agents = cloudDict[k].agentsPerFrame[f]
+#     #for each frame
+#     for f in cloudDict[k].agentsPerFrame.keys():
+#         agents = cloudDict[k].agentsPerFrame[f]
 
-        agentPositions = []
-        for x in agents:
-            agentPositions.append((agentDict[x].positions[f]))
+#         agentPositions = []
+#         for x in agents:
+#             agentPositions.append((agentDict[x].positions[f]))
 
-        array = np.array(agentPositions, dtype="float32")
-        hull = cv2.convexHull(array)
-        agentArea = cv2.contourArea(hull)
+#         array = np.array(agentPositions, dtype="float32")
+#         hull = cv2.convexHull(array)
+#         agentArea = cv2.contourArea(hull)
 
-        # for each other cloud
-        for k_ in cloudDict.keys():
-            if k_ != k:
-                #if the cloud has agents in that frame
-                if f in cloudDict[k_].agentsPerFrame:
-                    k2Agents = cloudDict[k_].agentsPerFrame[f]
+#         # for each other cloud
+#         for k_ in cloudDict.keys():
+#             if k_ != k:
+#                 #if the cloud has agents in that frame
+#                 if f in cloudDict[k_].agentsPerFrame:
+#                     k2Agents = cloudDict[k_].agentsPerFrame[f]
 
-                    #for each cloud agent in that frame
-                    for y in k2Agents:
-                        #if that agent is in the cloud convex hull
-                        if cv2.pointPolygonTest(hull, (agentDict[y].positions[f]), measureDist=False) >= 0:
+#                     #for each cloud agent in that frame
+#                     for y in k2Agents:
+#                         #if that agent is in the cloud convex hull
+#                         if cv2.pointPolygonTest(hull, (agentDict[y].positions[f]), measureDist=False) >= 0:
 
-                            #count it for density
-                            agentPositions.append(agentDict[y].positions[f])
+#                             #count it for density
+#                             agentPositions.append(agentDict[y].positions[f])
 
-        if(agentArea != 0):
-            cloudMultiAgentDensity[k][f] = float(len(agentPositions))/agentArea
-            cloudMultiDensOutput.write(str(f) + ";" + str(cloudMultiAgentDensity[k][f]) + '\n')
-            #print("cloud", k, "frame", f, "density", cloudMultiAgentDensity[k][f])
-        else:
-            cloudMultiAgentDensity[k][f] = 0.0
+#         if(agentArea != 0):
+#             cloudMultiAgentDensity[k][f] = float(len(agentPositions))/agentArea
+#             cloudMultiDensOutput.write(str(f) + ";" + str(cloudMultiAgentDensity[k][f]) + '\n')
+#             #print("cloud", k, "frame", f, "density", cloudMultiAgentDensity[k][f])
+#         else:
+#             cloudMultiAgentDensity[k][f] = 0.0
 
 
 avgDistsWindow = 10
@@ -203,34 +202,34 @@ cloudSpeedsOutput.close()
 
 
 # Calculate Agent Average Speeds    
-averageSpeepdsPerCloudPerFrame = {}
+# averageSpeepdsPerCloudPerFrame = {}
 
-agentSpeedOutput = open("agentSpeeds.txt", 'w') 
+# agentSpeedOutput = open("agentSpeeds.txt", 'w') 
 
-for k in cloudDict.keys():
-    averageSpeepdsPerCloudPerFrame[k] = {}
+# for k in cloudDict.keys():
+#     averageSpeepdsPerCloudPerFrame[k] = {}
 
-    sortedAgentsInFrame = sorted(cloudDict[k].agentsPerFrame.items())
-    agentSpeedOutput.write("cloud " + str(k) + '\n')
-    for i in range(1, len(sortedAgentsInFrame)):
-        aggregateDeltas = 0
-        counter = 0
-        frame = sortedAgentsInFrame[i][0]
-        previousFrame = sortedAgentsInFrame[i-1][0]
+#     sortedAgentsInFrame = sorted(cloudDict[k].agentsPerFrame.items())
+#     agentSpeedOutput.write("cloud " + str(k) + '\n')
+#     for i in range(1, len(sortedAgentsInFrame)):
+#         aggregateDeltas = 0
+#         counter = 0
+#         frame = sortedAgentsInFrame[i][0]
+#         previousFrame = sortedAgentsInFrame[i-1][0]
 
-        # for each agent in frame
-        for j in sortedAgentsInFrame[i][1]:
+#         # for each agent in frame
+#         for j in sortedAgentsInFrame[i][1]:
 
-            #if agent already existed 
-            if j in sortedAgentsInFrame[i-1][1]:
-                oldPos = agentDict[j].positions[previousFrame]
-                pos = agentDict[j].positions[frame]
-                dist = euclid(pos, oldPos)
-                aggregateDeltas += dist
-                counter += 1
+#             #if agent already existed 
+#             if j in sortedAgentsInFrame[i-1][1]:
+#                 oldPos = agentDict[j].positions[previousFrame]
+#                 pos = agentDict[j].positions[frame]
+#                 dist = euclid(pos, oldPos)
+#                 aggregateDeltas += dist
+#                 counter += 1
 
-        #print(counter)
+#         #print(counter)
 
-        averageSpeepdsPerCloudPerFrame[k][frame] = float(aggregateDeltas) / float(counter)
-        agentSpeedOutput.write(str(frame)+';'+str(averageSpeepdsPerCloudPerFrame[k][frame])+'\n')
+#         averageSpeepdsPerCloudPerFrame[k][frame] = float(aggregateDeltas) / float(counter)
+#         agentSpeedOutput.write(str(frame)+';'+str(averageSpeepdsPerCloudPerFrame[k][frame])+'\n')
 

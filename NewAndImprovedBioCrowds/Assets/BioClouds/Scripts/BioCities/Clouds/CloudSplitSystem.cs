@@ -69,12 +69,12 @@ namespace BioClouds
                 if (m_CloudGroup.CloudSplitData[i].CloudSplitTimer <= 0 &&
                     m_CloudGroup.CloudSplitData[i].splitCount < m_CloudGroup.CloudSplitData[i].CloudSplitLimit &&
                     m_CloudGroup.CloudData[i].AgentQuantity > m_CloudGroup.CloudSplitData[i].CloudSizeLimit)
-                {
+                    {
 
                     if (DecideSplit(i))
                         SplitCloud(i);
 
-              }  
+                }  
             }
 
             if (Input.GetKeyDown(KeyCode.Return))

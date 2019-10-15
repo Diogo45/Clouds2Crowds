@@ -36,7 +36,7 @@ namespace BioClouds
 
         public override string ToString()
         {
-            string head = string.Format("{0:D0};{1:D0};{2:F3}{3:D0};{4:F3};{5:F3};{6:D0};",
+            string head = string.Format("{0:D0};{1:D0};{2:F3};{3:D0};{4:F3};{5:F3};{6:D0};",
                 Frame,
                 ID,
                 Radius,

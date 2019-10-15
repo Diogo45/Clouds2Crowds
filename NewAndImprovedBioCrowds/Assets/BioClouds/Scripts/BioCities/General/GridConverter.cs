@@ -194,8 +194,8 @@ public class GridConverter
     {
         domain = new Rect() { maxx = maxX, minx = minX, maxy = maxY, miny = minY };
 
-        rows = (int)((maxY - minY) / Width);
-        cols = (int)((maxX - minX) / Width);
+        cols = (int)((maxY - minY) / Width);
+        rows = (int)((maxX - minX) / Width);
 
         CellQuantity = rows * cols;
 

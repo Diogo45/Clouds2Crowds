@@ -68,7 +68,7 @@ public class EndFrameCounter : ComponentSystem
             }
         }
 
-        Debug.Log("Recorded");
+        Debug.Log("Recorded Frame times");
     }
 
 }

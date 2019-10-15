@@ -68,6 +68,9 @@ namespace BioClouds
         public GameObject densityQuad;
         public GameObject mainCamera;
 
+        public Texture2D EnvironmentTexture;
+
+
         public List<CloudLateSpawn> cloudLateSpawns = new List<CloudLateSpawn>();
         public List<Entity> entitiesToDestroy = new List<Entity>();
         //Methods
@@ -263,6 +266,59 @@ namespace BioClouds
 
         }
 
+
+        public void CreateCellsFromTexture(Texture2D tex, float x, float xf, float y, float yf)
+        {
+
+            List<float3> cells = new List<float3>();
+
+            for (float i = x; i < xf; i += city.BioParameters.CellWidth)
+            {
+                for (float j = y; j < yf; j += city.BioParameters.CellWidth)
+                {
+                    int ID = GridConverter.Position2CellID(new float3(i, j, 0f));
+                    //Debug.Log(ID);
+                    if (created_cell_ids.Contains(ID))
+                        continue;
+
+                    if (tex.GetPixel((int)i, (int)j).r < 0.5f)
+                        continue;
+
+                    //Debug.Log(ID + " " + i + " " + j + GridConverter.PositionToGridCell(new float3(i, j, 0f)));
+                    Entity newCell = entityManager.CreateEntity(city.CellArchetype);
+
+                    entityManager.SetComponentData<Position>(newCell, new Position { Value = new float3(i, j, 0f) });
+                    entityManager.SetComponentData<Rotation>(newCell, new Rotation { Value = quaternion.identity });
+                    entityManager.SetComponentData<CellData>(newCell, new CellData
+                    {
+                        ID = ID,
+                        Area = city.BioParameters.CellWidth * city.BioParameters.CellWidth
+                    });
+                    created_cell_ids.Add(ID);
+                    cells.Add(new float3(i, j, 0f));
+                }
+            }
+
+            using (System.IO.StreamWriter file =
+                new System.IO.StreamWriter(Parameters.Instance.LogFilePath + "Cells.txt"))
+            {
+                foreach (float3 cellPos in cells)
+                {
+                    string line = string.Format("{0:D0};{1:F3};{2:F3};\n",
+                GridConverter.Position2CellID(new float3(cellPos.x, cellPos.y, 0f)),
+                cellPos.x,
+                cellPos.y
+                );
+
+                    file.Write(line);
+
+
+                }
+            }
+
+
+        }
+
         public static float CloudPreferredRadius(int quantity, float prefferedDensity)
         {
             return (float)math.sqrt(quantity  / (prefferedDensity * math.PI));
@@ -355,17 +411,23 @@ namespace BioClouds
         public void StartExperiment()
         {
 
-            
 
-            for(int i = 0; i < exp.CellRegions.Length; i++)
-            {
-                //Debug.Log("Make Cells!");
-                Debug.Log("Cell Region Created: id"+ i + " x" + exp.CellRegions[i].minX + " y" + exp.CellRegions[i].maxX);
-                CreateCells(exp.CellRegions[i].minX,
-                            exp.CellRegions[i].maxX,
-                            exp.CellRegions[i].minY,
-                            exp.CellRegions[i].maxY);
-            }
+            if (EnvironmentTexture == null)
+                for (int i = 0; i < exp.CellRegions.Length; i++)
+                {
+                    //Debug.Log("Make Cells!");
+                    Debug.Log("Cell Region Created: id" + i + " x" + exp.CellRegions[i].minX + " y" + exp.CellRegions[i].maxX);
+                    CreateCells(exp.CellRegions[i].minX,
+                                exp.CellRegions[i].maxX,
+                                exp.CellRegions[i].minY,
+                                exp.CellRegions[i].maxY);
+                }
+            else
+                CreateCellsFromTexture(EnvironmentTexture,
+                                exp.Domain.minX,
+                                exp.Domain.maxX,
+                                exp.Domain.minY,
+                                exp.Domain.maxY);
 
             //TODO Move this to a system
 
@@ -423,7 +485,7 @@ namespace BioClouds
             {
                 for (int i = 0; i < cloudLateSpawns.Count; i++)
                 {
-                    Debug.Log("LateSpawn");
+                   // Debug.Log("LateSpawn");
                     AddCloud(cloudLateSpawns[i].position,
                             cloudLateSpawns[i].agentQuantity,
                             cloudLateSpawns[i].end_goal_id,
