@@ -49,7 +49,7 @@ for line in cloudsFile:
     if(line.startswith("#")):
         continue
     s_line = line.split(";")
-    print(s_line[-1])
+    
     frame = int(s_line[0])
     c_id = int(s_line[1])
     c_radius_size = float(s_line[2])
@@ -69,7 +69,7 @@ cloudEstimated = open("cloudEstimatedDensities.txt", 'w')
 for cloudid, cloud in cloudDict.items():
     cloudEstimated.write("cloud " + str(cloudid)+'\n')
     for frame in cloud.capturedCells.keys():
-            cloudEstimated.write(str(frame)+";" + str(float(cloud.agentsInCloud) / (len(cloud.capturedCells[frame])*4))+'\n')
+            cloudEstimated.write(str(frame)+";" + str(float(cloud.agentsInCloud) / (len(cloud.capturedCells[frame])*(0.125*0.125)))+'\n')
 
 cloudEstimated.close()
 
