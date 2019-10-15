@@ -2,7 +2,7 @@
   "SeedState": 1000,
   "CloudDivisionLimit": 1,
   "CloudSizeLimit" : 7,
-  "CloudSplitTimer" : 30,
+  "CloudSplitTimer" : 20,
   "Domain": { "minX":0.0,"minY": 0.0, "maxX":100, "maxY":50},
 
   "CellRegions": [{"minX":41.06855 , "minY":0.4639072 , "maxX":101.5764 , "maxY":50.40462},
@@ -18,7 +18,7 @@
     "Region": {"minX":5.0, "maxX":5.0, "minY":25.0, "maxY": 25.0},
     "Quantity": 1,
     "CloudSize": 100,
-    "PreferredDensity": 1,
+    "PreferredDensity": 0.75,
     "RadiusChangeSpeed": 0.01
   }],
 

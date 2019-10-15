@@ -1,0 +1,47 @@
+{
+  "SeedState": 1000,
+  "CloudDivisionLimit": 1,
+  "CloudSizeLimit" : 100,
+  "CloudSplitTimer" : 20,
+
+  "Domain": { "minX":0.0,"minY": 0.0, "maxX":1000, "maxY":500},
+
+  "CellRegions": [{"minX":259.7429 , "minY":270.6409 , "maxX":1011.919 , "maxY":335.3529},
+  {"minX":203.019 , "minY":318.617 , "maxX":263.2681 , "maxY":502.7115},
+  {"minX":1.763031 , "minY":270.6409 , "maxX":210.4035 , "maxY":324.1957},
+  {"minX":180.279 , "minY":221.549 , "maxX":300.7772 , "maxY":270.6409},
+  {"minX":260.6111 , "minY":-1.007904 , "maxX":1005.787 , "maxY":221.549},
+  {"minX":348.6259 , "minY":210.9797 , "maxX":1011.366 , "maxY":282.3861},
+  {"minX":258.2521 , "minY":329.6888 , "maxX":1002.44 , "maxY":502.626},
+  {"minX":-0.9820251 , "minY":324.1101 , "maxX":206.5427 , "maxY":501.5103},
+  {"minX":129.5577 , "minY":-4.732239 , "maxX":211.0056 , "maxY":218.4126},
+  {"minX":181.9968 , "minY":194.9824 , "maxX":209.8899 , "maxY":236.2642},
+  {"minX":208.7741 , "minY":0.8463898 , "maxX":262.3289 , "maxY":170.4365},
+  {"minX":-3.213501 , "minY":-2.500809 , "maxX":129.5577 , "maxY":277.546}],
+  
+
+  "AgentTypes": [
+    {
+      "GoalWayPointID" : 7,
+      "Goal": [ 0.0, 0.0, 0.0 ],
+      "Type": 0,
+      
+      "Region": {"minX":50.0, "maxX":50.0, "minY":250.0, "maxY": 250.0},
+      "Quantity": 1,
+      "CloudSize": 1000,
+      "PreferredDensity": 0.75,
+      "RadiusChangeSpeed": 0.01
+    }],
+  
+    "WayPoints":[{"ID":0, "x":180.0, "y":300.0, "Neighbours":[3, 2]},
+                 {"ID":1, "x":180.0, "y":200.0, "Neighbours":[4, 3]},
+                 {"ID":2, "x":230.0, "y":340.0, "Neighbours":[5]},
+                 {"ID":3, "x":230.0, "y":250.0, "Neighbours":[9]},
+                 {"ID":4, "x":230.0, "y":150.0, "Neighbours":[6]},
+                 {"ID":5, "x":320.0, "y":300.0, "Neighbours":[7]},
+                 {"ID":6, "x":320.0, "y":200.0, "Neighbours":[7]},
+                 {"ID":7, "x":900.0, "y":250.0, "Neighbours":[7]},
+                 {"ID":8, "x":100.0, "y":250.0, "Neighbours":[0, 1]},
+                 {"ID":9, "x":280.0, "y":250.0, "Neighbours":[5, 6]} ]
+    
+  }

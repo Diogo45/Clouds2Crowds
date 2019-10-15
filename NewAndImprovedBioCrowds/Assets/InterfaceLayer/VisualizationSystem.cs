@@ -205,6 +205,7 @@ public class VisualizationSystem : ComponentSystem
                                                                        m_CloudDataGroup.Position[i].Value,
                                                                        m_CloudDataGroup.CloudData[i].Radius
                                                 );
+            //
             //Debug.Log(record);
                         bioCloudsRecords.Add(record);
                     //}

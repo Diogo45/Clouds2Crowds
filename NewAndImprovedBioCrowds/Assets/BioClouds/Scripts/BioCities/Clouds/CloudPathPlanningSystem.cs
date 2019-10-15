@@ -10,7 +10,7 @@ using Unity.Burst;
 
 namespace BioClouds {
 
-    [DisableAutoCreation]
+
     [UpdateAfter(typeof(CloudMoveSystem))]
     [UpdateInGroup(typeof(PostMarkGroup))]
     public class CloudPathPlanningSystem : JobComponentSystem
@@ -64,7 +64,7 @@ namespace BioClouds {
                 {
 
                     PathManager.WayPoint next = PathManager.GetNext(CloudPositions[index].Value, cg.EndObjectiveID);
-                    Debug.Log("new path, old current = " + cg.CurrentObjectiveID + " objective" + cg.EndObjectiveID + " new next" + next.ID);
+                    //Debug.Log("new path, old current = " + cg.CurrentObjectiveID + " objective" + cg.EndObjectiveID + " new next" + next.ID);
                     cg.CurrentObjectiveID = next.ID;
                     cg.SubGoal = new float3(next.x, next.y, 0);
                     cg.MovelessFrames = 0;

@@ -162,7 +162,7 @@ namespace BioClouds
                     lateSpawn.position = basePosition + offset;
 
 
-                if (!cell_map.Contains(GridConverter.Position2CellID(lateSpawn.position)))
+                if (!cell_map.Contains(GridConverter.Position2CellID(lateSpawn.position)) && i != divisions)
                     continue;
 
 
@@ -179,10 +179,7 @@ namespace BioClouds
                 lateSpawn.radiusChangeSpeed = data.RadiusChangeSpeed;
                 lateSpawn.splitCount = m_CloudGroup.CloudSplitData[index].splitCount + 1;
                 lateSpawn.fatherID = fatherData.fatherID;
-
-                //if (total_agents != 0 && i == divisions)
-                //    lateSpawn.agentQuantity += total_agents;
-
+                
                 bioClouds.cloudLateSpawns.Add(lateSpawn);
             }
             bioClouds.entitiesToDestroy.Add(m_CloudGroup.Entities[index]);
