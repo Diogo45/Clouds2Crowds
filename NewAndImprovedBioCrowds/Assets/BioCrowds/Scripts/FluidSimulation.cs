@@ -400,21 +400,23 @@ namespace BioCrowds
 
             }
 
-           
-
 
         }
 
 
         private bool WaitForFluidSim()
         {
+
             float[] ControlData = new float[3];
             AcessDLL.ReadMemoryShare(memMapControl, ControlData);
+
+            ControlData[1] = frame * 1f / 30f;
+            AcessDLL.WriteMemoryShare(memMapControl, ControlData);
             //Debug.Log(ControlData[0]);
 
-            if (frame * 1/30 >= ControlData[0])
+            if (frame * (1f/30f) >= ControlData[0])
             {
-                Thread.Sleep(10);
+                Thread.Sleep(1);
                 return true;
             }
 
@@ -429,10 +431,13 @@ namespace BioCrowds
             AcessDLL.ReadMemoryShare(memMapControl, ControlData);
             //Debug.Log(ControlData[0]);
 
-            if (frame * 1 / 30 >= ControlData[0])
+            if (frame * (1f / 30f) >= ControlData[0])
             {
                 yield return null;
             }
+
+
+
 
             yield return null;
         }
@@ -441,7 +446,7 @@ namespace BioCrowds
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             //HACK: Write better sync between fluid sim and biocrowds
-
+            while (WaitForFluidSim()) { }
             //Wait();
 
             if (Settings.instance.ScreenCap)
