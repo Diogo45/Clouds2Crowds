@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Collections;
+using System.Threading;
 
 namespace BioCrowds
 {
@@ -17,6 +19,8 @@ namespace BioCrowds
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidMovementOnAgent : JobComponentSystem
     {
+
+        #region VARIABLES
         [Inject] FluidParticleToCell m_fluidParticleToCell;
         public NativeHashMap<int3, float3> CellMomenta;
         public NativeHashMap<int3, float3> ParticleSetMass;
@@ -25,7 +29,8 @@ namespace BioCrowds
         //1 g/cm3 = 1000 kg/m3
         //Calculate based on the original SplishSplash code, mass = volume * density
         //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
-        private static float particleMass = 0.0001f;//kg
+        //private static float particleMass = 0.0001f;//kg
+        private static float particleMass = 0.001f;//kg
         private static float agentMass = 65f;
         private static float timeStep = 1f / 25f;
 
@@ -54,6 +59,7 @@ namespace BioCrowds
             [ReadOnly] public readonly int Length;
         }
         [Inject] public CellGroup cellGroup;
+        #endregion
 
         struct CalculateFluidMomenta : IJobParallelFor
         {
@@ -138,6 +144,7 @@ namespace BioCrowds
             }
         }
 
+        #region ON...
         protected override void OnStartRunning()
         {
 
@@ -150,6 +157,7 @@ namespace BioCrowds
             CellMomenta.Dispose();
             ParticleSetMass.Dispose();
         }
+        #endregion
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
@@ -172,7 +180,7 @@ namespace BioCrowds
 
             momentaJobHandle.Complete();
 
-            DrawMomenta();
+            //DrawMomenta();
 
             ApplyFluidMomentaOnAgents applyMomenta = new ApplyFluidMomentaOnAgents
             {
@@ -209,11 +217,12 @@ namespace BioCrowds
 
     }
 
+    [UpdateAfter(typeof(Settings))]
     [UpdateAfter(typeof(AgentMovementVectors))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidParticleToCell : JobComponentSystem
     {
-
+        #region VARIABLES
         public NativeList<float3> FluidPos;
         public NativeList<float3> FluidVel;
         public NativeMultiHashMap<int3, int> CellToParticles;
@@ -224,9 +233,13 @@ namespace BioCrowds
         public int frame = 0;
         private int last = 0;
         private bool first = true;
-        private static float thresholdHeigth = 1000f;
+        private static float thresholdHeigth = 1.7f;
         private const string memMapName = "unityMemMap";
         private const string memMapNameVel = "unityMemMapVel";
+
+        //[timeSPH, timeBC, frameSize]
+        private const string memMapControl = "unityMemMapControl";
+        
 
         public struct AgentGroup
         {
@@ -236,12 +249,22 @@ namespace BioCrowds
         }
         [Inject] AgentGroup agentGroup;
 
-        struct FillCellFluidParticles: IJobParallelFor
+        public struct CellGroup
+        {
+            [ReadOnly] public ComponentDataArray<CellName> CellName;
+            [ReadOnly] public SubtractiveComponent<AgentData> Agent;
+            [ReadOnly] public SubtractiveComponent<MarkerData> Marker;
+
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] public CellGroup cellGroup;
+        #endregion
+
+        struct FillCellFluidParticles : IJobParallelFor
         {
             [WriteOnly] public NativeMultiHashMap<int3, int>.Concurrent CellToParticles;
             [ReadOnly] public NativeList<float3> FluidPos;
-            public int frameSize;
-            public int frame;
+
 
 
             public void Execute(int index)
@@ -249,7 +272,7 @@ namespace BioCrowds
 
                 float3 ppos = FluidPos[index];
                 //float3 ppos = FluidPos[index + (frameSize - 1) * frame];
-                if (ppos.y > thresholdHeigth) return;
+                if (ppos.y > thresholdHeigth || ppos.x > Settings.experiment.TerrainX || ppos.z > Settings.experiment.TerrainZ) return;
 
                 int3 cell = new int3((int)math.floor(FluidPos[index].x / 2.0f) * 2 + 1, 0,
                                      (int)math.floor(FluidPos[index].z / 2.0f) * 2 + 1);
@@ -262,82 +285,49 @@ namespace BioCrowds
         }
 
 
+
+        #region ON...
         protected override void OnStartRunning()
         {
+            if (!Settings.experiment.FluidSim)
+            {
+                Debug.Log(Settings.experiment.FluidSim);
+                this.Enabled = false;
+                World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                return;
+            }
+
+
             CellToParticles = new NativeMultiHashMap<int3, int>(frameSize * (Settings.experiment.TerrainX * Settings.experiment.TerrainZ)/4, Allocator.Persistent);
             FluidPos = new NativeList<float3>(frameSize, Allocator.Persistent);
             FluidVel = new NativeList<float3>(frameSize, Allocator.Persistent);
 
         }
 
+        protected override void OnDestroyManager()
+        {
+            FluidPos.Dispose();
+            FluidVel.Dispose();
+            CellToParticles.Dispose();
+        }
+
 
         protected override void OnCreateManager()
         {
 
-            //BinParser(simFile);
-            bufferSize = frameSize * 3;
 
-            //TODO: Get frameSize from FluidSimulator
+
+
+            OpenMemoryMap(memMapControl, 3);
+
             //frameSize * 3 as there are 3 floats for every particle
-            int map = AcessDLL.OpenMemoryShare(memMapName, bufferSize);
-            switch (map)
-            {
-                case 0:
-                    Debug.Log("Memory Map " + memMapName + " Created");
-                    break;
-                case -1:
-                    Debug.Log("Memory Map " + memMapName + " Array too large");
-                    this.Enabled = false;
-                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                    //TODO: disable every fluid sim system
-                    return;
-                    
-                case -2:
-                    Debug.Log("Memory Map " + memMapName + " could not create file mapping object");
-                    this.Enabled = false;
-                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                    //TODO: disable every fluid sim system
-                    return;
-                case -3:
-                    Debug.Log("Memory Map " + memMapName + " could not create map view of the file");
-                    this.Enabled = false;
-                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                    //TODO: disable every fluid sim system
-                    return;
-                default:
-                    Debug.Log("A Memory Map " + memMapName + " Already Exists");
-                    break;
-            }
+            bufferSize = frameSize * 3;
+            //TODO: Get frameSize from FluidSimulator
 
-            map = AcessDLL.OpenMemoryShare(memMapNameVel, bufferSize);
-            switch (map)
-            {
-                case 0:
-                    Debug.Log("Memory Map "+ memMapNameVel +" Created");
-                    break;
-                case -1:
-                    Debug.Log("Memory Map " + memMapNameVel + " Array too large");
-                    this.Enabled = false;
-                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                    //TODO: disable every fluid sim system
-                    return;
 
-                case -2:
-                    Debug.Log("Memory Map " + memMapNameVel + " could not create file mapping object");
-                    this.Enabled = false;
-                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                    //TODO: disable every fluid sim system
-                    return;
-                case -3:
-                    Debug.Log("Memory Map " + memMapNameVel + " could not create map view of the file");
-                    this.Enabled = false;
-                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                    //TODO: disable every fluid sim system
-                    return;
-                default:
-                    Debug.Log("A Memory Map " + memMapNameVel + " Already Exists");
-                    break;
-            }
+            OpenMemoryMap(memMapName, bufferSize);
+
+            OpenMemoryMap(memMapNameVel, bufferSize);
 
 
             Debug.Log("Fluid Simulation Initialized");
@@ -373,11 +363,12 @@ namespace BioCrowds
                 FluidPos.Add(new float3((x*10) + 35, y*10 + 20, z*20 + 25));
             }     
         }
+        #endregion
 
         private void FillFrameParticlePositions()
         {
 
-            float3 translate = new float3(5f,0f,25f);
+            float3 translate = new float3(50f,0f,25f);
             float3 scale = new float3(10f, 10f, 10f);
 
             float[] floatStream = new float[bufferSize];
@@ -408,33 +399,79 @@ namespace BioCrowds
 
 
             }
+
+           
+
+
+        }
+
+
+        private bool WaitForFluidSim()
+        {
+            float[] ControlData = new float[3];
+            AcessDLL.ReadMemoryShare(memMapControl, ControlData);
+            //Debug.Log(ControlData[0]);
+
+            if (frame * 1/30 >= ControlData[0])
+            {
+                Thread.Sleep(10);
+                return true;
+            }
+
+            return false;
+        }
+
+
+        IEnumerator Wait()
+        {
+
+            float[] ControlData = new float[3];
+            AcessDLL.ReadMemoryShare(memMapControl, ControlData);
+            //Debug.Log(ControlData[0]);
+
+            if (frame * 1 / 30 >= ControlData[0])
+            {
+                yield return null;
+            }
+
+            yield return null;
         }
 
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            //HACK: Write better sync between fluid sim and biocrowds
+
+            //Wait();
+
+            if (Settings.instance.ScreenCap)
+            {
+                string s = frame.ToString();
+                if (s.Length == 1) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame000" + frame + ".png");
+                if (s.Length == 2) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame00" + frame + ".png");
+                if (s.Length == 3) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame0" + frame + ".png");
+                if (s.Length == 4) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame" + frame + ".png");
+            }
+            
 
 
 
-            ////TODO: Clear taking 120ms, solve performance issues
-            //if(frame >= FluidPos.Length / frameSize)
-            //{
-            //    this.Enabled = false;
-            //    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-            //    return inputDeps;
-            //}
-
-
+            FluidPos.Clear();
             FillFrameParticlePositions();
+            //Debug.Log(FluidPos.Length + " " + FluidPos.Capacity);
 
-            CellToParticles.Clear();
+            for (int i = 0; i < cellGroup.Length; i++)
+            {
+                int3 key = cellGroup.CellName[i].Value;
+
+                CellToParticles.Remove(key);
+            }
+
 
             var FillCellMomentaJob = new FillCellFluidParticles
             {
                 CellToParticles = CellToParticles.ToConcurrent(),
-                FluidPos = FluidPos,
-                frame = frame,
-                frameSize = frameSize
+                FluidPos = FluidPos
             };
 
             var FillCellJobHandle = FillCellMomentaJob.Schedule(frameSize, Settings.BatchSize, inputDeps);
@@ -444,26 +481,33 @@ namespace BioCrowds
             DebugFluid();
             frame++;
 
-            FluidPos.Clear();
-            
+            if (frame % 300 == 0)
+            {
+                CellToParticles.Clear();
+            }
+
+
             return FillCellJobHandle;
         }
 
-
-
+           
         private void DebugFluid()
         {
             for (int i = 0; i < frameSize; i++)
             {
-                Debug.DrawLine(FluidPos[i], FluidPos[i]+FluidVel[i]/100f );
+                float magnitude = ((Vector3)FluidVel[i]).magnitude/50f;
+                Color c = Color.LerpUnclamped(Color.yellow, Color.red, magnitude);
+                //if (magnitude < 0.5f)
+                //{
+                //    c = Color.blue;
+                //}
+                //else
+                //{
+                //    c = Color.red;
+                //}
+                Debug.DrawLine(FluidPos[i], FluidPos[i]+FluidVel[i]/100f,c );
             }
 
-        }
-        protected override void OnDestroyManager()
-        {
-            FluidPos.Dispose();
-            FluidVel.Dispose();
-            CellToParticles.Dispose();
         }
 
         private void DebugFluidParser()
@@ -481,8 +525,44 @@ namespace BioCrowds
                 i = last;
             }
         }
+
+
+        private void OpenMemoryMap(string mapName, int size)
+        {
+            int map = AcessDLL.OpenMemoryShare(mapName, size);
+            switch (map)
+            {
+                case 0:
+                    Debug.Log("Memory Map " + mapName + " Created");
+                    break;
+                case -1:
+                    Debug.Log("Memory Map " + mapName + " Array too large");
+                    this.Enabled = false;
+                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                    //TODO: disable every fluid sim system
+                    return;
+
+                case -2:
+                    Debug.Log("Memory Map " + mapName + " could not create file mapping object");
+                    this.Enabled = false;
+                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                    //TODO: disable every fluid sim system
+                    return;
+                case -3:
+                    Debug.Log("Memory Map " + mapName + " could not create map view of the file");
+                    this.Enabled = false;
+                    World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                    //TODO: disable every fluid sim system
+                    return;
+                default:
+                    Debug.Log("A Memory Map " + mapName + " Already Exists");
+                    break;
+            }
+        }
+
     }
 
+   
     public static class AcessDLL
     {
         //private const string UNITYCOM = "..\\UnityCom\\Release\\UnityCom.dll";

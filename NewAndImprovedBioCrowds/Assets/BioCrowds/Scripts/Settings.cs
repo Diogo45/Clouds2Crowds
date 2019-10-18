@@ -56,6 +56,7 @@ namespace BioCrowds
 
 
         public string FluidSimPath = "out.bin";
+        public bool FluidSim = false;
         public bool WayPointOn = false;
         public float agentRadius = 1f;
         public float markerRadius = 0.1f;
@@ -74,6 +75,7 @@ namespace BioCrowds
         public static int BatchSize = 1;
         //Real value is the sum of all groups instantiated in the bootstrap
         public static int agentQuantity = 0;
+        public bool ScreenCap = false;
         public static CrowdExperiment experiment = new CrowdExperiment();
         
         public int treeHeight = 4;
@@ -119,6 +121,7 @@ namespace BioCrowds
                 System.IO.File.WriteAllText(settingsFile, JsonUtility.ToJson(experiment, true));
             else
             {
+                Debug.Log("Reading Experiment File");
                 string file = System.IO.File.ReadAllText(settingsFile);
                 experiment = JsonUtility.FromJson<CrowdExperiment>(file);
             }
@@ -134,7 +137,7 @@ namespace BioCrowds
             //Debug.Log("b " + b + " L:" + path.corners.Length);
 
             //TODO: descobrir os 500 lugares que o andre seta a pos da camera
-            //Camera.main.transform.position = new Vector3(22.6f, 62.7f, 9.6f);
+            Camera.main.transform.position = new Vector3(64.5f, 77.3f, 4.1f);
 
 
         }
