@@ -25,7 +25,7 @@ namespace BioCrowds
         public bool BioCloudsEnabled = false;
         public int TerrainX = 50;
         public int TerrainZ = 50;
-        public int FramesPerSecond = 30;
+        public float FramesPerSecond = 32f;
         public bool showMarkers = false;
         public bool showCells = false;
         public SpawnArea[] SpawnAreas = { new SpawnArea{qtd = 50,
@@ -75,7 +75,7 @@ namespace BioCrowds
         public static int BatchSize = 1;
         //Real value is the sum of all groups instantiated in the bootstrap
         public static int agentQuantity = 0;
-        public bool ScreenCap = false;
+        public bool ScreenCap = true;
         public static CrowdExperiment experiment = new CrowdExperiment();
         
         public int treeHeight = 4;

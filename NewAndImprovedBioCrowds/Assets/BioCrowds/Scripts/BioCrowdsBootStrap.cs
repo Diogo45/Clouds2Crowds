@@ -39,7 +39,7 @@ namespace BioCrowds
             //Getting data from settings
             float agentRadius = Settings.experiment.agentRadius;
 
-            int framesPerSecond = Settings.experiment.FramesPerSecond;
+            float framesPerSecond = Settings.experiment.FramesPerSecond;
 
             float markerRadius = Settings.experiment.markerRadius;
 
@@ -58,10 +58,10 @@ namespace BioCrowds
             }
 
             //Just to have a nicer terrain
-            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            ground.transform.localScale = new Vector3(size.x, 0.5f, size.y);
-            ground.transform.position = ground.transform.localScale / 2;
-            ground.isStatic = true;
+            //var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            //ground.transform.localScale = new Vector3(size.x, 0.5f, size.y);
+            //ground.transform.position = ground.transform.localScale / 2;
+            //ground.isStatic = true;
             //var navmesh = ground.AddComponent<NavMeshSurface>();
             //navmesh.BuildNavMesh();
             
@@ -81,8 +81,8 @@ namespace BioCrowds
                 ComponentType.Create<Position>());
 
             //The cells are 2x2 so there are (X*Z)/2*2 cells 
-            int qtdX = (int)(ground.transform.localScale.x / (agentRadius * 2));
-            int qtdZ = (int)(ground.transform.localScale.z / (agentRadius * 2));
+            int qtdX = (int)(size.x / (agentRadius * 2));
+            int qtdZ = (int)(size.y / (agentRadius * 2));
             Debug.Log(qtdX + "X" + qtdZ);
 
             //For instantiating Entities we first need to create a buffer for all the Enities of the same archetype.

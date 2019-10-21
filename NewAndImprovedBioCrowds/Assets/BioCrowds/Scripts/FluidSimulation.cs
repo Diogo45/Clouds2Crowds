@@ -410,11 +410,11 @@ namespace BioCrowds
             float[] ControlData = new float[3];
             AcessDLL.ReadMemoryShare(memMapControl, ControlData);
 
-            ControlData[1] = frame * 1f / 30f;
+            ControlData[1] = frame / Settings.experiment.FramesPerSecond ;
             AcessDLL.WriteMemoryShare(memMapControl, ControlData);
             //Debug.Log(ControlData[0]);
 
-            if (frame * (1f/30f) >= ControlData[0])
+            if (ControlData[1] >= ControlData[0])
             {
                 Thread.Sleep(1);
                 return true;
@@ -424,40 +424,22 @@ namespace BioCrowds
         }
 
 
-        IEnumerator Wait()
-        {
-
-            float[] ControlData = new float[3];
-            AcessDLL.ReadMemoryShare(memMapControl, ControlData);
-            //Debug.Log(ControlData[0]);
-
-            if (frame * (1f / 30f) >= ControlData[0])
-            {
-                yield return null;
-            }
-
-
-
-
-            yield return null;
-        }
+      
 
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             //HACK: Write better sync between fluid sim and biocrowds
             while (WaitForFluidSim()) { }
-            //Wait();
 
-            if (Settings.instance.ScreenCap)
-            {
-                string s = frame.ToString();
-                if (s.Length == 1) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame000" + frame + ".png");
-                if (s.Length == 2) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame00" + frame + ".png");
-                if (s.Length == 3) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame0" + frame + ".png");
-                if (s.Length == 4) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame" + frame + ".png");
-            }
-            
+
+
+            string s = frame.ToString();
+            if (s.Length == 1) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame000" + frame + ".png");
+            if (s.Length == 2) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame00" + frame + ".png");
+            if (s.Length == 3) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame0" + frame + ".png");
+            if (s.Length == 4) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame" + frame + ".png");
+
 
 
 
@@ -491,7 +473,7 @@ namespace BioCrowds
                 CellToParticles.Clear();
             }
 
-
+            Debug.Log(frame);
             return FillCellJobHandle;
         }
 
@@ -510,7 +492,7 @@ namespace BioCrowds
                 //{
                 //    c = Color.red;
                 //}
-                Debug.DrawLine(FluidPos[i], FluidPos[i]+FluidVel[i]/100f,c );
+                Debug.DrawLine(FluidPos[i], FluidPos[i]+ (float3)Vector3.left,c );
             }
 
         }
