@@ -136,15 +136,6 @@ namespace BioCrowds
 
             }
 
-            //QuadTree qt = new QuadTree(new Rectangle { x = 0, y = 0, w = size.x, h = size.y }, 0);
-            //ShowQuadTree.qt = qt;
-
-
-
-
-
-
-
             cells.Dispose();
 
             //Create one entity so the marker spawner injects it and the system runs
@@ -231,10 +222,10 @@ namespace BioCrowds
                     {
                         delta = float3.zero
                     });
-                    entityManager.SetComponentData(newAgent, new Rotation
-                    {
-                        Value = quaternion.identity
-                    });
+                    //entityManager.SetComponentData(newAgent, new Rotation
+                    //{
+                    //    Value = quaternion.identity
+                    //});
                     entityManager.SetComponentData(newAgent, new CellName { Value = new int3(CellX, CellY, CellZ) });
                     entityManager.SetComponentData(newAgent, new AgentGoal { SubGoal = g, EndGoal = g });
                     //entityManager.AddComponent(newAgent, ComponentType.FixedArray(typeof(int), qtdMarkers));

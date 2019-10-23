@@ -98,9 +98,6 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             if (!keepgoing)
                 return;
 
-            //Debug.Log("DESIRED1");
-
-
             cellCount++;
             if(CheckDesiredPosition(currentCellPosition))
             {
@@ -119,53 +116,12 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
             if (cloudDensities.TryGetValue(currentCloudData.ID, out cloudDensity))
             {
-                //Debug.Log("DESIRED2");
-                //Debug.Log(cloudDensity);
                 int agentQuantity = (int)(desiredCellQnt * cloudDensity * BioClouds.Parameters.Instance.CellArea);
                 desiredQuantity.TryAdd(currentCloudData.ID, agentQuantity);
             }
 
         }
     }
-
-    //struct CurrentInAreaJob : IJobParallelFor
-    //{
-    //    [ReadOnly] public ComponentDataArray<BioCities.CloudData> CloudData;
-    //    [ReadOnly] public ComponentDataArray<Position> Position;
-
-    //    [ReadOnly] public NativeMultiHashMap<int, float3> CloudMarkersMap;
-    //    [ReadOnly] public ComponentDataArray<BioCrowds.AgentData> AgentData;
-
-    //    [WriteOnly] public NativeHashMap<int, int>.Concurrent CloudID2AgentInWindow;
-
-    //    public void Execute(int index)
-    //    {
-    //        BioCities.CloudData currentCloudData = CloudData[index];
-    //        Position currentCloudPosition = Position[index];
-
-
-    //        float3 currentCellPosition;
-    //        int cellCount = 0;
-    //        NativeMultiHashMapIterator<int> it;
-    //        float3 posSum = float3.zero;
-
-    //        bool keepgoing = CloudMarkersMap.TryGetFirstValue(currentCloudData.ID, out currentCellPosition, out it);
-
-    //        if (!keepgoing)
-    //            return;
-
-    //        cellCount++;
-
-
-
-    //        while (CloudMarkersMap.TryGetNextValue(out currentCellPosition, ref it))
-    //        {
-    //            cellCount++;
-
-    //        }
-
-    //    }
-    //}
 
     struct AddDifferencePerCloudJob : IJobParallelFor
     {
@@ -191,22 +147,17 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             if (!CloudID2AgentInWindow.TryGetValue(currentCloudID, out agentsInWindow))
                 return;
 
-           // Debug.Log("PASS1");
-
 
             //fetch desired cloud agents in window
             int desiredAgentsInWindow;
             if (!DesiredCloudID2AgentInWindow.TryGetValue(currentCloudID, out desiredAgentsInWindow))
                 return;
 
-            //Debug.Log("PASS2");
 
             //create um menos o outro
             
             int agentsToCreate = (int)math.max(desiredAgentsInWindow - agentsInWindow, 0f);
-            //Debug.Log(agentsToCreate);
-            //if (agentsToCreate < 0)
-            //    Debug.Log("DEU MEME GURIZADA");
+
 
             List<float3> positionList = new List<float3>();
 
@@ -218,11 +169,11 @@ public class Clouds2CrowdsSystem : JobComponentSystem
             if (!keepgoing)
                 return;
 
-            //Debug.Log("PASSTOT");
+
 
             if (CheckCreatePosition(currentCellPosition))
             {
-                //Debug.Log(currentCellPosition);
+
                 positionList.Add(currentCellPosition);
 
             }
@@ -233,13 +184,11 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                 if (CheckCreatePosition(currentCellPosition))
                 {
                     positionList.Add(currentCellPosition);
-                    //Debug.Log(currentCellPosition);
+
                 }
             }
 
             agentsToCreate = math.min(CloudData[index].AgentQuantity - Counter[index].Quantity, agentsToCreate);
-
-            
 
             int spawnPerCell = (int)math.max(math.ceil((float)agentsToCreate / positionList.Count), 0f);
 
@@ -263,34 +212,14 @@ public class Clouds2CrowdsSystem : JobComponentSystem
                     spawnDimensions = new float2 { x = 2f, y = 2f },
                     spawnOrigin = position
                 };
-                //Debug.Log("CREATE AGENT " + currentCloudID);
+
 
                 buffer.TryAdd(GridConverter.Position2CellID(position), par);
                 AddedAgentsPerCloud.Add(currentCloudID, par.qtdAgents);
                 spawned += par.qtdAgents;
             }
 
-            //Uniform distribution
-            //foreach (float3 position in positionList)
-            //{
-            //    //create agent
-            //    BioCrowds.AgentSpawner.Parameters par = new BioCrowds.AgentSpawner.Parameters
-            //    {
-            //        cloud = currentCloudID,
-            //        goal = CloudGoal[index].SubGoal,
-            //        maxSpeed = CloudData[index].MaxSpeed,
-            //        qtdAgents = math.min(agentsToCreate-spawned, spawnPerCell),
-            //        spawnDimensions = new float2 { x = 2f, y = 2f },
-            //        spawnOrigin = position
-            //    };
-            //    //Debug.Log("CREATE AGENT " + currentCloudID);
-
-            //    buffer.TryAdd(GridConverter.Position2CellID(position), par);
-            //    AddedAgentsPerCloud.Add(currentCloudID, par.qtdAgents);
-            //    spawned += par.qtdAgents;
-            //}
-            //Debug.Log("Agents to create: " + agentsToCreate + " , spawnPerCell: " + spawnPerCell + " , positions: " + positionList.Count + " , spawned: " + spawned);
-
+          
         }
     }
 
@@ -391,31 +320,18 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
         var cg = ComponentGroups[m_AgentDataGroup.GroupIndex];
 
-        //JobHandle[] jobs =  new JobHandle[m_CloudDataGroup.Length];
+
         for(int i = 0; i < m_CloudDataGroup.Length; i++)
         {
             AgentCloudID newCloudID = new AgentCloudID { CloudID = i };
             cg.SetFilter<AgentCloudID>(newCloudID);
 
-            //CurrentInAreaJob newAreajob = new CurrentInAreaJob
-            //{
-            //    AgentData = cg.GetComponentDataArray<BioCrowds.AgentData>(),
-            //    CloudData = m_CloudDataGroup.CloudData,
-            //    CloudID2AgentInWindow = CloudID2AgentInWindow.ToConcurrent(),
-            //    CloudMarkersMap = m_CellMarkSystem.cloudID2MarkedCellsMap,
-            //    Position = cg.GetComponentDataArray<Position>()
-            //};
 
-            //jobs[i] = newAreajob.Schedule(m_CloudDataGroup.Length, 1, inputDeps);
             int quantity = cg.CalculateLength();
-            //Debug.Log("Cloud " + i + " has " + quantity + " agents");
+
             CloudID2AgentInWindow.TryAdd(i, quantity);
         }
 
-        //for (int i = 0; i < m_CloudDataGroup.Length; i++)
-        //{
-        //    jobs[i].Complete();
-        //}
 
         if (_ChangedWindow)
         {
@@ -470,12 +386,7 @@ public class Clouds2CrowdsSystem : JobComponentSystem
 
         var accumJobHandle = accumulatorJob.Schedule(m_CloudDataGroup.Length, 1, diffJobHandle);
         accumJobHandle.Complete();
-        //Debug.Log("L1 " + parameterBuffer.Length);
 
-        //for(int i = 0; i < m_CloudDataGroup.Length; i++)
-        //{
-        //    Debug.Log("Spawned Agents in Cloud" + m_CloudDataGroup.CloudData[i].ID + " : " + m_CloudDataGroup.SpawnedAgents[i].Quantity);
-        //}
 
         _ChangedWindow = false;
         return accumJobHandle;

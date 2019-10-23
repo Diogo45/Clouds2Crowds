@@ -130,7 +130,7 @@ namespace BioCrowds
                         delta = float3.zero
                     });
                     CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
-                    CommandBuffer.SetComponent(index, new Counter { Value = 0 });
+                    CommandBuffer.SetComponent(index, new Counter { Value = 0});
                     CommandBuffer.SetComponent(index, new NormalLifeData
                     {
                         confort = 0,
@@ -140,7 +140,7 @@ namespace BioCrowds
                         incStress = 0f
                     });
 
-                    CommandBuffer.SetComponent<BioCrowdsAnchor>(index, new BioCrowdsAnchor { Pivot = float3.zero });
+                    CommandBuffer.SetComponent(index, new BioCrowdsAnchor { Pivot = float3.zero });
 
                     CommandBuffer.AddSharedComponent(index, AgentRenderer);
                     CommandBuffer.AddSharedComponent(index, new AgentCloudID { CloudID = spawnList.cloud });
@@ -187,7 +187,6 @@ namespace BioCrowds
                 int minX = (int)convertedOrigin.x;
                 float maxSpeed = spawnList.maxSpeed;
 
-                //Debug.Log(" MAX MIN " + new int4(maxZ, minZ, maxX, minX));
 
                 int startID = AgentAtCellQuantity[index] + LastIDUsed;
                 
@@ -197,58 +196,38 @@ namespace BioCrowds
                 int CellX = minX + 1;
                 int CellZ = minZ + 1;
                 int CellY = 0;
-                //Debug.Log("ConvertedOrigin:" + convertedOrigin + "CELL: " + CellX + " " + CellZ);
 
-                //Problema total agents
+
                 for (int i = startID; i < qtdAgtTotal + startID; i++)
                 {
 
-                    //Debug.Log("Agent id : " + i);
 
                     if (doNotFreeze > qtdAgtTotal)
                     {
                         doNotFreeze = 0;
-                        //maxZ += 2;
-                        //maxX += 2;
+
                     }
 
                     float x = (float)r.NextDouble() * (maxX - minX) + minX;
                     float z = (float)r.NextDouble() * (maxZ - minZ) + minZ;
                     float y = 0;
-                    //Debug.Log("AGENT: " + x + " " + z);
-
-                    
-
 
                     float3 g = WindowManager.Clouds2Crowds(spawnList.goal);
-
-                    //x = UnityEngine.Random.Range(x - 0.99f, x + 0.99f);
-                    //float y = 0f;
-                    //z = UnityEngine.Random.Range(z - 0.99f, z + 0.99f);
-
-                    
 
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
                     CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
-                    //Debug.Log(maxSpeed / Settings.experiment.FramesPerSecond);
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed + (maxSpeed /* (float)(r.NextDouble() */ * 0.2f),// / Settings.experiment.FramesPerSecond,
+                        MaxSpeed = maxSpeed + (maxSpeed * 0.2f),
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
                     {
                         delta = float3.zero
                     });
-                    CommandBuffer.SetComponent(index, new Rotation
-                    {
-                        Value = quaternion.identity
-                    });
-                    CommandBuffer.SetComponent(index, new CellName { Value = new int3(CellX, CellY, CellZ) });
                     CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
-                    //entityManager.AddComponent(newAgent, ComponentType.FixedArray(typeof(int), qtdMarkers));
                     //TODO:Normal Life stuff change
                     CommandBuffer.SetComponent(index, new Counter { Value = 0 });
                     CommandBuffer.SetComponent(index, new NormalLifeData
@@ -264,7 +243,6 @@ namespace BioCrowds
 
                     CommandBuffer.AddSharedComponent(index, AgentRenderer);
                     CommandBuffer.AddSharedComponent(index, new AgentCloudID { CloudID = spawnList.cloud });
-
 
                 }
             }

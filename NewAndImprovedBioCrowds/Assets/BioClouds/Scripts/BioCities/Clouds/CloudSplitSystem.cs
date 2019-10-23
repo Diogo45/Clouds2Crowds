@@ -56,12 +56,12 @@ namespace BioClouds
             //float desired_sumMagnitude = 0;
             for (int i = 0; i < m_CloudGroup.Length; i ++)
             {
-                Debug.DrawLine(m_CloudGroup.Position[i].Value,
-                    m_CloudGroup.Position[i].Value + m_RightPreference.dessums[i],
-                    Color.green);
-                Debug.DrawLine(m_CloudGroup.Position[i].Value,
-                    m_CloudGroup.Position[i].Value + m_RightPreference.sums[i],
-                    Color.yellow);
+                //Debug.DrawLine(m_CloudGroup.Position[i].Value,
+                //    m_CloudGroup.Position[i].Value + m_RightPreference.dessums[i],
+                //    Color.green);
+                //Debug.DrawLine(m_CloudGroup.Position[i].Value,
+                //    m_CloudGroup.Position[i].Value + m_RightPreference.sums[i],
+                //    Color.yellow);
 
                 if (m_CloudGroup.CloudSplitData[i].splitCount < m_CloudGroup.CloudSplitData[i].CloudSplitLimit &&
                     m_CloudGroup.CloudData[i].AgentQuantity > m_CloudGroup.CloudSplitData[i].CloudSizeLimit)
