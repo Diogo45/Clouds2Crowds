@@ -46,7 +46,6 @@ public class BioCrowdsPivotCorrectonatorSystemDeluxe : JobComponentSystem
 
             float3 newPos = WindowManager.ChangePivot(oldPos, oldPivot, newPivot);
 
-            //Debug.Log("Pivots : " + newPivot + oldPivot + " Positions: " + oldPos + newPos);
 
             Position[index] = new Position { Value = newPos };
             Pivot[index] = new BioCrowdsAnchor { Pivot = newPivot };
@@ -164,6 +163,16 @@ public class VisualizationSystem : ComponentSystem
         processing = aux;
 
 
+        #region Diogo's Gambi to save frames
+
+        string s = frames.ToString();
+
+
+        ScreenCapture.CaptureScreenshot(@"C:\Users\VHLAB\Documents\VHLAB\BioClouds\frames\" + s.PadLeft(10, '0') + ".jpg");
+        //Debug.Log(System.Environment.SpecialFolder.MyDocuments + @"\VHLAB\BioClouds\frames\" + s.PadLeft(10, '0'));
+        #endregion
+
+
         var inst = BioClouds.Parameters.Instance;
 
         if (!inst.SaveSimulationData)
@@ -237,6 +246,9 @@ public class VisualizationSystem : ComponentSystem
         //}
 
         #endregion
+
+
+
 
     }
 

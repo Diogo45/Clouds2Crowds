@@ -107,7 +107,7 @@ namespace BioClouds
             city.BioParameters.DefaultDomainMaxX = exp.Domain.maxX; //2
             city.BioParameters.DefaultDomainMaxY = exp.Domain.maxY; //3
 
-            densityQuad.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 5);
+            densityQuad.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 0);
             densityQuad.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1);
             background.transform.position = new Vector3((exp.Domain.minX + exp.Domain.maxX) / 2, (exp.Domain.minY + exp.Domain.maxY) / 2, 10);
             background.transform.localScale = new Vector3(exp.Domain.maxX - exp.Domain.minX, exp.Domain.maxY - exp.Domain.minY, 1);
@@ -260,7 +260,8 @@ namespace BioClouds
             float radius;
 
             //if(fatherID == -1)
-                radius = CloudMinRadius(quantity) * radiusMultiplier;
+                //radius = CloudMinRadius(quantity) * radiusMultiplier;
+                radius = CloudPreferredRadius(quantity, preferredDensity);
             //else
             //    radius = CloudPreferredRadius(quantity, preferredDensity) * radiusMultiplier;
 
