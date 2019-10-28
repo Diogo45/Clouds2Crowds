@@ -21,29 +21,40 @@ namespace BioCrowds
         }
 
 
-        public bool NormalLife = false;
-        public bool BioCloudsEnabled = false;
+        public float agentRadius = 1f;
+        public float markerRadius = 0.1f;
+        public float MarkerDensity = 0.65f;
         public int TerrainX = 50;
         public int TerrainZ = 50;
         public float FramesPerSecond = 32f;
+
+
         public bool showMarkers = false;
         public bool showCells = false;
+
+       
+      
+        
         public SpawnArea[] SpawnAreas = { new SpawnArea{qtd = 50,
                                          goal = new float3{x = 25, y = 0, z = 50},
                                          max = new int3 {x = 15, y = 0, z = 50},
                                          min = new int3 {x = 0, y = 0, z = 0 },
-                                         maxSpeed = 1.3f},
-                                         new SpawnArea{qtd = 50,
-                                         goal = new float3{x = 50, y = 0, z = 25},
-                                         max = new int3 {x = 15, y = 0, z = 50},
-                                         min = new int3 {x = 0, y = 0, z = 0 },
-                                         maxSpeed = 2f},
-                                         new SpawnArea{qtd = 50,
-                                         goal = new float3{x = 25, y = 0, z = 25},
-                                         max = new int3 {x = 15, y = 0, z = 50},
-                                         min = new int3 {x = 0, y = 0, z = 0 },
-                                         maxSpeed = 1.5f},
+                                         maxSpeed = 1.3f}
                                         };
+
+
+
+        public bool NormalLife = false;
+        public bool BioCloudsEnabled = false;
+
+        public bool FluidSim = false;
+        public string FluidSimPath = "out.bin";
+
+        public bool SpringSystem = false;
+        public int2[] SpringConnections = { new int2(1, 2), new int2(4, 3)};
+        
+
+        public bool WayPointOn = false;
         public float3[] WayPoints = new float3[]{
             new float3(25,0,25),
             new float3(45,0,25),
@@ -52,15 +63,6 @@ namespace BioCrowds
             new float3(25,0,15),
         };
 
-
-
-
-        public string FluidSimPath = "out.bin";
-        public bool FluidSim = false;
-        public bool WayPointOn = false;
-        public float agentRadius = 1f;
-        public float markerRadius = 0.1f;
-        public float MarkerDensity = 0.65f;
 
     }
 

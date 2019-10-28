@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Collections;
 using System.Threading;
 
+
 namespace BioCrowds
 {
     [UpdateAfter(typeof(FluidParticleToCell))]
@@ -29,15 +30,15 @@ namespace BioCrowds
         //1 g/cm3 = 1000 kg/m3
         //Calculate based on the original SplishSplash code, mass = volume * density
         //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
-        //private static float particleMass = 0.0001f;//kg
-        private static float particleMass = 0.001f;//kg
+        private static float particleMass = 0.0001f;//kg
         private static float agentMass = 65f;
-        private static float timeStep = 1f / 25f;
+        private static float timeStep = 1f / Settings.experiment.FramesPerSecond;
+        private float particleRadius = 0.025f;
 
-        
-           
-            
-            
+
+
+
+
 
 
         public struct AgentGroup
@@ -150,6 +151,17 @@ namespace BioCrowds
 
             CellMomenta = new NativeHashMap<int3, float3>((Settings.experiment.TerrainX * Settings.experiment.TerrainZ) / 4, Allocator.Persistent);
             ParticleSetMass = new NativeHashMap<int3, float3>((Settings.experiment.TerrainX * Settings.experiment.TerrainZ) / 4, Allocator.Persistent);
+
+            //1 g/cm3 = 1000 kg/m3
+            //Calculate based on the original SplishSplash code, mass = volume * density
+            //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
+            float particleDiameter = 2 * particleRadius * 10f;
+            float volume = 0.8f * math.pow(particleDiameter, 3);
+            float density = 1000f;
+            //particleMass = volume * density;
+            particleMass = 0.001f;//ANDRE: Troca aqui por 10
+            Debug.Log("Particle Mass: " + particleMass);
+
         }
 
         protected override void OnDestroyManager()
@@ -180,7 +192,8 @@ namespace BioCrowds
 
             momentaJobHandle.Complete();
 
-            //DrawMomenta();
+            
+            DrawMomenta();
 
             ApplyFluidMomentaOnAgents applyMomenta = new ApplyFluidMomentaOnAgents
             {
@@ -227,7 +240,7 @@ namespace BioCrowds
         public NativeList<float3> FluidVel;
         public NativeMultiHashMap<int3, int> CellToParticles;
 
-        public int frameSize = 100000;//particles
+        public int frameSize = 35000;//particles
         public int bufferSize;// number of particles times the number of floats of data of each particle, for now 3 for 3 floats
 
         public int frame = 0;
@@ -236,10 +249,12 @@ namespace BioCrowds
         private static float thresholdHeigth = 1.7f;
         private const string memMapName = "unityMemMap";
         private const string memMapNameVel = "unityMemMapVel";
-
         //[timeSPH, timeBC, frameSize]
         private const string memMapControl = "unityMemMapControl";
-        
+
+        public float3 scale = new float3(10f, 10f, 10f);
+
+        public int NLerp = 4;
 
         public struct AgentGroup
         {
@@ -299,9 +314,9 @@ namespace BioCrowds
 
 
             CellToParticles = new NativeMultiHashMap<int3, int>(frameSize * (Settings.experiment.TerrainX * Settings.experiment.TerrainZ)/4, Allocator.Persistent);
-            FluidPos = new NativeList<float3>(frameSize, Allocator.Persistent);
-            FluidVel = new NativeList<float3>(frameSize, Allocator.Persistent);
-
+            FluidPos = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
+            FluidVel = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
+            Debug.Log(frame +  " Fluid Pos Size: " + FluidPos.Length + " " +  FluidPos.Capacity);
         }
 
         protected override void OnDestroyManager()
@@ -369,7 +384,7 @@ namespace BioCrowds
         {
 
             float3 translate = new float3(50f,0f,25f);
-            float3 scale = new float3(10f, 10f, 10f);
+            
 
             float[] floatStream = new float[bufferSize];
             AcessDLL.ReadMemoryShare(memMapName, floatStream);
@@ -378,9 +393,20 @@ namespace BioCrowds
                 float x = floatStream[i];
                 float y = floatStream[i + 1];
                 float z = -floatStream[i + 2];
+                if (x == 0 && y == 0 & z == 0) continue;
                 //TODO: Parametrize the translation and scale]
                 float3 pos = new float3(x, y, z) * scale + translate;
                 FluidPos.Add(pos);
+
+                for(int l= 1; l < NLerp; l++)
+                {
+                    float xl = UnityEngine.Random.Range(0f, 0.5f);
+                    float yl = UnityEngine.Random.Range(0f, 0.5f);
+                    float zl = UnityEngine.Random.Range(0f, 0.5f);
+                    float3 offset = new float3(xl,yl,zl);
+                    FluidPos.Add(pos + offset);
+                }
+                
 
                
             }
@@ -392,11 +418,20 @@ namespace BioCrowds
                 float x = floatStreamVel[i];
                 float y = floatStreamVel[i + 1];
                 float z = -floatStreamVel[i + 2];
+                if (x == 0 && y == 0 & z == 0) continue;
+
                 //TODO: Parametrize the translation and scale]
                 float3 vel = new float3(x, y, z) * scale;
                 FluidVel.Add(vel);
 
-
+                for (int l = 1; l < NLerp; l++)
+                {
+                    float xl = UnityEngine.Random.Range(0f, 0.5f);
+                    float yl = UnityEngine.Random.Range(0f, 0.5f);
+                    float zl = UnityEngine.Random.Range(0f, 0.5f);
+                    float3 offset = new float3(xl, yl, zl);
+                    FluidVel.Add(vel + offset);
+                }
 
             }
 
@@ -410,15 +445,17 @@ namespace BioCrowds
             float[] ControlData = new float[3];
             AcessDLL.ReadMemoryShare(memMapControl, ControlData);
 
-            ControlData[1] = frame / Settings.experiment.FramesPerSecond ;
+            ControlData[1] = frame/Settings.experiment.FramesPerSecond;
             AcessDLL.WriteMemoryShare(memMapControl, ControlData);
             //Debug.Log(ControlData[0]);
 
-            if (ControlData[1] >= ControlData[0])
+            if (ControlData[1] > ControlData[0])
             {
                 Thread.Sleep(1);
                 return true;
             }
+
+            //Debug.Log(frame + " " + ControlData[0] + " " + ControlData[1]);
 
             return false;
         }
@@ -431,18 +468,7 @@ namespace BioCrowds
         {
             //HACK: Write better sync between fluid sim and biocrowds
             while (WaitForFluidSim()) { }
-
-
-
-            string s = frame.ToString();
-            if (s.Length == 1) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame000" + frame + ".png");
-            if (s.Length == 2) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame00" + frame + ".png");
-            if (s.Length == 3) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame0" + frame + ".png");
-            if (s.Length == 4) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame" + frame + ".png");
-
-
-
-
+            
             FluidPos.Clear();
             FillFrameParticlePositions();
             //Debug.Log(FluidPos.Length + " " + FluidPos.Capacity);
@@ -461,38 +487,41 @@ namespace BioCrowds
                 FluidPos = FluidPos
             };
 
-            var FillCellJobHandle = FillCellMomentaJob.Schedule(frameSize, Settings.BatchSize, inputDeps);
+            var FillCellJobHandle = FillCellMomentaJob.Schedule(FluidPos.Length, Settings.BatchSize, inputDeps);
 
             FillCellJobHandle.Complete();
 
-            DebugFluid();
-            frame++;
-
+            
             if (frame % 300 == 0)
             {
                 CellToParticles.Clear();
             }
 
-            Debug.Log(frame);
+     
+
+            string s = frame.ToString();
+            if (s.Length == 1) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame000" + frame + ".png");
+            if (s.Length == 2) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame00" + frame + ".png");
+            if (s.Length == 3) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame0" + frame + ".png");
+            if (s.Length == 4) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame" + frame + ".png");
+
+
+            DebugFluid();
+            frame++;
+
+            //Debug.Log(frame);
             return FillCellJobHandle;
         }
 
            
         private void DebugFluid()
         {
-            for (int i = 0; i < frameSize; i++)
+            for (int i = 0; (i + NLerp) < FluidPos.Length; i+=NLerp)
             {
                 float magnitude = ((Vector3)FluidVel[i]).magnitude/50f;
                 Color c = Color.LerpUnclamped(Color.yellow, Color.red, magnitude);
-                //if (magnitude < 0.5f)
-                //{
-                //    c = Color.blue;
-                //}
-                //else
-                //{
-                //    c = Color.red;
-                //}
-                Debug.DrawLine(FluidPos[i], FluidPos[i]+ (float3)Vector3.left,c );
+
+                Debug.DrawLine(FluidPos[i], FluidPos[i] + FluidVel[i]/100f, c);
             }
 
         }
