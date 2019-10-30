@@ -133,10 +133,11 @@ namespace BioCrowds
                 if (!keepgoing) return;
 
                 float3 oldVel = AgentStep[index].delta;
-                //Debug.Log(index + " " + oldVel + " " + particleVel + " " + particleSetMass);
                 //TOTAL INELASTIC COLLISION
                 oldVel = (oldVel * agentMass + particleVel * particleSetMass) / (agentMass + particleSetMass);
 
+                //HACK: For now, while we dont have ragdolls or the buoyancy(upthrust) force, not making use of the y coordinate 
+                oldVel.y = 0f;
 
                 AgentStep[index] = new AgentStep { delta = oldVel };
 
@@ -159,7 +160,7 @@ namespace BioCrowds
             float volume = 0.8f * math.pow(particleDiameter, 3);
             float density = 1000f;
             //particleMass = volume * density;
-            particleMass = 0.001f;//ANDRE: Troca aqui por 10
+            particleMass = 0.001f;
             Debug.Log("Particle Mass: " + particleMass);
 
         }
@@ -193,7 +194,7 @@ namespace BioCrowds
             momentaJobHandle.Complete();
 
             
-            DrawMomenta();
+            //DrawMomenta();
 
             ApplyFluidMomentaOnAgents applyMomenta = new ApplyFluidMomentaOnAgents
             {
@@ -240,7 +241,7 @@ namespace BioCrowds
         public NativeList<float3> FluidVel;
         public NativeMultiHashMap<int3, int> CellToParticles;
 
-        public int frameSize = 35000;//particles
+        public int frameSize = 100000;//particles
         public int bufferSize;// number of particles times the number of floats of data of each particle, for now 3 for 3 floats
 
         public int frame = 0;
@@ -254,7 +255,7 @@ namespace BioCrowds
 
         public float3 scale = new float3(10f, 10f, 10f);
 
-        public int NLerp = 4;
+        public int NLerp = 10;
 
         public struct AgentGroup
         {
@@ -471,7 +472,8 @@ namespace BioCrowds
             
             FluidPos.Clear();
             FillFrameParticlePositions();
-            //Debug.Log(FluidPos.Length + " " + FluidPos.Capacity);
+            Debug.Log(frame + " Fluid Pos Size: " + FluidPos.Length + " " + FluidPos.Capacity);
+
 
             for (int i = 0; i < cellGroup.Length; i++)
             {
@@ -491,13 +493,13 @@ namespace BioCrowds
 
             FillCellJobHandle.Complete();
 
-            
+
             if (frame % 300 == 0)
             {
                 CellToParticles.Clear();
             }
 
-     
+
 
             string s = frame.ToString();
             if (s.Length == 1) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame000" + frame + ".png");
@@ -510,7 +512,7 @@ namespace BioCrowds
             frame++;
 
             //Debug.Log(frame);
-            return FillCellJobHandle;
+            return inputDeps;
         }
 
            

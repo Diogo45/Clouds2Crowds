@@ -542,8 +542,16 @@ namespace BioCrowds
             public void Execute(int index)
             {
                 float3 old = Positions[index].Value;
+                float3 newPos = old + Deltas[index].delta;
 
-                Positions[index] = new Position { Value = old + Deltas[index].delta };
+
+                if (newPos.x > Settings.experiment.TerrainX) newPos.x = Settings.experiment.TerrainX;
+                else if (newPos.x < 0f) newPos.x = 0f;
+
+                if (newPos.z > Settings.experiment.TerrainZ) newPos.z = Settings.experiment.TerrainZ;
+                else if (newPos.z < 0f) newPos.z = 0f;
+
+                Positions[index] = new Position { Value = newPos };
 
 
 
