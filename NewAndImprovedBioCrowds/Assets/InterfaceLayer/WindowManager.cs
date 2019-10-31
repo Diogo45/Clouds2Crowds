@@ -122,6 +122,11 @@ public class WindowManager: MonoBehaviour
 
     public void Awake()
     {
+        if (!BioCrowds.Settings.experiment.BioCloudsEnabled)
+        {
+            this.gameObject.SetActive(false);
+            return;
+        }
         World activeWorld = World.Active;
         PivotSystem = activeWorld.GetExistingManager<BioCrowdsPivotCorrectonatorSystemDeluxe>();
         transform = gameObject.transform;

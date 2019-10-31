@@ -138,8 +138,7 @@ namespace BioCrowds
             //bool b = NavMesh.CalculatePath(new Vector3(0, 0.25f, 5f), new Vector3(10f, 0.25f, 100f), NavMesh.AllAreas, path);
             //Debug.Log("b " + b + " L:" + path.corners.Length);
 
-            //TODO: descobrir os 500 lugares que o andre seta a pos da camera
-            Camera.main.transform.position = new Vector3(64.5f, 77.3f, 4.1f);
+            //Camera.main.transform.position = new Vector3(64.5f, 77.3f, 4.1f);
 
 
         }

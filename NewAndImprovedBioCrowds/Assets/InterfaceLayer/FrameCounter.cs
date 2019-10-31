@@ -43,7 +43,7 @@ public class EndFrameCounter : ComponentSystem
     {
         float t = Time.realtimeSinceStartup - m_frameCounterSystem.currentTime;
         frameTimes.Add(t);
-        filename = BioClouds.Parameters.Instance.LogFilePath + "FrameTimes.txt";
+        filename = "FrameTimes.txt";
         //Debug.Log(t);
     }
 
