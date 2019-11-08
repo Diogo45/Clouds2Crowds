@@ -16,6 +16,8 @@ using System.Threading;
 
 namespace BioCrowds
 {
+   
+
     [UpdateAfter(typeof(FluidParticleToCell))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidMovementOnAgent : JobComponentSystem
@@ -35,8 +37,9 @@ namespace BioCrowds
         private static float timeStep = 1f / Settings.experiment.FramesPerSecond;
         private float particleRadius = 0.025f;
 
-
-
+        //0 --> Total inelastic collision
+        //1 --> Elastic Collision
+        private static float RestitutionCoef = 0f;
 
 
 
@@ -119,12 +122,14 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<Position> AgentPos;
             public ComponentDataArray<AgentStep> AgentStep;
 
+            [ReadOnly] public float RestitutionCoef;
+
             public void Execute(int index)
             {
                 int3 cell = new int3((int)math.floor(AgentPos[index].Value.x / 2.0f) * 2 + 1, 0,
                                    (int)math.floor(AgentPos[index].Value.z / 2.0f) * 2 + 1);
 
-
+                
 
                 bool keepgoing = CellMomenta.TryGetValue(cell, out float3 particleVel);
                 if (!keepgoing) return;
@@ -132,14 +137,15 @@ namespace BioCrowds
                 keepgoing = ParticleSetMass.TryGetValue(cell, out float3 particleSetMass);
                 if (!keepgoing) return;
 
-                float3 oldVel = AgentStep[index].delta;
+                float3 OldAgentVel = AgentStep[index].delta;
+                
                 //TOTAL INELASTIC COLLISION
-                oldVel = (oldVel * agentMass + particleVel * particleSetMass) / (agentMass + particleSetMass);
+                OldAgentVel = (OldAgentVel * agentMass + particleVel) / (agentMass + particleSetMass);
 
                 //HACK: For now, while we dont have ragdolls or the buoyancy(upthrust) force, not making use of the y coordinate 
-                oldVel.y = 0f;
+                OldAgentVel.y = 0f;
 
-                AgentStep[index] = new AgentStep { delta = oldVel };
+                AgentStep[index] = new AgentStep { delta = OldAgentVel };
 
 
 
@@ -174,6 +180,9 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+
+            WriteData();
+
             CellMomenta.Clear();
             ParticleSetMass.Clear();
 
@@ -201,6 +210,7 @@ namespace BioCrowds
                 AgentPos = agentGroup.AgentPos,
                 AgentStep = agentGroup.AgentStep,
                 CellMomenta = CellMomenta,
+                RestitutionCoef = RestitutionCoef,
                 ParticleSetMass = ParticleSetMass
 
             };
@@ -214,6 +224,21 @@ namespace BioCrowds
             m_fluidParticleToCell.FluidVel.Clear();
 
             return applyMomentaHandle;
+        }
+
+        private void WriteData()
+        {
+            string data = ""; 
+            for (int i = 0; i < cellGroup.Length; i++)
+            {
+                int3 cell = cellGroup.CellName[i].Value;
+                float3 particleVel;
+                CellMomenta.TryGetValue(cell, out particleVel);
+                data += i + ";" + ((Vector3)particleVel).magnitude + "\n";
+
+            }
+
+            System.IO.File.AppendAllText(AcessDLL.dataPath, data);
         }
 
         private void DrawMomenta()
@@ -255,7 +280,7 @@ namespace BioCrowds
 
         public float3 scale = new float3(10f, 10f, 10f);
 
-        public int NLerp = 10;
+        public int NLerp = 1;
 
         public struct AgentGroup
         {
@@ -583,6 +608,10 @@ namespace BioCrowds
    
     public static class AcessDLL
     {
+
+        public static string dataPath = "out.txt";
+
+
         //private const string UNITYCOM = "..\\UnityCom\\Release\\UnityCom.dll";
         private const string UNITYCOM = "..\\UnityCom\\x64\\Release\\UnityCom";
         [DllImport(UNITYCOM, EntryPoint = "Add")]
