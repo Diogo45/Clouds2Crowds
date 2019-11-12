@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1992416518614676}
+  m_IsPrefabAsset: 1
+--- !u!1 &1992416518614676
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4080837592160650}
+  - component: {fileID: 114581930845807136}
+  m_Layer: 0
+  m_Name: Colour Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4080837592160650
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1992416518614676}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.69, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114581930845807136
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1992416518614676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a7f2fb7efcfa49e5be67c9dde95e073, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mat: {fileID: 2100000, guid: d93366c815783437abcf8032ab99990b, type: 2}
+  gradient:
+    serializedVersion: 2
+    key0: {r: 0.019090425, g: 0.14871565, b: 0.3679245, a: 1}
+    key1: {r: 0.2117647, g: 0.35868955, b: 0.59607846, a: 1}
+    key2: {r: 0.43805626, g: 0.5657142, b: 0.8679245, a: 0}
+    key3: {r: 0.17254901, g: 0.5433483, b: 0.67058825, a: 0}
+    key4: {r: 0.04705882, g: 0.2847519, b: 0.42352942, a: 0}
+    key5: {r: 0.0980392, g: 0.3099773, b: 0.3882353, a: 0}
+    key6: {r: 1, g: 1, b: 1, a: 0}
+    key7: {r: 1, g: 1, b: 1, a: 0}
+    ctime0: 9638
+    ctime1: 19853
+    ctime2: 24865
+    ctime3: 29684
+    ctime4: 40551
+    ctime5: 52814
+    ctime6: 57440
+    ctime7: 56509
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 7
+    m_NumAlphaKeys: 2
+  normalOffsetWeight: 0
