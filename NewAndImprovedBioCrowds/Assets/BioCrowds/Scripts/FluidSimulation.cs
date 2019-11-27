@@ -409,7 +409,7 @@ namespace BioCrowds
         private void FillFrameParticlePositions()
         {
 
-            float3 translate = new float3(50f,0f,25f);
+            float3 translate = new float3(-10f,0f,25f);
             
 
             float[] floatStream = new float[bufferSize];
