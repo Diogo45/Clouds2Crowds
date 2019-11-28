@@ -12,6 +12,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Threading;
+using System.Collections.Generic;
 
 
 namespace BioCrowds
@@ -262,9 +263,13 @@ namespace BioCrowds
     public class FluidParticleToCell : JobComponentSystem
     {
         #region VARIABLES
+        public ComputeBuffer fluidBuffer;
         public NativeList<float3> FluidPos;
         public NativeList<float3> FluidVel;
         public NativeMultiHashMap<int3, int> CellToParticles;
+
+        public Dictionary<int3, List<float3>> marchingCubes;
+
 
         public int frameSize = 100000;//particles
         public int bufferSize;// number of particles times the number of floats of data of each particle, for now 3 for 3 floats
@@ -279,7 +284,9 @@ namespace BioCrowds
         private const string memMapControl = "unityMemMapControl";
 
         public float3 scale = new float3(10f, 10f, 10f);
-
+        public float3 translate = new float3(50f, 0f, 25f);
+        public int numPointsPerAxis = 30;
+        public float stride = 1 / 30f;
         public int NLerp = 1;
 
         public struct AgentGroup
@@ -325,7 +332,39 @@ namespace BioCrowds
             }
         }
 
+        //struct FillMarchingCubesData : IJobParallelFor
+        //{
 
+        //    [ReadOnly] public NativeMultiHashMap<int3, int> CellToParticles;
+        //    [ReadOnly] public NativeList<float3> FluidPos;
+        //    [ReadOnly] public ComponentDataArray<CellName> CellName;
+        //    [ReadOnly] public float stride;
+
+        //    public void Execute(int index)
+        //    {
+        //        int3 cell = CellName[index].Value;
+
+        //        NativeMultiHashMapIterator<int3> it;
+        //        int particleID;
+
+        //        bool keepgoing = CellToParticles.TryGetFirstValue(cell, out particleID, out it);
+
+        //        if (!keepgoing) return;
+
+        //        //Testa em qual subcubo a particula esta
+        //        float3 particlePos = FluidPos[particleID];
+        //        int3 key = new int3((int)math.ceil(particlePos.x / stride), (int)math.ceil(particlePos.y / stride), (int)math.ceil(particlePos.z / stride));
+
+
+        //        //Faz pro resto
+        //        while (CellToParticles.TryGetNextValue(out particleID, ref it))
+        //        {
+                    
+        //        }
+
+
+        //    }
+        //}
 
         #region ON...
         protected override void OnStartRunning()
@@ -339,6 +378,11 @@ namespace BioCrowds
             }
 
 
+            fluidBuffer = GameObject.FindObjectOfType<MeshGenerator>().pointsBuffer;
+            marchingCubes = new Dictionary<int3, List<float3>>();
+            numPointsPerAxis = GameObject.FindObjectOfType<MeshGenerator>().numPointsPerAxis;
+            stride = 1f / numPointsPerAxis;
+
             CellToParticles = new NativeMultiHashMap<int3, int>(frameSize * (Settings.experiment.TerrainX * Settings.experiment.TerrainZ)/4, Allocator.Persistent);
             FluidPos = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
             FluidVel = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
@@ -350,6 +394,7 @@ namespace BioCrowds
             FluidPos.Dispose();
             FluidVel.Dispose();
             CellToParticles.Dispose();
+            
         }
 
 
@@ -409,7 +454,7 @@ namespace BioCrowds
         private void FillFrameParticlePositions()
         {
 
-            float3 translate = new float3(-10f,0f,25f);
+            
             
 
             float[] floatStream = new float[bufferSize];
@@ -424,7 +469,22 @@ namespace BioCrowds
                 float3 pos = new float3(x, y, z) * scale + translate;
                 FluidPos.Add(pos);
 
-                for(int l= 1; l < NLerp; l++)
+                int3 cube = new int3((int)math.floor(pos.x / (stride*100f)), (int)math.floor(pos.y / (stride * 10f)), (int)math.floor(pos.z / (stride * 50f)));
+                if (marchingCubes.TryGetValue(cube, out List<float3> values))
+                {
+                    values.Add(pos);
+                }
+                else
+                {
+                    //if(i < 200)
+                    //{
+                    //    Debug.Log(cube + " " + pos);
+                    //}
+                    marchingCubes.Add(cube, new List<float3>{pos});
+                }
+
+
+                for (int l= 1; l < NLerp; l++)
                 {
                     float xl = UnityEngine.Random.Range(0f, 0.5f);
                     float yl = UnityEngine.Random.Range(0f, 0.5f);
@@ -447,7 +507,7 @@ namespace BioCrowds
                 if (x == 0 && y == 0 & z == 0) continue;
 
                 //TODO: Parametrize the translation and scale]
-                float3 vel = new float3(x, y, z) * scale;
+                float3 vel = new float3(x, y, z);
                 FluidVel.Add(vel);
 
                 for (int l = 1; l < NLerp; l++)
@@ -497,7 +557,7 @@ namespace BioCrowds
             
             FluidPos.Clear();
             FillFrameParticlePositions();
-            Debug.Log(frame + " Fluid Pos Size: " + FluidPos.Length + " " + FluidPos.Capacity);
+            //Debug.Log(frame + " Fluid Pos Size: " + FluidPos.Length + " " + FluidPos.Capacity);
 
 
             for (int i = 0; i < cellGroup.Length; i++)
@@ -527,20 +587,54 @@ namespace BioCrowds
 
 
             string s = frame.ToString();
-            if (s.Length == 1) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame000" + frame + ".png");
-            if (s.Length == 2) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame00" + frame + ".png");
-            if (s.Length == 3) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame0" + frame + ".png");
-            if (s.Length == 4) ScreenCapture.CaptureScreenshot("D:\\Clouds2Crowds\\Clouds2Crowds\\NewAndImprovedBioCrowds\\Prints\\frame" + frame + ".png");
+            if (s.Length == 1) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0000" + frame + ".png");
+            if (s.Length == 2) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame000" + frame + ".png");
+            if (s.Length == 3) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame00" + frame + ".png");
+            if (s.Length == 4) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0" + frame + ".png");
+            if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
 
 
-            DebugFluid();
+            // DebugFluid();
+            DrawFluid();
             frame++;
 
             //Debug.Log(frame);
             return inputDeps;
         }
 
-           
+        int indexFromCoord(int x, int y, int z)
+        {
+            return z * numPointsPerAxis * numPointsPerAxis + y * numPointsPerAxis + x;
+        }
+
+        private void DrawFluid()
+        {
+            float4[] fluidData = new float4[(numPointsPerAxis * numPointsPerAxis * numPointsPerAxis)];
+            foreach (int3 key in marchingCubes.Keys)
+            {
+                List<float3> particles = marchingCubes[key];
+
+                //int3 cube = new int3((int)math.ceil(pos.x / (stride * 100f)), (int)math.ceil(pos.y / (stride * 10f)), (int)math.ceil(pos.z / (stride * 27f)));
+                float3 pos = new float3(key.x * (stride * 100f) + (stride/ 2), key.y * (stride * 10f) + (stride / 2), key.z * (stride * 50f) + (stride / 2));
+                
+                int normalX = key.x;//(int)math.floor((key.x /*- translate.x*/) / (stride * 100f));
+                int normalY = key.y; //(int)math.floor((key.y /*- translate.y*/) / (stride * 10f));
+                int normalZ = key.z;//(int)math.floor((key.z /*- translate.z*/) / (stride * 27f));
+
+                int3 normalizedCube = new int3(normalX, normalY, normalZ);
+
+                int index = indexFromCoord(normalizedCube.x, normalizedCube.y, normalizedCube.z);
+                if (index > fluidData.Length || index < 0)
+                {
+                    Debug.Log(index + " " + key + " " + normalizedCube + " " + pos);
+                }
+                fluidData[index] = new float4(pos, 1f);
+            }
+
+            fluidBuffer.SetData(fluidData);
+
+        }
+
         private void DebugFluid()
         {
             for (int i = 0; (i + NLerp) < FluidPos.Length; i+=NLerp)
