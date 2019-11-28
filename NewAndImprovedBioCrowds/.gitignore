@@ -36,3 +36,8 @@ sysinfo.txt
 *.unitypackage
 */Logs
 */Prints
+
+#Log Files
+Agents.txt
+out.txt
+FrameTimes.txt
