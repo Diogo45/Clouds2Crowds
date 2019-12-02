@@ -592,7 +592,7 @@ namespace BioCrowds
             if (s.Length == 3) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame00" + frame + ".png");
             if (s.Length == 4) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0" + frame + ".png");
             if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
-
+            
 
             // DebugFluid();
             DrawFluid();
@@ -705,8 +705,6 @@ namespace BioCrowds
 
         public static string dataPath = "out.txt";
 
-
-        //private const string UNITYCOM = "..\\UnityCom\\Release\\UnityCom.dll";
         private const string UNITYCOM = "..\\UnityCom\\x64\\Release\\UnityCom";
         [DllImport(UNITYCOM, EntryPoint = "Add")]
         public static extern float Add(float a, float b);
