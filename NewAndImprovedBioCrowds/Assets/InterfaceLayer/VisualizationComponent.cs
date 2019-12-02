@@ -39,11 +39,14 @@ public class VisualizationComponent : MonoBehaviour {
             else
             {
                 //var agnt = Instantiate(agentPrefabs[(int)Random.Range(0, agentPrefabs.Count)]);
-                var agnt = Instantiate(agentPrefabs[ar.CloudID % agentPrefabs.Count]);
+                //pega um prefab pra instanciar,  todos prefabs de uma cloud são iguais ?
+                var agnt = Instantiate(agentPrefabs[0]);
+                //inicializa componente visual com a posição atual
                 var va = agnt.GetComponent<VisualAgent>();
                 agentList.Add(ar.AgentID, va);
                 va.Initialize(ar.Position);
                 va.CurrPosition = (ar.Position);
+                va.force = Vector3.zero;
             }
 
         }

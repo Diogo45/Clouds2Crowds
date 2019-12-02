@@ -9,11 +9,16 @@ public class VisualAgent : MonoBehaviour {
 
     
     private Animator anim;
-    public Queue<float> moveMem;
+    private int moveMemLength = 30;
+    public Queue<float> moveMem;        //fila com deslocamentos/magnitudes dos últimos moveMemLength movimentos
     public float[] qview;
     private Vector3 currPosition;
     private bool updated;
     private bool initialized;
+
+
+    public Vector3 force;
+    //public Vector3[] forceByLimb;
 
     void Start()
     {
@@ -29,7 +34,7 @@ public class VisualAgent : MonoBehaviour {
 
         
         transform.Translate(speed * Time.deltaTime, Space.World);
-
+        
         
         */
         if (!updated)
@@ -38,18 +43,19 @@ public class VisualAgent : MonoBehaviour {
         }
 
         
-
+        //atualiza histórico de movimento
         Vector3 currMoveVect = currPosition - transform.position;
         moveMem.Dequeue();
-        //moveMem.Enqueue(currMoveVect);
         moveMem.Enqueue(currMoveVect.magnitude);
-        float speedSum = 0;
+
+
         //float angleDifSum = 0;
-        var prevV = moveMem.Peek();
-        foreach(float v in moveMem){
+        //var prevV = moveMem.Peek();       //não parece é usado em nenhum lugar
+        float speedSum = 0;
+        foreach (float v in moveMem){
             speedSum += v;
             //angleDifSum += Vector3.SignedAngle(prevV, v,Vector3.back);
-            prevV = v;
+            //prevV = v;
         }
         float presentAvgSpeed = (speedSum  / moveMem.Count) ;
         float estFutureSpeed = currMoveVect.magnitude;
@@ -92,15 +98,12 @@ public class VisualAgent : MonoBehaviour {
         currPosition = new Vector3(pos.x, pos.y, pos.z);
         transform.position = currPosition;
         updated = false;
-        for (int i = 0; i < 30; i++)
+        for (int i = 0; i < moveMemLength; i++)
         {
             moveMem.Enqueue(0);
         }
 
         initialized = true;
     }
-
-
-
 }
 

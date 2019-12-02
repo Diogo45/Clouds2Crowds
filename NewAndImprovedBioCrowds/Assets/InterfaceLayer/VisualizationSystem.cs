@@ -31,8 +31,8 @@ public class BioCrowdsPivotCorrectonatorSystemDeluxe : JobComponentSystem
         [ReadOnly] public readonly int Length;
     };
 
-    [Inject]public AnchorCorrectGroup m_AnchorGroup;
-    
+    [Inject] public AnchorCorrectGroup m_AnchorGroup;
+
     public struct PositionCorrectonatorJob : IJobParallelFor
     {
         public ComponentDataArray<Position> Position;
@@ -79,15 +79,13 @@ public class VisualizationSystem : ComponentSystem
     {
         public int AgentID;
         public float3 Position;
-        public int CloudID;
 
         public override string ToString()
         {
-            string head = string.Format("{0:D0};{1:D0};{2:F3};{3:F3};",
+            string head = string.Format("{0:D0};{1:F3};{2:F3}",
                 AgentID,
-                CloudID,
                 Position.x,
-                Position.y
+                Position.z
             );
             return head;
         }
@@ -114,7 +112,7 @@ public class VisualizationSystem : ComponentSystem
     public FrameRecord complete = new FrameRecord() { records = new List<AgentRecord>() };
     public FrameRecord processing = new FrameRecord() { records = new List<AgentRecord>() };
 
-    public IReadOnlyList<AgentRecord> CurrentAgentPositions { get { return complete.records.AsReadOnly(); } }
+    public List<AgentRecord> CurrentAgentPositions = new List<AgentRecord>();
     public int CurrentFrame { get { return complete.frame; } }
 
     public int frames = 0;
@@ -126,7 +124,6 @@ public class VisualizationSystem : ComponentSystem
     {
         public ComponentDataArray<Position> Position;
         [ReadOnly] public ComponentDataArray<AgentData> Data;
-        [ReadOnly] public SharedComponentDataArray<AgentCloudID> OwnerCloud;
         [ReadOnly] public readonly int Length;
     }
     [Inject] public AgentGroup agentGroup;
@@ -134,13 +131,13 @@ public class VisualizationSystem : ComponentSystem
     [Inject] public BioClouds.CellMarkSystem m_CellMarkSystem;
 
 
-    public struct CloudDataGroup
-    {
-        [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
-        [ReadOnly] public ComponentDataArray<Position> Position;
-        [ReadOnly] public readonly int Length;
-    }
-    [Inject] public CloudDataGroup m_CloudDataGroup;
+    //public struct CloudDataGroup
+    //{
+    //    [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
+    //    [ReadOnly] public ComponentDataArray<Position> Position;
+    //    [ReadOnly] public readonly int Length;
+    //}
+    //[Inject] public CloudDataGroup m_CloudDataGroup;
 
 
     protected override void OnUpdate()
@@ -226,6 +223,23 @@ public class VisualizationSystem : ComponentSystem
 
 
         #region BioCrowds DataRecording
+
+
+        for(int i = 0; i < agentGroup.Length; i++)
+        {
+            var agentRecord = new AgentRecord();
+            agentRecord.AgentID = agentGroup.Data[i].ID;
+            agentRecord.Position = agentGroup.Position[i].Value;
+            if ( !CurrentAgentPositions.Contains(agentRecord) )
+            {
+                CurrentAgentPositions.Add(agentRecord);
+            }
+            else
+            {
+                CurrentAgentPositions[i] = agentRecord;
+            }
+            
+        }
 
         //if (inst.MaxSimulationFrames == CurrentFrame - 1)
         //{
