@@ -507,7 +507,7 @@ namespace BioCrowds
                 if (x == 0 && y == 0 & z == 0) continue;
 
                 //TODO: Parametrize the translation and scale]
-                float3 vel = new float3(x, y, z) * scale;
+                float3 vel = new float3(x, y, z);
                 FluidVel.Add(vel);
 
                 for (int l = 1; l < NLerp; l++)
@@ -587,13 +587,14 @@ namespace BioCrowds
 
 
             string s = frame.ToString();
-            if (s.Length == 1) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame000" + frame + ".png");
-            if (s.Length == 2) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame00" + frame + ".png");
-            if (s.Length == 3) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0" + frame + ".png");
-            if (s.Length == 4) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
+            if (s.Length == 1) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0000" + frame + ".png");
+            if (s.Length == 2) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame000" + frame + ".png");
+            if (s.Length == 3) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame00" + frame + ".png");
+            if (s.Length == 4) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0" + frame + ".png");
+            if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
+            
 
-
-            //DebugFluid();
+            // DebugFluid();
             DrawFluid();
             frame++;
 
@@ -704,8 +705,6 @@ namespace BioCrowds
 
         public static string dataPath = "out.txt";
 
-
-        //private const string UNITYCOM = "..\\UnityCom\\Release\\UnityCom.dll";
         private const string UNITYCOM = "..\\UnityCom\\x64\\Release\\UnityCom";
         [DllImport(UNITYCOM, EntryPoint = "Add")]
         public static extern float Add(float a, float b);

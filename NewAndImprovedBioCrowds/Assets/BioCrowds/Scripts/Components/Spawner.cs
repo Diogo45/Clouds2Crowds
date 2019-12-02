@@ -115,6 +115,7 @@ namespace BioCrowds
                     float y = 0;
 
                     float3 g = spawnList.goal;
+                    //Debug.Log(i);
 
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
@@ -226,7 +227,6 @@ namespace BioCrowds
                     //float y = 0f;
                     //z = UnityEngine.Random.Range(z - 0.99f, z + 0.99f);
 
-                    
 
                     CommandBuffer.CreateEntity(index, AgentArchetype);
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
@@ -323,7 +323,7 @@ namespace BioCrowds
                         spawnOrigin = exp[i].min,
                         spawnDimensions = new float2(exp[i].max.x, exp[i].max.z)
                     };
-
+                    Settings.agentQuantity += exp[i].qtd;
                     parBuffer.Add(par);
                 }
                 AgentAtCellQuantity = new NativeArray<int>(parBuffer.Length, Allocator.Persistent);
