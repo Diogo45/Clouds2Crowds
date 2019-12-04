@@ -63,7 +63,7 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<AgentData> AgentData;
             [ReadOnly] public readonly int Length;
         }
-        [Inject] AgentGroup agentGroup;
+        [Inject] public AgentGroup agentGroup;
 
         struct MapCellToAgents : IJobParallelFor
         {
@@ -330,7 +330,6 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<AgentGoal> AgentGoals;
             [ReadOnly] public ComponentDataArray<Position> AgentPos;
 
-            [ReadOnly] public SharedComponentDataArray<AgentCloudID> AgentCloudID;
 
             [ReadOnly] public NativeMultiHashMap<int, float3> AgentMarkersMap;
             [ReadOnly] public NativeHashMap<int, float> AgentTotalW;
@@ -340,7 +339,6 @@ namespace BioCrowds
             public void Execute(int index)
             {
 
-                BioClouds.CloudIDPosRadius CloudPos;
 
 
                 float3 currentMarkerPosition;
@@ -384,6 +382,7 @@ namespace BioCrowds
 
                 AgentStep[index] = new AgentStep() { delta = moveStep };
 
+                Agent2StepMap.TryAdd(index, moveStep);
             }
         }
 
@@ -476,14 +475,6 @@ namespace BioCrowds
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
 
-            if (AgentIDToStep.Capacity < agentGroup.Length)
-            {
-                AgentIDToStep.Dispose();
-                AgentIDToStep = new NativeHashMap<int, float3>(agentGroup.Length * 2, Allocator.Persistent);
-            }
-            else
-                AgentIDToStep.Clear();
-
 
             if (Settings.experiment.BioCloudsEnabled)
             {
@@ -509,6 +500,8 @@ namespace BioCrowds
             }
             else
             {
+                AgentIDToStep.Clear();
+
                 var calculateMoveStepJob = new CalculateAgentMoveStep()
                 {
                     AgentData = agentGroup.AgentData,
@@ -517,7 +510,6 @@ namespace BioCrowds
                     AgentStep = agentGroup.AgentStep,
                     AgentTotalW = totalWeightSystem.AgentTotalMarkerWeight,
                     AgentMarkersMap = markerSystem.AgentMarkers,
-                    AgentCloudID = agentGroup.AgentCloudID, 
                     Agent2StepMap = AgentIDToStep.ToConcurrent()
                 };
                 
@@ -533,16 +525,13 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
-            int qtdAgts = Settings.agentQuantity;
-            AgentIDToStep = new NativeHashMap<int, float3>(qtdAgts * 2, Allocator.Persistent);
+            AgentIDToStep = new NativeHashMap<int, float3>(Settings.agentQuantity * 2, Allocator.Persistent);
         }
 
         protected override void OnStopRunning()
         {
             AgentIDToStep.Dispose();
-
         }
-
     }
 
     

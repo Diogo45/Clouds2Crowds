@@ -446,6 +446,8 @@ MonoBehaviour:
   - {fileID: 4300000, guid: f2ae37d811075c24b9d6f7115cb28e11, type: 3}
   - {fileID: 4300000, guid: 938a3b5529c38724dad59db6dc37cc1c, type: 3}
   Renderers: []
+  ScreenCap: 1
+  treeHeight: 4
 --- !u!114 &114135407987216626
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -511,8 +513,8 @@ MonoBehaviour:
     mesh: {fileID: 4300000, guid: f2ae37d811075c24b9d6f7115cb28e11, type: 3}
     material: {fileID: 2100000, guid: a568da71e8b5b03448d43b0c1cfb6747, type: 2}
     subMesh: 0
-    castShadows: 0
-    receiveShadows: 0
+    castShadows: 1
+    receiveShadows: 1
 --- !u!114 &114889874191659396
 MonoBehaviour:
   m_ObjectHideFlags: 1
