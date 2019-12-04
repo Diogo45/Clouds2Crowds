@@ -9,15 +9,15 @@ using UnityEngine;
 
 namespace BioCrowds
 {
-    [UpdateAfter(typeof(FluidMovementOnAgent))]
-    [UpdateBefore(typeof(AgentMovementSystem))]
+    [UpdateAfter(typeof(AgentMovementVectors))]
+    [UpdateBefore(typeof(FluidParticleToCell))]
     public class SpringSystem : JobComponentSystem
     {
 
-        private float InitialK = 50f;
+        private float InitialK = -500f;
         private float InitialKD = 3f;
         private float TimeStep = 0.0005f;
-        public int meia_iter = 1;
+
         [Inject] CellTagSystem cellTagSystem;
         [Inject] AgentMovementVectors agentMovementVectors;
 
@@ -44,9 +44,10 @@ namespace BioCrowds
 
         public NativeMultiHashMap<int, float3> AgentToForcesBeingApplied;
 
-        protected override void OnCreateManager()
+        protected override void OnStopRunning()
         {
-           
+            springs.Dispose();
+            AgentToForcesBeingApplied.Dispose();
         }
 
 
@@ -151,17 +152,19 @@ namespace BioCrowds
 
 
                 float3 a = F / 70f;
-                
+
                 currVel += a * TimeStep;
                 AgentIDToStep.Remove(index);
-                AgentIDToStep.TryAdd(index, currVel);
-
+                bool b = AgentIDToStep.TryAdd(index, currVel);
+                if (!b) Debug.Log("AAAAAAAA");
                 AgentStep[index] = new AgentStep { delta = currVel };
 
 
                 currPos += currVel * TimeStep;
                 AgentIDToPos.Remove(index);
-                AgentIDToPos.TryAdd(index, currPos);
+                b = AgentIDToPos.TryAdd(index, currPos);
+                if (!b) Debug.Log("BBBBBBBB");
+
             }
         }
 
@@ -181,6 +184,10 @@ namespace BioCrowds
                     springs = springs
                 };
 
+                var ComputeForcesHandle = ComputeForces.Schedule(springs.Length, Settings.BatchSize, inputDeps);
+
+                ComputeForcesHandle.Complete();
+
                 var ApplyForces = new ApplySpringForces
                 {
                     AgentIDToPos = cellTagSystem.AgentIDToPos,
@@ -190,12 +197,12 @@ namespace BioCrowds
                     AgentStep = agentGroup.AgentStep
                 };
 
-                var ComputeForcesHandle = ComputeForces.Schedule(springs.Length, Settings.BatchSize, inputDeps);
+                
 
                 var ApplyForcesJobHandle = ApplyForces.Schedule(agentGroup.Length, Settings.BatchSize, ComputeForcesHandle);
 
                 ApplyForcesJobHandle.Complete();
-
+                //Debug.Log("a");
 
             }
 

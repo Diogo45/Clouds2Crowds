@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -81,7 +83,7 @@ namespace BioCrowds
         public static CrowdExperiment experiment = new CrowdExperiment();
         
         public int treeHeight = 4;
-        public static bool QuadTreeActive = true; 
+        public static bool QuadTreeActive = true;
 
 
         public void Awake()
@@ -112,14 +114,14 @@ namespace BioCrowds
 
             var folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
 
-            var bioCrowdsFolder = System.IO.Directory.CreateDirectory(folder +  "\\VHLAB\\BioCrowds");
+            var bioCrowdsFolder = System.IO.Directory.CreateDirectory(folder + "\\VHLAB\\BioCrowds");
 
 
             string settingsFile = bioCrowdsFolder.FullName + "\\BaseExperiment.json";
             bool basisCase = System.IO.File.Exists(settingsFile);
             //Debug.Log(basisCase + " " + settingsFile);
 
-            if(!basisCase)
+            if (!basisCase)
                 System.IO.File.WriteAllText(settingsFile, JsonUtility.ToJson(experiment, true));
             else
             {
@@ -130,6 +132,18 @@ namespace BioCrowds
 
 
 
+        }
+
+
+        //TODO: Change to a visualization script
+        private void OnGUI()
+        {
+            var cellTagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
+            for (int i = 0; i < cellTagSystem.agentGroup.Length; i++)
+            {
+                Handles.Label(cellTagSystem.agentGroup.AgentPos[i].Value, cellTagSystem.agentGroup.AgentData[i].ID.ToString());
+
+            }
         }
 
         private void Update()

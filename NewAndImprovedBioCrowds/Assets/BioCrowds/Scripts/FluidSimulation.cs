@@ -288,6 +288,7 @@ namespace BioCrowds
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
         public int NLerp = 1;
+        private bool sync = false;
 
         public struct AgentGroup
         {
@@ -332,39 +333,7 @@ namespace BioCrowds
             }
         }
 
-        //struct FillMarchingCubesData : IJobParallelFor
-        //{
-
-        //    [ReadOnly] public NativeMultiHashMap<int3, int> CellToParticles;
-        //    [ReadOnly] public NativeList<float3> FluidPos;
-        //    [ReadOnly] public ComponentDataArray<CellName> CellName;
-        //    [ReadOnly] public float stride;
-
-        //    public void Execute(int index)
-        //    {
-        //        int3 cell = CellName[index].Value;
-
-        //        NativeMultiHashMapIterator<int3> it;
-        //        int particleID;
-
-        //        bool keepgoing = CellToParticles.TryGetFirstValue(cell, out particleID, out it);
-
-        //        if (!keepgoing) return;
-
-        //        //Testa em qual subcubo a particula esta
-        //        float3 particlePos = FluidPos[particleID];
-        //        int3 key = new int3((int)math.ceil(particlePos.x / stride), (int)math.ceil(particlePos.y / stride), (int)math.ceil(particlePos.z / stride));
-
-
-        //        //Faz pro resto
-        //        while (CellToParticles.TryGetNextValue(out particleID, ref it))
-        //        {
-                    
-        //        }
-
-
-        //    }
-        //}
+     
 
         #region ON...
         protected override void OnStartRunning()
@@ -383,10 +352,11 @@ namespace BioCrowds
             numPointsPerAxis = GameObject.FindObjectOfType<MeshGenerator>().numPointsPerAxis;
             stride = 1f / numPointsPerAxis;
 
-            CellToParticles = new NativeMultiHashMap<int3, int>(frameSize * (Settings.experiment.TerrainX * Settings.experiment.TerrainZ)/4, Allocator.Persistent);
+            CellToParticles = new NativeMultiHashMap<int3, int>(frameSize + ((Settings.experiment.TerrainX)/2 * (Settings.experiment.TerrainZ)/2), Allocator.Persistent);
+            //Debug.Log(CellToParticles.Capacity);
+
             FluidPos = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
             FluidVel = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
-            Debug.Log(frame +  " Fluid Pos Size: " + FluidPos.Length + " " +  FluidPos.Capacity);
         }
 
         protected override void OnDestroyManager()
@@ -401,15 +371,11 @@ namespace BioCrowds
         protected override void OnCreateManager()
         {
 
-
-
-
             OpenMemoryMap(memMapControl, 3);
 
             //frameSize * 3 as there are 3 floats for every particle
             bufferSize = frameSize * 3;
             //TODO: Get frameSize from FluidSimulator
-
 
             OpenMemoryMap(memMapName, bufferSize);
 
@@ -421,34 +387,7 @@ namespace BioCrowds
 
 
 
-        
-        private void BinParser(string file)
-        {
-
-            var folder = Application.dataPath;
-            var simFile = folder + "/" + Settings.experiment.FluidSimPath;
-            if (!System.IO.File.Exists(simFile))
-            {
-                Debug.Log("Fluid Simulation File Not Found: " + simFile);
-                this.Enabled = false;
-                World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                //TODO: disable every fluid sim system
-                return;
-            }
-            BinaryReader binread = new BinaryReader(File.Open(file, FileMode.Open));
-            frameSize = binread.ReadInt32();
-            Debug.Log("N Particles: " + frameSize);
-            Debug.Log("Lenght of File: " + (binread.BaseStream.Length - 3 * sizeof(float)));
-            while (binread.BaseStream.Position != (binread.BaseStream.Length - 3 * sizeof(float)))
-            {
-
-                float x = binread.ReadSingle();
-                float y = binread.ReadSingle();
-                float z = binread.ReadSingle();
-                //TODO: Parametrize the translation and scale
-                FluidPos.Add(new float3((x*10) + 35, y*10 + 20, z*20 + 25));
-            }     
-        }
+     
         #endregion
 
         private void FillFrameParticlePositions()
@@ -535,7 +474,7 @@ namespace BioCrowds
             AcessDLL.WriteMemoryShare(memMapControl, ControlData);
             //Debug.Log(ControlData[0]);
 
-            if (ControlData[1] > ControlData[0])
+            if (ControlData[1] > ControlData[0] && sync)
             {
                 Thread.Sleep(1);
                 return true;
@@ -546,7 +485,7 @@ namespace BioCrowds
             return false;
         }
 
-
+        
       
 
 
@@ -557,7 +496,7 @@ namespace BioCrowds
             
             FluidPos.Clear();
             FillFrameParticlePositions();
-            //Debug.Log(frame + " Fluid Pos Size: " + FluidPos.Length + " " + FluidPos.Capacity);
+            //Debug.Log(frame + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
 
 
             for (int i = 0; i < cellGroup.Length; i++)
@@ -594,8 +533,8 @@ namespace BioCrowds
             if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
             
 
-            // DebugFluid();
-            DrawFluid();
+            //DebugFluid();
+            //DrawFluid();
             frame++;
 
             //Debug.Log(frame);
