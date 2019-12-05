@@ -288,7 +288,7 @@ namespace BioCrowds
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
         public int NLerp = 1;
-        private bool sync = false;
+        private bool sync = false;       //turn of for performance
 
         public struct AgentGroup
         {
@@ -533,7 +533,7 @@ namespace BioCrowds
             if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
             
 
-            //DebugFluid();
+            //DebugFluid();       //turn of for performance
             //DrawFluid();
             frame++;
 

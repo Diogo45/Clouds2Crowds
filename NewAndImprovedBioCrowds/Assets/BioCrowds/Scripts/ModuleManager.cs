@@ -81,9 +81,7 @@ namespace BioCrowds
                 markerSystem.Enabled = true;
                 markerSystemQuadTree.Enabled = false;
             }
-
-            if (!modules.BioCloudsEnabled)
-                BioClouds.BioClouds.DeactivateBioclouds();
+            
 
             //TODO: Time Machine not in Scene
             //if (!TimeMachineSettings.experiment.Enabled && World.Active.GetExistingManager<AgentMovementTimeMachine>().Enabled)

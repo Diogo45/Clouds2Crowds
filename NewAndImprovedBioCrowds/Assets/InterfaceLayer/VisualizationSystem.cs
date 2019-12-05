@@ -9,68 +9,6 @@ using Unity.Jobs;
 using Unity.Burst;
 using BioCrowds;
 
-public struct BioCrowdsAnchor : IComponentData
-{
-    public float3 Pivot;
-}
-[UpdateAfter(typeof(BioCrowds.AgentMovementSystem))]
-public class BioCrowdsPivotCorrectonatorSystemDeluxe : JobComponentSystem
-{
-    private float3 currentPivot;
-    private bool dirtyFlag;
-
-    public void PivotChange(float3 newPivot)
-    {
-        currentPivot = newPivot;
-        dirtyFlag = true;
-    }
-    public struct AnchorCorrectGroup
-    {
-        public ComponentDataArray<Position> Position;
-        public ComponentDataArray<BioCrowdsAnchor> Pivot;
-        [ReadOnly] public readonly int Length;
-    };
-
-    [Inject] public AnchorCorrectGroup m_AnchorGroup;
-
-    public struct PositionCorrectonatorJob : IJobParallelFor
-    {
-        public ComponentDataArray<Position> Position;
-        public ComponentDataArray<BioCrowdsAnchor> Pivot;
-        [ReadOnly] public float3 newPivot;
-
-        public void Execute(int index)
-        {
-            float3 oldPos = Position[index].Value;
-            float3 oldPivot = Pivot[index].Pivot;
-
-            float3 newPos = WindowManager.ChangePivot(oldPos, oldPivot, newPivot);
-
-            //Debug.Log("Pivots : " + newPivot + oldPivot + " Positions: " + oldPos + newPos);
-
-            Position[index] = new Position { Value = newPos };
-            Pivot[index] = new BioCrowdsAnchor { Pivot = newPivot };
-        }
-    }
-
-    protected override JobHandle OnUpdate(JobHandle inputDeps)
-    {
-        if (!dirtyFlag)
-            return inputDeps;
-
-        var job = new PositionCorrectonatorJob
-        {
-            Position = m_AnchorGroup.Position,
-            Pivot = m_AnchorGroup.Pivot,
-            newPivot = currentPivot
-        };
-
-        var jobHandle = job.Schedule(m_AnchorGroup.Length, 1, inputDeps);
-        dirtyFlag = false;
-        return jobHandle;
-    }
-}
-
 [UpdateAfter(typeof(AgentMovementSystem)), UpdateAfter(typeof(EndFrameCounter))]
 public class VisualizationSystem : ComponentSystem
 {
@@ -118,47 +56,37 @@ public class VisualizationSystem : ComponentSystem
     public int frames = 0;
 
 
-    public List<BioClouds.Record> bioCloudsRecords = new List<BioClouds.Record>();
-
     public struct AgentGroup
     {
         public ComponentDataArray<Position> Position;
         [ReadOnly] public ComponentDataArray<AgentData> Data;
         [ReadOnly] public readonly int Length;
     }
-    [Inject] public AgentGroup agentGroup;
-
-    [Inject] public BioClouds.CellMarkSystem m_CellMarkSystem;
-
-
-    //public struct CloudDataGroup
-    //{
-    //    [ReadOnly] public ComponentDataArray<BioClouds.CloudData> CloudData;
-    //    [ReadOnly] public ComponentDataArray<Position> Position;
-    //    [ReadOnly] public readonly int Length;
-    //}
-    //[Inject] public CloudDataGroup m_CloudDataGroup;
-
+    [Inject] public AgentGroup agentGroup;         
 
     protected override void OnUpdate()
     {
-        //processing.records.Clear();
-        //processing.frame = frames++;
+        //clear processing list
+        processing.records.Clear();
+        processing.frame = ++frames;
 
-        //for (int i = 0; i < agentGroup.Length; i++)
-        //{
-        //    processing.records.Add(new AgentRecord
-        //    {
-        //        AgentID = agentGroup.Data[i].ID,
-        //        Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
-        //        CloudID = agentGroup.OwnerCloud[i].CloudID
-        //    });
-            
-        //}
+        for (int i = 0; i < agentGroup.Length; i++)
+        {
+            processing.records.Add(new AgentRecord
+            {
+                AgentID = agentGroup.Data[i].ID,
+                Position = agentGroup.Position[i].Value,
+                
+                //Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
+                //CloudID = agentGroup.OwnerCloud[i].CloudID
+            });
 
-        //FrameRecord aux = complete;
-        //complete = processing;
-        //processing = aux;
+        }
+
+        //update complete
+        FrameRecord aux = complete;
+        complete = processing;
+        processing = aux;
 
 
         //var inst = BioClouds.Parameters.Instance;
@@ -166,80 +94,11 @@ public class VisualizationSystem : ComponentSystem
         //if (!inst.SaveSimulationData)
         //    return;
 
-        //Data recording
-        #region BioClouds Datarecording
-        //NativeMultiHashMap<int, float3> cellmap = m_CellMarkSystem.cloudID2MarkedCellsMap;
-        //float3 currentCellPosition;
-        //NativeMultiHashMapIterator<int> it;
+
+        #region BioCrowds DataRecording update CurrentAgentPosition
+
+        // TODO pegar do complete essas posições ai ?
         
-        ////if ((inst.SaveDenstiies || inst.SavePositions))
-        ////{
-        //    if (inst.MaxSimulationFrames > CurrentFrame && CurrentFrame % inst.FramesForDataSave == 0)
-        //    {
-        //        for (int i = 0; i < m_CloudDataGroup.Length; i++)
-        //        {
-        //            List<int> cellIDs = new List<int>();
-
-        //            if (!cellmap.TryGetFirstValue(m_CloudDataGroup.CloudData[i].ID, out currentCellPosition, out it))
-        //                continue;
-        //            int2 grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
-        //            cellIDs.Add(GridConverter.GridCell2CellID(grid_cell));
-
-        //            while (cellmap.TryGetNextValue(out currentCellPosition, ref it))
-        //            {
-        //                grid_cell = GridConverter.PositionToGridCell(new float3(currentCellPosition.x, currentCellPosition.y, currentCellPosition.z));
-        //                cellIDs.Add(GridConverter.GridCell2CellID(grid_cell));
-        //            }
-
-        //            if(inst.IDToRecord == -1 || m_CloudDataGroup.CloudData[i].ID == inst.IDToRecord)
-        //            {
-        //                BioClouds.Record record = new BioClouds.Record(frames,
-        //                                                               m_CloudDataGroup.CloudData[i].ID,
-        //                                                               m_CloudDataGroup.CloudData[i].AgentQuantity,
-        //                                                               cellIDs.Count,
-        //                                                               cellIDs,
-        //                                                               m_CloudDataGroup.Position[i].Value,
-        //                                                               m_CloudDataGroup.CloudData[i].Radius
-        //                                        );
-
-        //                bioCloudsRecords.Add(record);
-        //            }
-                    
-        //        }
-        //    }
-
-        //    //if (inst.MaxSimulationFrames == CurrentFrame - 1)
-        //    //{
-        //    using (System.IO.StreamWriter file =
-        //    new System.IO.StreamWriter(inst.LogFilePath + "Clouds.txt", true))
-        //    {
-        //        foreach (BioClouds.Record record in bioCloudsRecords)
-        //            file.Write(record.ToString() + '\n');
-        //    }
-        //    bioCloudsRecords.Clear();
-        //    //}
-        ////}
-        #endregion
-
-
-        #region BioCrowds DataRecording
-
-
-        for(int i = 0; i < agentGroup.Length; i++)
-        {
-            var agentRecord = new AgentRecord();
-            agentRecord.AgentID = agentGroup.Data[i].ID;
-            agentRecord.Position = agentGroup.Position[i].Value;
-            if ( !CurrentAgentPositions.Contains(agentRecord) )
-            {
-                CurrentAgentPositions.Add(agentRecord);
-            }
-            else
-            {
-                CurrentAgentPositions[i] = agentRecord;
-            }
-            
-        }
 
         //if (inst.MaxSimulationFrames == CurrentFrame - 1)
         //{

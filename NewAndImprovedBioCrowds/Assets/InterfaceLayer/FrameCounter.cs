@@ -10,7 +10,7 @@ using Unity.Burst;
 using BioCrowds;
 using System.IO;
 
-[UpdateBefore(typeof(BioClouds.CloudTagDesiredQuantitySystem))]
+[UpdateBefore(typeof(CellTagSystem))]
 public class FrameCounter : ComponentSystem {
 
     public float currentTime;
