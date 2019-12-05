@@ -38,7 +38,7 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
-            Debug.Log(TimeMachineSettings.experiment.Enabled);
+            //Debug.Log(TimeMachineSettings.experiment.Enabled);
             if (TimeMachineSettings.experiment.Enabled)
             {
                 Debug.Log("TimeMachine On");

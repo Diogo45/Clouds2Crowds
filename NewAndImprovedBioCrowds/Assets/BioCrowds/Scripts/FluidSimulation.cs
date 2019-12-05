@@ -222,7 +222,6 @@ namespace BioCrowds
 
 
 
-            m_fluidParticleToCell.FluidVel.Clear();
 
             return applyMomentaHandle;
         }
@@ -355,8 +354,8 @@ namespace BioCrowds
             CellToParticles = new NativeMultiHashMap<int3, int>(frameSize + ((Settings.experiment.TerrainX)/2 * (Settings.experiment.TerrainZ)/2), Allocator.Persistent);
             //Debug.Log(CellToParticles.Capacity);
 
-            FluidPos = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
-            FluidVel = new NativeList<float3>(frameSize * NLerp, Allocator.Persistent);
+            FluidPos = new NativeList<float3>(frameSize, Allocator.Persistent);
+            FluidVel = new NativeList<float3>(frameSize, Allocator.Persistent);
         }
 
         protected override void OnDestroyManager()
@@ -393,72 +392,84 @@ namespace BioCrowds
         private void FillFrameParticlePositions()
         {
 
-            
-            
 
+            float[] floatStreamVel = new float[bufferSize];
+            AcessDLL.ReadMemoryShare(memMapNameVel, floatStreamVel);
+            
             float[] floatStream = new float[bufferSize];
             AcessDLL.ReadMemoryShare(memMapName, floatStream);
+
+            if (floatStream.Length != floatStreamVel.Length) Debug.Log("WTF");
+
             for (int i = 0; i < floatStream.Length - 2; i += 3)
             {
+
+                float xv = floatStreamVel[i];
+                float yv = floatStreamVel[i + 1];
+                float zv = -floatStreamVel[i + 2];
+
+                //if (xv == 0 && yv == 0 & zv == 0) continue;
+
+
                 float x = floatStream[i];
                 float y = floatStream[i + 1];
                 float z = -floatStream[i + 2];
+
                 if (x == 0 && y == 0 & z == 0) continue;
                 //TODO: Parametrize the translation and scale]
                 float3 pos = new float3(x, y, z) * scale + translate;
                 FluidPos.Add(pos);
 
-                int3 cube = new int3((int)math.floor(pos.x / (stride*100f)), (int)math.floor(pos.y / (stride * 10f)), (int)math.floor(pos.z / (stride * 50f)));
-                if (marchingCubes.TryGetValue(cube, out List<float3> values))
-                {
-                    values.Add(pos);
-                }
-                else
-                {
-                    //if(i < 200)
-                    //{
-                    //    Debug.Log(cube + " " + pos);
-                    //}
-                    marchingCubes.Add(cube, new List<float3>{pos});
-                }
-
-
-                for (int l= 1; l < NLerp; l++)
-                {
-                    float xl = UnityEngine.Random.Range(0f, 0.5f);
-                    float yl = UnityEngine.Random.Range(0f, 0.5f);
-                    float zl = UnityEngine.Random.Range(0f, 0.5f);
-                    float3 offset = new float3(xl,yl,zl);
-                    FluidPos.Add(pos + offset);
-                }
-                
-
-               
-            }
-
-            float[] floatStreamVel = new float[bufferSize];
-            AcessDLL.ReadMemoryShare(memMapNameVel, floatStreamVel);
-            for (int i = 0; i < floatStreamVel.Length - 2; i += 3)
-            {
-                float x = floatStreamVel[i];
-                float y = floatStreamVel[i + 1];
-                float z = -floatStreamVel[i + 2];
-                if (x == 0 && y == 0 & z == 0) continue;
-
                 //TODO: Parametrize the translation and scale]
-                float3 vel = new float3(x, y, z);
+                float3 vel = new float3(xv, yv, zv);
                 FluidVel.Add(vel);
 
-                for (int l = 1; l < NLerp; l++)
-                {
-                    float xl = UnityEngine.Random.Range(0f, 0.5f);
-                    float yl = UnityEngine.Random.Range(0f, 0.5f);
-                    float zl = UnityEngine.Random.Range(0f, 0.5f);
-                    float3 offset = new float3(xl, yl, zl);
-                    FluidVel.Add(vel + offset);
-                }
+
+                //int3 cube = new int3((int)math.floor(pos.x / (stride * 100f)), (int)math.floor(pos.y / (stride * 10f)), (int)math.floor(pos.z / (stride * 50f)));
+                //if (marchingCubes.TryGetValue(cube, out List<float3> values))
+                //{
+                //    values.Add(pos);
+                //}
+                //else
+                //{
+                //    //if(i < 200)
+                //    //{
+                //    //    Debug.Log(cube + " " + pos);
+                //    //}
+                //    marchingCubes.Add(cube, new List<float3> { pos });
+                //}
+
+
+                //for (int l= 1; l < NLerp; l++)
+                //{
+                //    float xl = UnityEngine.Random.Range(0f, 0.5f);
+                //    float yl = UnityEngine.Random.Range(0f, 0.5f);
+                //    float zl = UnityEngine.Random.Range(0f, 0.5f);
+                //    float3 offset = new float3(xl,yl,zl);
+                //    FluidPos.Add(pos + offset);
+                //}
+
+
 
             }
+
+
+            //for (int i = 0; i < floatStreamVel.Length - 2; i += 3)
+            //{
+                
+            //    if (x == 0 && y == 0 & z == 0) continue;
+
+                
+            //    for (int l = 1; l < NLerp; l++)
+            //    {
+            //        float xl = UnityEngine.Random.Range(0f, 0.5f);
+            //        float yl = UnityEngine.Random.Range(0f, 0.5f);
+            //        float zl = UnityEngine.Random.Range(0f, 0.5f);
+            //        float3 offset = new float3(xl, yl, zl);
+            //        FluidVel.Add(vel + offset);
+            //    }
+
+            //}
 
 
         }
@@ -495,8 +506,11 @@ namespace BioCrowds
             while (WaitForFluidSim()) { }
             
             FluidPos.Clear();
+            FluidVel.Clear();
+
             FillFrameParticlePositions();
-            //Debug.Log(frame + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
+
+            Debug.Log(frame + " FluidVel Size: " + FluidVel.Length + " " + FluidVel.Capacity + " FluidPos Size: " + FluidPos.Length + " " + FluidPos.Capacity + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
 
 
             for (int i = 0; i < cellGroup.Length; i++)
@@ -533,7 +547,11 @@ namespace BioCrowds
             if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
             
 
+<<<<<<< HEAD
             //DebugFluid();       //turn of for performance
+=======
+            DebugFluid();
+>>>>>>> dfc684fd8d8019b5e19925dd740374becbd941b1
             //DrawFluid();
             frame++;
 
@@ -576,31 +594,16 @@ namespace BioCrowds
 
         private void DebugFluid()
         {
-            for (int i = 0; (i + NLerp) < FluidPos.Length; i+=NLerp)
+            for (int i = 0; i < FluidPos.Length; i++)
             {
                 float magnitude = ((Vector3)FluidVel[i]).magnitude/50f;
                 Color c = Color.LerpUnclamped(Color.yellow, Color.red, magnitude);
 
-                Debug.DrawLine(FluidPos[i], FluidPos[i] + FluidVel[i]/100f, c);
+                Debug.DrawLine(FluidPos[i], FluidPos[i] + FluidVel[i]/75f, c);
             }
 
         }
 
-        private void DebugFluidParser()
-        {
-            int i = last;
-            for (; i < frameSize + last && i < FluidPos.Length; i++)
-            {
-                Debug.DrawLine(FluidPos[i], FluidPos[i] + new float3(0f, 0.01f, 0f), Color.blue);
-            }
-            last = i;
-
-            if (i >= FluidPos.Length - 1)
-            {
-                last = 0;
-                i = last;
-            }
-        }
 
 
         private void OpenMemoryMap(string mapName, int size)
