@@ -167,7 +167,7 @@ namespace BioCrowds
             float volume = 0.8f * math.pow(particleDiameter, 3);
             float density = 1000f;
             //particleMass = volume * density;
-            particleMass = 0.001f;
+            particleMass = 10.001f;
             Debug.Log("Particle Mass: " + particleMass);
 
         }
@@ -204,7 +204,7 @@ namespace BioCrowds
             momentaJobHandle.Complete();
 
             
-            //DrawMomenta();
+            DrawMomenta();
 
             ApplyFluidMomentaOnAgents applyMomenta = new ApplyFluidMomentaOnAgents
             {
@@ -256,7 +256,6 @@ namespace BioCrowds
 
     }
 
-    [UpdateAfter(typeof(Settings))]
     [UpdateAfter(typeof(AgentMovementVectors))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidParticleToCell : JobComponentSystem
@@ -287,7 +286,7 @@ namespace BioCrowds
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
         public int NLerp = 1;
-        private bool sync = false;       //turn of for performance
+        private bool sync = true;       //turn of for performance
 
         public struct AgentGroup
         {
@@ -510,7 +509,7 @@ namespace BioCrowds
 
             FillFrameParticlePositions();
 
-            Debug.Log(frame + " FluidVel Size: " + FluidVel.Length + " " + FluidVel.Capacity + " FluidPos Size: " + FluidPos.Length + " " + FluidPos.Capacity + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
+            //Debug.Log(frame + " FluidVel Size: " + FluidVel.Length + " " + FluidVel.Capacity + " FluidPos Size: " + FluidPos.Length + " " + FluidPos.Capacity + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
 
 
             for (int i = 0; i < cellGroup.Length; i++)
@@ -547,11 +546,8 @@ namespace BioCrowds
             if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
             
 
-<<<<<<< HEAD
-            //DebugFluid();       //turn of for performance
-=======
-            DebugFluid();
->>>>>>> dfc684fd8d8019b5e19925dd740374becbd941b1
+
+            //DebugFluid();
             //DrawFluid();
             frame++;
 
@@ -594,12 +590,17 @@ namespace BioCrowds
 
         private void DebugFluid()
         {
+            int j = 0;
             for (int i = 0; i < FluidPos.Length; i++)
             {
+                if( i % 1000 == 0)
+                {
+                    Debug.Log(FluidPos[i] + " " + FluidPos[i] + FluidVel[i] / 75f);
+                }
                 float magnitude = ((Vector3)FluidVel[i]).magnitude/50f;
                 Color c = Color.LerpUnclamped(Color.yellow, Color.red, magnitude);
 
-                Debug.DrawLine(FluidPos[i], FluidPos[i] + FluidVel[i]/75f, c);
+                Debug.DrawLine(FluidPos[i], FluidPos[i] + FluidVel[i]/75f);
             }
 
         }

@@ -376,7 +376,10 @@ namespace BioCrowds
 
                 AgentStep[index] = new AgentStep() { delta = moveStep };
 
-                Agent2StepMap.TryAdd(index, moveStep);
+                if(!Agent2StepMap.TryAdd(index, moveStep))
+                {
+                    Debug.Log("Crap");
+                }
             }
         }
         
