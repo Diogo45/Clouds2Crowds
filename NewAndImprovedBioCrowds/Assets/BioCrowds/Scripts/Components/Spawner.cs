@@ -26,11 +26,7 @@ namespace BioCrowds
     [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class AgentSpawner : JobComponentSystem
     {
-        private bool _ChangedWindow;
-        private void ChangedWindow(float3 newPosition, float2 newSize)
-        {
-            _ChangedWindow = true;
-        }
+
         // Holds how many agents have been spawned up to the i-th cell.
         public NativeArray<int> AgentAtCellQuantity;
 
@@ -44,6 +40,7 @@ namespace BioCrowds
 
         public struct Parameters
         {
+            //TODO: Remove Clouds
             public int cloud;
             public int qtdAgents;
             public float3 spawnOrigin;
@@ -55,7 +52,7 @@ namespace BioCrowds
 
         public static EntityArchetype AgentArchetype;
         public static MeshInstanceRenderer AgentRenderer;
-
+        protected EntityCommandBuffer command_buffer;
 
         public struct CellGroup
         {
@@ -67,7 +64,7 @@ namespace BioCrowds
         }
         [Inject] public CellGroup m_CellGroup;
 
-        public struct InicialSpawn : IJobParallelFor
+        public struct InitialSpawn : IJobParallelFor
         {
             [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
             [ReadOnly] public int LastIDUsed;
@@ -123,7 +120,7 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed/Settings.experiment.FramesPerSecond,
+                        MaxSpeed = maxSpeed / Settings.experiment.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -140,7 +137,7 @@ namespace BioCrowds
                         movStrAcumulator = 0f,
                         incStress = 0f
                     });
-                    
+
 
                     CommandBuffer.AddSharedComponent(index, AgentRenderer);
 
@@ -151,7 +148,7 @@ namespace BioCrowds
             }
         }
 
-       
+
 
 
         protected override void OnCreateManager()
@@ -169,7 +166,7 @@ namespace BioCrowds
                ComponentType.Create<NormalLifeData>(),
                ComponentType.Create<Counter>());
 
-            
+
 
 
         }
@@ -184,7 +181,7 @@ namespace BioCrowds
         {
             AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
             UpdateInjectedComponentGroups();
-            
+
             lastAgentId = 0;
             //If bioclouds isn't enabled we must use other job to spawn the agents
             //Here we get the necessary data from the experiment file
@@ -221,33 +218,35 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            
 
-                int lastValue = parBuffer[0].qtdAgents;
-                AgentAtCellQuantity[0] = 0;
-                for (int i = 1; i < parBuffer.Length; i++)
-                {
+            command_buffer = barrier.CreateCommandBuffer();
 
-                    AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
-                    Parameters spawnList = parBuffer[i-1];
-                    lastValue = spawnList.qtdAgents;
-                    
-                }
-                var job = new InicialSpawn
-                {
-                    AgentAtCellQuantity = AgentAtCellQuantity,
-                    CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                    parBuffer = parBuffer
-                };
 
-                var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
-                handle.Complete();
-                this.Enabled = false;
-                return handle;
+            int lastValue = parBuffer[0].qtdAgents;
+            AgentAtCellQuantity[0] = 0;
+            for (int i = 1; i < parBuffer.Length; i++)
+            {
 
-            
+                AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
+                Parameters spawnList = parBuffer[i - 1];
+                lastValue = spawnList.qtdAgents;
 
-}
+            }
+            var job = new InitialSpawn
+            {
+                AgentAtCellQuantity = AgentAtCellQuantity,
+                CommandBuffer = command_buffer.ToConcurrent(),
+                parBuffer = parBuffer
+            };
+
+            var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+            handle.Complete();
+            this.Enabled = false;
+            return handle;
+
+
+
+        }
 
     }
 
@@ -270,7 +269,7 @@ namespace BioCrowds
 
         }
         [Inject] AgentGroup agentGroup;
-        
+
 
         public struct CheckAreas : IJobParallelFor
         {
@@ -280,12 +279,12 @@ namespace BioCrowds
 
             public void Execute(int index)
             {
-            //    float3 posCloudCoord = WindowManager.Crowds2Clouds(AgtPos[index].Value);
-                
-            //    if (WindowManager.CheckDestructZone(posCloudCoord))
-            //    {
-            //        CommandBuffer.DestroyEntity(index, entities[index]);
-            //    }
+                //    float3 posCloudCoord = WindowManager.Crowds2Clouds(AgtPos[index].Value);
+
+                //    if (WindowManager.CheckDestructZone(posCloudCoord))
+                //    {
+                //        CommandBuffer.DestroyEntity(index, entities[index]);
+                //    }
             }
         }
 

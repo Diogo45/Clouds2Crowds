@@ -33,10 +33,7 @@ namespace BioCrowds
         public float3 delta;
     }
 
-    public struct Active : IComponentData
-    {
-        public int active;
-    }
+
 
 
 

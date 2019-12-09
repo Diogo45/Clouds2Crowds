@@ -1243,7 +1243,7 @@ GameObject:
   - component: {fileID: 1273202703}
   - component: {fileID: 1273202700}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: ParticleSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1286,7 +1286,7 @@ ParticleSystemRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_RenderMode: 4
+  m_RenderMode: 2
   m_SortMode: 1
   m_MinParticleSize: 0
   m_MaxParticleSize: 0.5
