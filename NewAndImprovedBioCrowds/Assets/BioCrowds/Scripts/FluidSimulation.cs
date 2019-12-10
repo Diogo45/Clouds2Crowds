@@ -12,7 +12,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Threading;
-
+using static FluidSettings;
 
 namespace BioCrowds
 {
@@ -26,17 +26,19 @@ namespace BioCrowds
         public float mass;
     }
 
-    [UpdateAfter(typeof(FluidSpawner))]
+    [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidParticleToCell))]
-    public class FluidSpawnerBarrier : BarrierSystem { }
+    public class FluidBarrier : BarrierSystem { }
 
     [UpdateAfter(typeof(SpawnAgentBarrier))]
     [UpdateBefore(typeof(FluidParticleToCell))]
-    public class FluidSpawner : JobComponentSystem
+    public class FluidInitializationSystem : JobComponentSystem
     {
 
-        [Inject] public FluidSpawnerBarrier spawnerBarrier;
- 
+        [Inject] public FluidBarrier spawnerBarrier;
+
+        NativeArray<CubeObstacleData> data; 
+
 
         public struct AgentGroup
         {
@@ -59,16 +61,40 @@ namespace BioCrowds
 
                 float tau = (float)r.NextDouble() * 0.4f + 0.4f;
 
-                CommandBuffer.AddComponent<FluidData>(index, entities[index], new FluidData { tau = tau });
-
+                CommandBuffer.AddComponent(index, entities[index], new FluidData { tau = tau });
 
 
             }
         }
 
+        public struct SpawnFluidObstacles : IJobParallelFor
+        {
+            public void Execute(int index)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+
+        protected override void OnCreateManager()
+        {
+            var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+
+
+
+            var AgentArchetype = entityManager.CreateArchetype(
+               ComponentType.Create<Position>(),
+               ComponentType.Create<Rotation>(),
+               ComponentType.Create<AgentData>(),
+               ComponentType.Create<AgentGoal>(),
+               ComponentType.Create<Counter>());
+        }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+
+            data = new NativeArray<CubeObstacleData>(GetObstacleData(), Allocator.Persistent);
+
 
             var FluidDataJob = new AddFluidData
             {
@@ -77,12 +103,21 @@ namespace BioCrowds
             };
 
 
+
+
+
             var FluidDataHandle = FluidDataJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
 
             FluidDataHandle.Complete();
 
             this.Enabled = false;
             return inputDeps;
+
+        }
+
+        private CubeObstacleData[] GetObstacleData()
+        {
+            return Settings.instance.getFluid().cubeObstacleDatas;
 
         }
     }
@@ -118,11 +153,11 @@ namespace BioCrowds
         {
             [ReadOnly] public ComponentDataArray<Position> AgentPos;
             [ReadOnly] public ComponentDataArray<AgentData> AgentData;
-            public ComponentDataArray<FluidData> FluidData; 
+            public ComponentDataArray<FluidData> FluidData;
             public ComponentDataArray<AgentStep> AgentStep;
             [ReadOnly] public readonly int Length;
         }
-        [Inject] AgentGroup agentGroup;
+        [Inject] public AgentGroup agentGroup;
 
 
         public struct CellGroup
@@ -214,7 +249,7 @@ namespace BioCrowds
                 //tau is how much the fluid acts on the agent, or (1 - tau) is how much the agent resists the fluid
                 float tau = FluidData[index].tau;
                 //TOTAL INELASTIC COLLISION
-                OldAgentVel = (OldAgentVel * agentMass + tau * particleVel) / (agentMass + particleSetMass);
+                OldAgentVel = (OldAgentVel * agentMass + tau * particleVel) / (agentMass + tau * particleSetMass);
 
                 //HACK: For now, while we dont have ragdolls or the buoyancy(upthrust) force, not making use of the y coordinate 
                 OldAgentVel.y = 0f;
@@ -355,11 +390,8 @@ namespace BioCrowds
         //[timeSPH, timeBC, frameSize]
         private const string memMapControl = "unityMemMapControl";
 
-        public float3 scale = new float3(10f, 10f, 10f);
-        public float3 translate = new float3(50f, 0f, 25f);
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
-        public int NLerp = 1;
         private bool sync = true;       //turn of for performance
 
         public struct AgentGroup
@@ -393,7 +425,9 @@ namespace BioCrowds
 
                 float3 ppos = FluidPos[index];
                 //float3 ppos = FluidPos[index + (frameSize - 1) * frame];
-                if (ppos.y > thresholdHeigth || ppos.x > Settings.experiment.TerrainX || ppos.z > Settings.experiment.TerrainZ) return;
+                if (ppos.y > thresholdHeigth ||
+                    ppos.x > Settings.experiment.TerrainX || ppos.z > Settings.experiment.TerrainZ ||
+                    ppos.x < 0f || ppos.z < 0f) return;
 
                 int3 cell = new int3((int)math.floor(FluidPos[index].x / 2.0f) * 2 + 1, 0,
                                      (int)math.floor(FluidPos[index].z / 2.0f) * 2 + 1);
@@ -462,9 +496,11 @@ namespace BioCrowds
 
         #endregion
 
+
+
         private void FillFrameParticlePositions()
         {
-
+            var settings = Settings.instance.getFluid();
 
             float[] floatStreamVel = new float[bufferSize];
             AcessDLL.ReadMemoryShare(memMapNameVel, floatStreamVel);
@@ -490,7 +526,7 @@ namespace BioCrowds
 
                 if (x == 0 && y == 0 & z == 0) continue;
                 //TODO: Parametrize the translation and scale]
-                float3 pos = new float3(x, y, z) * scale + translate;
+                float3 pos = new float3(x, y, z) * settings.scale + settings.translate;
                 FluidPos.Add(pos);
 
                 //TODO: Parametrize the translation and scale]
@@ -583,7 +619,7 @@ namespace BioCrowds
 
             FillFrameParticlePositions();
 
-            //Debug.Log(frame + " FluidVel Size: " + FluidVel.Length + " " + FluidVel.Capacity + " FluidPos Size: " + FluidPos.Length + " " + FluidPos.Capacity + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
+            Debug.Log(frame + " FluidVel Size: " + FluidVel.Length + " " + FluidVel.Capacity + " FluidPos Size: " + FluidPos.Length + " " + FluidPos.Capacity + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
 
 
             for (int i = 0; i < cellGroup.Length; i++)

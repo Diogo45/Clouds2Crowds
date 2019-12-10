@@ -183,38 +183,30 @@ namespace BioCrowds
             UpdateInjectedComponentGroups();
 
             lastAgentId = 0;
-            //If bioclouds isn't enabled we must use other job to spawn the agents
-            //Here we get the necessary data from the experiment file
-            if (!Settings.experiment.BioCloudsEnabled)
+
+            var exp = Settings.experiment.SpawnAreas;
+
+            parBuffer = new NativeList<Parameters>(exp.Length, Allocator.Persistent);
+
+            for (int i = 0; i < exp.Length; i++)
             {
-                var exp = Settings.experiment.SpawnAreas;
-
-                parBuffer = new NativeList<Parameters>(exp.Length, Allocator.Persistent);
-
-                for (int i = 0; i < exp.Length; i++)
+                Parameters par = new Parameters
                 {
-                    Parameters par = new Parameters
-                    {
-                        cloud = i,
-                        goal = exp[i].goal,
-                        maxSpeed = exp[i].maxSpeed,
-                        qtdAgents = exp[i].qtd,
-                        spawnOrigin = exp[i].min,
-                        spawnDimensions = new float2(exp[i].max.x, exp[i].max.z)
-                    };
-                    Settings.agentQuantity += exp[i].qtd;
-                    parBuffer.Add(par);
-                }
-                AgentAtCellQuantity = new NativeArray<int>(parBuffer.Length, Allocator.Persistent);
-
+                    cloud = i,
+                    goal = exp[i].goal,
+                    maxSpeed = exp[i].maxSpeed,
+                    qtdAgents = exp[i].qtd,
+                    spawnOrigin = exp[i].min,
+                    spawnDimensions = new float2(exp[i].max.x, exp[i].max.z)
+                };
+                Settings.agentQuantity += exp[i].qtd;
+                parBuffer.Add(par);
             }
-            else
-            {
-                AgentAtCellQuantity = new NativeArray<int>(m_CellGroup.Length, Allocator.Persistent);
+            AgentAtCellQuantity = new NativeArray<int>(parBuffer.Length, Allocator.Persistent);
 
-            }
 
         }
+
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
@@ -254,6 +246,7 @@ namespace BioCrowds
     [UpdateAfter(typeof(AgentDespawner))]
     public class DespawnAgentBarrier : BarrierSystem { }
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(AgentMovementSystem))]
     public class AgentDespawner : JobComponentSystem
     {
