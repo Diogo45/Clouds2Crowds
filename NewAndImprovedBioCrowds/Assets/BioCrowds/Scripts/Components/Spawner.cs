@@ -41,7 +41,7 @@ namespace BioCrowds
         public struct Parameters
         {
             //TODO: Remove Clouds
-            public int cloud;
+            //public int cloud;
             public int qtdAgents;
             public float3 spawnOrigin;
             public float2 spawnDimensions;
@@ -195,7 +195,6 @@ namespace BioCrowds
                 {
                     Parameters par = new Parameters
                     {
-                        cloud = i,
                         goal = exp[i].goal,
                         maxSpeed = exp[i].maxSpeed,
                         qtdAgents = exp[i].qtd,

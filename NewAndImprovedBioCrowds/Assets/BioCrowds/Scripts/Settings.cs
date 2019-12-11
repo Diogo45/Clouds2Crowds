@@ -138,12 +138,19 @@ namespace BioCrowds
         //TODO: Change to a visualization script
         private void OnGUI()
         {
-            var cellTagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
-            for (int i = 0; i < cellTagSystem.agentGroup.Length; i++)
+            //var cellTagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
+            //for (int i = 0; i < cellTagSystem.agentGroup.Length; i++)
+            //{
+            //    Handles.Label(cellTagSystem.agentGroup.AgentPos[i].Value, cellTagSystem.agentGroup.AgentData[i].ID.ToString());
+
+            //}
+            var cellTagSystem = World.Active.GetOrCreateManager<CouplingSystem>();
+            for (int i = 0; i < cellTagSystem.CouplingData.Length; i++)
             {
-                Handles.Label(cellTagSystem.agentGroup.AgentPos[i].Value, cellTagSystem.agentGroup.AgentData[i].ID.ToString());
+                Handles.Label(cellTagSystem.CouplingData.Position[i].Value, cellTagSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
 
             }
+
         }
 
         private void Update()

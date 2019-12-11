@@ -27,6 +27,78 @@ namespace BioCrowds
     }
 
     [UpdateAfter(typeof(FluidSpawner))]
+    [UpdateBefore(typeof(FluidMovementOnAgent))]
+    public class AgentMassMapSystem : JobComponentSystem
+    {
+
+        public struct AgentGroup
+        {
+            [ReadOnly] public ComponentDataArray<PhysicalData> PhysicalData;
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            [ReadOnly] public readonly int Length;
+        }
+
+
+
+        public NativeHashMap<int, float> AgentID2MassMap;
+        [Inject] AgentGroup m_agentGroup;
+
+        public struct FillMassMapJob : IJobParallelFor
+        {
+            [ReadOnly]  public ComponentDataArray<PhysicalData> PhysicalData;
+            [ReadOnly]  public ComponentDataArray<AgentData> AgentData;
+            [WriteOnly] public NativeHashMap<int, float>.Concurrent AgentMassMap;
+
+
+            public void Execute(int index)
+            {
+                AgentMassMap.TryAdd(AgentData[index].ID, PhysicalData[index].mass);
+            }
+        }
+
+
+        protected override void OnStartRunning()
+        {
+            AgentID2MassMap = new NativeHashMap<int, float>(0, Allocator.Persistent);
+            Debug.Log("MapCreated");
+        }
+
+        protected override void OnStopRunning()
+        {
+            AgentID2MassMap.Dispose();
+        }
+
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
+            if (AgentID2MassMap.Length != m_agentGroup.Length)
+            {
+                Debug.Log("Map Is Created");
+                AgentID2MassMap.Dispose();
+                AgentID2MassMap = new NativeHashMap<int, float>(m_agentGroup.Length, Allocator.Persistent);
+
+                var massJob = new FillMassMapJob()
+                {
+                    AgentData = m_agentGroup.AgentData,
+                    AgentMassMap = AgentID2MassMap.ToConcurrent(),
+                    PhysicalData = m_agentGroup.PhysicalData
+                };
+
+                var massjob_handle = massJob.Schedule(m_agentGroup.Length, Settings.BatchSize);
+                massjob_handle.Complete();
+                return massjob_handle;
+
+            }
+
+
+
+            return inputDeps;
+
+
+        }
+    }
+
+
+    [UpdateAfter(typeof(FluidSpawner))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class FluidSpawnerBarrier : BarrierSystem { }
 
@@ -60,6 +132,8 @@ namespace BioCrowds
                 float tau = (float)r.NextDouble() * 0.4f + 0.4f;
 
                 CommandBuffer.AddComponent<FluidData>(index, entities[index], new FluidData { tau = tau });
+                CommandBuffer.AddComponent<PhysicalData>(index, entities[index], new PhysicalData { mass = 70f });
+                CommandBuffer.AddComponent<CouplingComponent>(index, entities[index], new CouplingComponent { CouplingDistance = 1f, CurrentCouplings = 0, MaxCouplings = 2 });
 
 
 
@@ -88,7 +162,7 @@ namespace BioCrowds
     }
 
 
-    [UpdateAfter(typeof(FluidParticleToCell))]
+    [UpdateAfter(typeof(FluidParticleToCell)), UpdateAfter(typeof(AgentMassMapSystem))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidMovementOnAgent : JobComponentSystem
     {
@@ -103,7 +177,7 @@ namespace BioCrowds
         //Calculate based on the original SplishSplash code, mass = volume * density
         //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
         private static float particleMass = 0.0001f;//kg
-        private static float agentMass = 65f;
+        private static float agentMass = 65f; //TODO USAR MASSA COMPONENTAL
         private static float timeStep = 1f / Settings.experiment.FramesPerSecond;
         private float particleRadius = 0.025f;
 
@@ -240,7 +314,7 @@ namespace BioCrowds
             float volume = 0.8f * math.pow(particleDiameter, 3);
             float density = 1000f;
             //particleMass = volume * density;
-            particleMass = 10.001f;
+            particleMass = 0.001f;
             Debug.Log("Particle Mass: " + particleMass);
 
         }
@@ -277,7 +351,7 @@ namespace BioCrowds
             momentaJobHandle.Complete();
 
 
-            DrawMomenta();
+            //DrawMomenta();
 
             ApplyFluidMomentaOnAgents applyMomenta = new ApplyFluidMomentaOnAgents
             {
