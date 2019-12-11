@@ -13,6 +13,10 @@ public class ParticleSystemVisualization : MonoBehaviour {
     public float size = 0.25f;
     private void Start()
     {
+        if (!BioCrowds.Settings.experiment.FluidSim)
+        {
+            this.enabled = false;
+        }
         particle_system = GetComponent<ParticleSystem>();
 
         fluidSimulation = World.Active.GetOrCreateManager<BioCrowds.FluidParticleToCell>();

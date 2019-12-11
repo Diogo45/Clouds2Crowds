@@ -1039,6 +1039,8 @@ MonoBehaviour:
   Renderers: []
   ScreenCap: 1
   treeHeight: 4
+  ModuleSettings:
+  - {fileID: 11400000, guid: 6e3f75dcb889ef043a473eb2fe7a85d9, type: 2}
 --- !u!4 &661593540
 Transform:
   m_ObjectHideFlags: 0

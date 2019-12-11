@@ -22,11 +22,18 @@ namespace BioCrowds
             public float maxSpeed;
         }
 
+        public struct ObstacleArea
+        {
+            public float3 start;
+            public float3 end;
+        }
+
+
 
         public float agentRadius = 1f;
         public float markerRadius = 0.1f;
         public float MarkerDensity = 0.65f;
-        public int TerrainX = 50;
+        public int TerrainX = 100;
         public int TerrainZ = 50;
         public float FramesPerSecond = 32f;
 
@@ -34,13 +41,12 @@ namespace BioCrowds
         public bool showMarkers = false;
         public bool showCells = false;
 
-       
-      
-        
+
+
         public SpawnArea[] SpawnAreas = { new SpawnArea{qtd = 50,
-                                         goal = new float3{x = 25, y = 0, z = 50},
-                                         max = new int3 {x = 15, y = 0, z = 50},
-                                         min = new int3 {x = 0, y = 0, z = 0 },
+                                         goal = new float3{x = 100, y = 0, z = 25},
+                                         max = new int3 {x = 15, y = 0, z = 40},
+                                         min = new int3 {x = 0, y = 0, z = 10 },
                                          maxSpeed = 1.3f}
                                         };
 
@@ -50,11 +56,11 @@ namespace BioCrowds
         public bool BioCloudsEnabled = false;
 
         public bool FluidSim = false;
-        public string FluidSimPath = "out.bin";
+        //TODO: Make path relative to project
 
         public bool SpringSystem = false;
-        public int2[] SpringConnections = { new int2(1, 2), new int2(4, 3)};
-        
+        public int2[] SpringConnections = { new int2(1, 2), new int2(4, 3) };
+
 
         public bool WayPointOn = false;
         public float3[] WayPoints = new float3[]{
@@ -68,7 +74,7 @@ namespace BioCrowds
 
     }
 
-    
+
     public class Settings : MonoBehaviour
     {
         public static Settings instance;
@@ -81,9 +87,15 @@ namespace BioCrowds
         public static int agentQuantity = 0;
         public bool ScreenCap = true;
         public static CrowdExperiment experiment = new CrowdExperiment();
-        
+
         public int treeHeight = 4;
         public static bool QuadTreeActive = true;
+
+        [SerializeField]
+        public List<ISettings> ModuleSettings;
+
+        //HACK: Change get method 
+        public FluidSettings getFluid() => ((FluidSettings)Settings.instance.ModuleSettings[0]);
 
 
         public void Awake()
@@ -149,6 +161,7 @@ namespace BioCrowds
             {
                 Handles.Label(cellTagSystem.CouplingData.Position[i].Value, cellTagSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
 
+                //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
             }
 
         }
