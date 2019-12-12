@@ -150,14 +150,20 @@ namespace BioCrowds
         //TODO: Change to a visualization script
         private void OnGUI()
         {
-            var cellTagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
-            var fluidSystem = World.Active.GetOrCreateManager<FluidMovementOnAgent>();
-            for (int i = 0; i < fluidSystem.agentGroup.Length; i++)
+            //var cellTagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
+            //for (int i = 0; i < cellTagSystem.agentGroup.Length; i++)
+            //{
+            //    Handles.Label(cellTagSystem.agentGroup.AgentPos[i].Value, cellTagSystem.agentGroup.AgentData[i].ID.ToString());
+
+            //}
+            var cellTagSystem = World.Active.GetOrCreateManager<CouplingSystem>();
+            for (int i = 0; i < cellTagSystem.CouplingData.Length; i++)
             {
-                Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value + (float3)Vector3.up * 2f, fluidSystem.agentGroup.AgentData[i].ID.ToString());
+                Handles.Label(cellTagSystem.CouplingData.Position[i].Value, cellTagSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
 
                 //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
             }
+
         }
 
         private void Update()
