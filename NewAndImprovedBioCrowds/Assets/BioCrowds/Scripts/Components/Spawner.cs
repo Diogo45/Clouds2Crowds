@@ -28,7 +28,7 @@ namespace BioCrowds
     {
 
         // Holds how many agents have been spawned up to the i-th cell.
-        public NativeArray<int> AgentAtCellQuantity;
+        public NativeArray<int> AgentAtGroupQuantity;
 
 
         [Inject] public SpawnAgentBarrier barrier;
@@ -173,7 +173,7 @@ namespace BioCrowds
 
         protected override void OnStopRunning()
         {
-            AgentAtCellQuantity.Dispose();
+            AgentAtGroupQuantity.Dispose();
             parBuffer.Dispose();
         }
 
@@ -202,7 +202,7 @@ namespace BioCrowds
                 Settings.agentQuantity += exp[i].qtd;
                 parBuffer.Add(par);
             }
-            AgentAtCellQuantity = new NativeArray<int>(parBuffer.Length, Allocator.Persistent);
+            AgentAtGroupQuantity = new NativeArray<int>(parBuffer.Length, Allocator.Persistent);
 
 
         }
@@ -215,21 +215,23 @@ namespace BioCrowds
 
 
             int lastValue = parBuffer[0].qtdAgents;
-            AgentAtCellQuantity[0] = 0;
+            AgentAtGroupQuantity[0] = 0;
             for (int i = 1; i < parBuffer.Length; i++)
             {
 
-                AgentAtCellQuantity[i] = lastValue + AgentAtCellQuantity[i - 1];
+                AgentAtGroupQuantity[i] = lastValue + AgentAtGroupQuantity[i - 1];
                 Parameters spawnList = parBuffer[i - 1];
                 lastValue = spawnList.qtdAgents;
 
             }
             var job = new InitialSpawn
             {
-                AgentAtCellQuantity = AgentAtCellQuantity,
+                AgentAtCellQuantity = AgentAtGroupQuantity,
                 CommandBuffer = command_buffer.ToConcurrent(),
                 parBuffer = parBuffer
             };
+
+            lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
 
             var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
             handle.Complete();

@@ -154,9 +154,9 @@ namespace BioCrowds
             var fluidSystem = World.Active.GetOrCreateManager<FluidMovementOnAgent>();
             for (int i = 0; i < fluidSystem.agentGroup.Length; i++)
             {
-                //Handles.Label(cellTagSystem.agentGroup.AgentPos[i].Value + (float3)Vector3.up * 2f, cellTagSystem.agentGroup.AgentData[i].ID.ToString());
+                Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value + (float3)Vector3.up * 2f, fluidSystem.agentGroup.AgentData[i].ID.ToString());
 
-                Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
+                //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
             }
         }
 

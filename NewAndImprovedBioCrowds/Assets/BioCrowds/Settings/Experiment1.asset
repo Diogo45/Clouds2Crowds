@@ -19,8 +19,9 @@ MonoBehaviour:
   scale:
     x: 10
     y: 10
-    z: 20.28
+    z: 10
   translate:
     x: 50
     y: 0
     z: 25
+  FluidSimPath: D:\BackUp\SPlisHSPlasH\data\Scenes\Emitter.json

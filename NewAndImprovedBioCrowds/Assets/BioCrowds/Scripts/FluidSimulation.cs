@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Collections;
 using System.Threading;
 using static FluidSettings;
+using Unity.Rendering;
 
 namespace BioCrowds
 {
@@ -34,10 +35,17 @@ namespace BioCrowds
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class FluidInitializationSystem : JobComponentSystem
     {
-
+        [Inject] public AgentSpawner agentSpawner;
         [Inject] public FluidBarrier spawnerBarrier;
 
-        NativeArray<CubeObstacleData> data; 
+        NativeArray<CubeObstacleData> data;
+        public static EntityArchetype AgentArchetype;
+        public static MeshInstanceRenderer AgentRenderer;
+
+        public NativeArray<int> AgentAtObstacle;
+        public int LastIDUsed;
+
+        public static FluidSettings settings;
 
 
         public struct AgentGroup
@@ -69,9 +77,52 @@ namespace BioCrowds
 
         public struct SpawnFluidObstacles : IJobParallelFor
         {
+            public NativeArray<CubeObstacleData> data;
+            public EntityCommandBuffer.Concurrent CommandBuffer;
+
+            [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
+            [ReadOnly] public int LastIDUsed;
+
+            
+
             public void Execute(int index)
             {
-                throw new NotImplementedException();
+                //TODO: Make cube size by dimension
+                float halfCubeSizeX = (1f * settings.scale.x) / 2f;
+                float halfCubeSizeZ = (1f * settings.scale.z) / 2f;
+
+                float xi = (data[index].position.x * settings.scale.x + settings.translate.x);
+                float zi = (data[index].position.z * settings.scale.z + settings.translate.z);
+
+                float maxX = xi + halfCubeSizeX;
+                float maxZ = zi + halfCubeSizeZ;
+
+                float minX = xi - halfCubeSizeX;
+                float minZ = zi - halfCubeSizeZ;
+
+                int i = AgentAtCellQuantity[index] + LastIDUsed;
+
+                for (float x = minX ; x < maxX; x++)
+                {
+                    for (float z = minZ; z < maxZ; z++)
+                    {
+                        float3 pos = new float3(x, 0f, z);
+                        float3 g = pos;
+                        CommandBuffer.CreateEntity(index, AgentArchetype);
+                        CommandBuffer.SetComponent(index, new Position { Value = pos });
+                        CommandBuffer.SetComponent(index, new AgentData
+                        {
+                            ID = i,
+                            MaxSpeed = 0f,
+                            Radius = 1f
+                        });
+                        CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
+                        CommandBuffer.AddSharedComponent(index, AgentRenderer);
+
+
+                        i++;
+                    }
+                }
             }
         }
 
@@ -81,8 +132,7 @@ namespace BioCrowds
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
 
-
-            var AgentArchetype = entityManager.CreateArchetype(
+            AgentArchetype = entityManager.CreateArchetype(
                ComponentType.Create<Position>(),
                ComponentType.Create<Rotation>(),
                ComponentType.Create<AgentData>(),
@@ -90,28 +140,86 @@ namespace BioCrowds
                ComponentType.Create<Counter>());
         }
 
+        protected override void OnStartRunning()
+        {
+            settings = Settings.instance.getFluid();
+            data = new NativeArray<CubeObstacleData>(GetObstacleData(), Allocator.Persistent);
+            AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
+            AgentAtObstacle = new NativeArray<int>(data.Length, Allocator.Persistent);
+            LastIDUsed = agentSpawner.lastAgentId;
+        }
+
+        protected override void OnStopRunning()
+        {
+            data.Dispose();
+            AgentAtObstacle.Dispose();
+        }
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
 
-            data = new NativeArray<CubeObstacleData>(GetObstacleData(), Allocator.Persistent);
+            var commandBuffer = spawnerBarrier.CreateCommandBuffer();
 
+
+            //HACK: Get cube size from .obj
+            //This is in meters
+            //TODO: Make cube size by dimension
+            float halfCubeSizeX = (1f * settings.scale.x)/2f;
+            float halfCubeSizeZ = (1f * settings.scale.z)/2f;
+
+            float x = (data[0].position.x * settings.scale.x + settings.translate.x);
+            float z = (data[0].position.z * settings.scale.z + settings.translate.z);
+
+            float maxX = x + halfCubeSizeX;
+            float maxZ = z + halfCubeSizeZ;
+
+            float minX = x - halfCubeSizeX;
+            float minZ = z - halfCubeSizeZ;
+
+
+
+            int lastValue =  (int)(math.floor(halfCubeSizeX*2) * math.floor(halfCubeSizeZ*2));
+            AgentAtObstacle[0] = 0;
+            for (int i = 1; i < data.Length; i++)
+            {
+                halfCubeSizeX = (1f * settings.scale.x) / 2f;
+                halfCubeSizeZ = (1f * settings.scale.z) / 2f;
+
+                x = (data[i].position.x * settings.scale.x + settings.translate.x);
+                z = (data[i].position.z * settings.scale.z + settings.translate.z);
+
+                maxX = x + halfCubeSizeX;
+                maxZ = z + halfCubeSizeZ;
+
+                minX = x - halfCubeSizeX;
+                minZ = z - halfCubeSizeZ;
+
+
+                AgentAtObstacle[i] = lastValue + AgentAtObstacle[i - 1];
+                CubeObstacleData spawnList = data[i - 1];
+                lastValue = (int)(math.floor(halfCubeSizeX * 2) * math.floor(halfCubeSizeZ * 2));
+
+            }
 
             var FluidDataJob = new AddFluidData
             {
-                CommandBuffer = spawnerBarrier.CreateCommandBuffer().ToConcurrent(),
+                CommandBuffer = commandBuffer.ToConcurrent(),
                 entities = agentGroup.entities
             };
-
-
-
-
-
             var FluidDataHandle = FluidDataJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-
             FluidDataHandle.Complete();
 
+            var SpawnFluidObstaclesJob = new SpawnFluidObstacles
+            {
+                AgentAtCellQuantity = AgentAtObstacle,
+                CommandBuffer = commandBuffer.ToConcurrent(),
+                LastIDUsed = LastIDUsed,
+                data = data
+            };
+            var SpawnFluidObstaclesJobHandle = SpawnFluidObstaclesJob.Schedule(data.Length, Settings.BatchSize, FluidDataHandle);
+            SpawnFluidObstaclesJobHandle.Complete();
+
             this.Enabled = false;
-            return inputDeps;
+            return SpawnFluidObstaclesJobHandle;
 
         }
 
@@ -137,10 +245,11 @@ namespace BioCrowds
         //1 g/cm3 = 1000 kg/m3
         //Calculate based on the original SplishSplash code, mass = volume * density
         //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
-        private static float particleMass = 0.0001f;//kg
+        private static float particleMass;//kg
         private static float agentMass = 65f;
         private static float timeStep = 1f / Settings.experiment.FramesPerSecond;
-        private float particleRadius = 0.025f;
+        //particleRadius in decimeters = 0.025f; in meters = 0.0025f
+        private float particleRadius = 0.0025f;
 
         //0 --> Total inelastic collision
         //1 --> Elastic Collision
@@ -271,11 +380,11 @@ namespace BioCrowds
             //1 g/cm3 = 1000 kg/m3
             //Calculate based on the original SplishSplash code, mass = volume * density
             //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
-            float particleDiameter = 2 * particleRadius * 10f;
+            float particleDiameter = 2 * particleRadius * Settings.instance.getFluid().scale.x;
             float volume = 0.8f * math.pow(particleDiameter, 3);
             float density = 1000f;
             //particleMass = volume * density;
-            particleMass = 10.001f;
+            particleMass = 100f;
             Debug.Log("Particle Mass: " + particleMass);
 
         }
@@ -392,7 +501,7 @@ namespace BioCrowds
 
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
-        private bool sync = true;       //turn of for performance
+        private bool sync = false;       //turn of for performance
 
         public struct AgentGroup
         {
@@ -619,7 +728,7 @@ namespace BioCrowds
 
             FillFrameParticlePositions();
 
-            Debug.Log(frame + " FluidVel Size: " + FluidVel.Length + " " + FluidVel.Capacity + " FluidPos Size: " + FluidPos.Length + " " + FluidPos.Capacity + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
+            //Debug.Log(frame + " FluidVel Size: " + FluidVel.Length + " " + FluidVel.Capacity + " FluidPos Size: " + FluidPos.Length + " " + FluidPos.Capacity + " CellToParticles Size: " + CellToParticles.Length + " " + CellToParticles.Capacity);
 
 
             for (int i = 0; i < cellGroup.Length; i++)

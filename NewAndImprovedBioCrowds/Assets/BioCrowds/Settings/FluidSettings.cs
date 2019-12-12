@@ -35,6 +35,7 @@ public class FluidSettings : ISettings
 
     public CubeObstacleData[] cubeObstacleDatas =
     {
+        //IN METERS
         new CubeObstacleData
         {
             position = new float3(0f, 0.05f, 0f),
