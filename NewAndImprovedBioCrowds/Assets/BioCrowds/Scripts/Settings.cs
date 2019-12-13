@@ -94,7 +94,8 @@ namespace BioCrowds
         [SerializeField]
         public List<ISettings> ModuleSettings;
 
-        //HACK: Change get method 
+        //HACK: Change get method
+        // This looks ok, to be honest
         public FluidSettings getFluid() => ((FluidSettings)Settings.instance.ModuleSettings[0]);
 
 
@@ -156,13 +157,31 @@ namespace BioCrowds
             //    Handles.Label(cellTagSystem.agentGroup.AgentPos[i].Value, cellTagSystem.agentGroup.AgentData[i].ID.ToString());
 
             //}
-            var cellTagSystem = World.Active.GetOrCreateManager<CouplingSystem>();
-            for (int i = 0; i < cellTagSystem.CouplingData.Length; i++)
-            {
-                Handles.Label(cellTagSystem.CouplingData.Position[i].Value, cellTagSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
+            //var cellTagSystem = World.Active.GetOrCreateManager<CouplingSystem>();
+            //for (int i = 0; i < cellTagSystem.CouplingData.Length; i++)
+            //{
+            //    Handles.Label(cellTagSystem.CouplingData.Position[i].Value, cellTagSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
 
-                //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
+            //    //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
+            //}
+
+            var cellTagSystem = World.Active.GetOrCreateManager<SurvivalInstinctSystem>();
+            var fluidSystem = World.Active.GetOrCreateManager<FluidMovementOnAgent>();
+            var fluidSystem2 = World.Active.GetOrCreateManager<FluidParticleToCell>();
+            for (int i = 0; i < cellTagSystem.agentGroup.Length; i++)
+            {
+                //Handles.Label(cellTagSystem.agentGroup.Position[i].Value, cellTagSystem.agentGroup.SurvivalComponent[i].survival_state.ToString());
+
+                Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
             }
+
+            //for (int i = 0; i < fluidSystem2.FluidPos.Length; i++)
+            //{
+            //    //if (i % 100 == 0) Debug.Log(fluidSystem2.FluidVel[i]);
+            //    Handles.DrawLine(fluidSystem2.FluidPos[i], fluidSystem2.FluidPos[i] + fluidSystem2.FluidVel[i]/100f);
+            //}
+
+
 
         }
 

@@ -40,8 +40,7 @@ namespace BioCrowds
 
         public struct Parameters
         {
-            //TODO: Remove Clouds
-            //public int cloud;
+
             public int qtdAgents;
             public float3 spawnOrigin;
             public float2 spawnDimensions;
@@ -110,6 +109,11 @@ namespace BioCrowds
                     float x = (float)r.NextDouble() * (maxX - minX) + minX;
                     float z = (float)r.NextDouble() * (maxZ - minZ) + minZ;
                     float y = 0;
+
+                    if(x > 80f)
+                    {
+                        Debug.Log(minX + " " + maxX);
+                    }
 
                     float3 g = spawnList.goal;
                     //Debug.Log(i);

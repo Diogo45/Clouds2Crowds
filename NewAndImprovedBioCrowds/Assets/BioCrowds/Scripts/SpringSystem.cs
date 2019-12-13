@@ -118,6 +118,12 @@ namespace BioCrowds
                 //BOTA EM M2
                 AgentToForcesBeingApplied.Add(ag2, (float)(-scalar + dampingScalar) * dir);
 
+                //BOTA EM M1
+                AgentToForcesBeingApplied.Add(ag1, (float)(-scalar + dampingScalar) * dir);
+
+
+
+
             }
         }
 
@@ -266,7 +272,8 @@ namespace BioCrowds
         public float CouplingDistance;
 
     }
-
+    //TODO DEFINE COUPLINGSYSTEM ORDER UUUUUUUUUUUUUUUUUUUUUUUURGENTLY
+    [DisableAutoCreation]
     public class CouplingSystem : ComponentSystem
     {
 
@@ -313,7 +320,8 @@ namespace BioCrowds
                 float3 current_agent_pos;
                 AgentToPosition.TryGetValue(currentAgent, out current_agent_pos);
 
-                if (math.distance(agent_position, current_agent_pos) < coupling_distance)
+                if (math.distance(agent_position, current_agent_pos) < coupling_distance &&
+                        currentAgent != agent_id)
                 {
                     springConnectionsCandidates.Enqueue(new int2(agent_id, currentAgent));
                 }
@@ -322,7 +330,8 @@ namespace BioCrowds
                 {
                     AgentToPosition.TryGetValue(currentAgent, out current_agent_pos);
 
-                    if (math.distance(agent_position, current_agent_pos) < coupling_distance)
+                    if (math.distance(agent_position, current_agent_pos) < coupling_distance &&
+                        currentAgent != agent_id)
                     {
                         springConnectionsCandidates.Enqueue(new int2(agent_id, currentAgent));
                     }
@@ -354,19 +363,27 @@ namespace BioCrowds
 
             public void Execute()
             {
+                //TODO CHECK HOW BIDIRECTIONAL SPRINGS SHOULD WORK
                 while(springConnectionsCandidates.Count > 0)
                 {
                     int2 candidate = springConnectionsCandidates.Dequeue();
 
                     //if (CheckInList(candidate, springs))
                     //    continue;
+                    bool new_spring = true;
                     for(int j = 0; j < springs.Length; j++)
                     {
                         var elem = springs[j];
-                        if (!(elem.ID1 == candidate.x && elem.ID2 == candidate.y))
-                            continue;
+                        if (elem.ID1 == candidate.x && elem.ID2 == candidate.y || 
+                            elem.ID2 == candidate.x && elem.ID1 == candidate.y)
+                        {
+                            new_spring = false;
+                            break;
+                        }
+                        
                     }
-
+                    if (!new_spring)
+                        continue;
 
                     int id1 = -1;
                     int id2 = -1;
@@ -459,7 +476,6 @@ namespace BioCrowds
 
             foreach (int2 s in Settings.experiment.SpringConnections)
             {
-                //TODO: isolate agent mass
                 m_springSystem.springs.Add(new SpringSystem.Spring { k = m_springSystem.InitialK, kd = m_springSystem.InitialKD, ID1 = s.x, ID2 = s.y, l0 = 1f });
             }
         }

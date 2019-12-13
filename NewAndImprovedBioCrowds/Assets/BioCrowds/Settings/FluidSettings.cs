@@ -7,6 +7,7 @@ using UnityEngine;
 [System.Serializable]
 public class FluidSettings : ISettings
 {
+    [System.Serializable]
     public struct CubeObstacleData
     {
         public float3 position;
@@ -33,13 +34,14 @@ public class FluidSettings : ISettings
 
     public string FluidSimPath = @"D:\BackUp\SPlisHSPlasH\data\Scenes\Emitter.json";
 
+    [SerializeField]
     public CubeObstacleData[] cubeObstacleDatas =
     {
-        //IN METERS
-        new CubeObstacleData
-        {
-            position = new float3(0f, 0.05f, 0f),
-            rotation = float3.zero
-        }
+        ////IN METERS
+        //new CubeObstacleData
+        //{
+        //    position = new float3(0f, 0.05f, 0f),
+        //    rotation = float3.zero
+        //}
     };
 }
