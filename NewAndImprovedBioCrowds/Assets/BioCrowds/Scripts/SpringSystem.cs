@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace BioCrowds
 {
-    [DisableAutoCreation]
     [UpdateAfter(typeof(AgentMovementVectors))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     [UpdateAfter(typeof(AgentMassMapSystem))]
@@ -38,7 +37,7 @@ namespace BioCrowds
             public float l0;
         }
 
-        
+
         public NativeList<Spring> springs;
 
         public NativeMultiHashMap<int, float3> AgentToForcesBeingApplied;
@@ -62,6 +61,11 @@ namespace BioCrowds
 
             AgentToForcesBeingApplied = new NativeMultiHashMap<int, float3>(Settings.agentQuantity * 5, Allocator.Persistent);
             springs = new NativeList<Spring>(Settings.experiment.SpringConnections.Length, Allocator.Persistent);
+            AgentPosMap = cellTagSystem.AgentIDToPos;
+            AgentPosMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
+            AgentStepMap = agentMovementVectors.AgentIDToStep;
+            AgentStepMap2 = new NativeHashMap<int, float3>(AgentStepMap.Capacity, Allocator.TempJob);
+
 
         }
 
@@ -119,7 +123,7 @@ namespace BioCrowds
                 AgentToForcesBeingApplied.Add(ag2, (float)(-scalar + dampingScalar) * dir);
 
                 //BOTA EM M1
-                AgentToForcesBeingApplied.Add(ag1, (float)(-scalar + dampingScalar) * dir);
+                AgentToForcesBeingApplied.Add(ag1, (float)(scalar + dampingScalar) * dir);
 
 
 
@@ -189,11 +193,17 @@ namespace BioCrowds
         {
             int iters = (int)math.ceil((1f / Settings.experiment.FramesPerSecond) * TimeStep);
 
+            AgentPosMap2.Dispose();
+            AgentStepMap2.Dispose();
+
             AgentPosMap = cellTagSystem.AgentIDToPos;
             AgentPosMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
 
-            AgentStepMap = cellTagSystem.AgentIDToPos;
-            AgentStepMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
+           
+
+
+            AgentStepMap = agentMovementVectors.AgentIDToStep;
+            AgentStepMap2 = new NativeHashMap<int, float3>(AgentStepMap.Capacity, Allocator.TempJob);
 
 
 
@@ -201,11 +211,11 @@ namespace BioCrowds
             for (int i = 0; i < iters; i++)
             {
                 AgentToForcesBeingApplied.Clear();
-                
+
                 var ComputeForces = new SolveSpringForces
                 {
-                    AgentIDToPos = cellTagSystem.AgentIDToPos,
-                    AgentIDToStep = agentMovementVectors.AgentIDToStep,
+                    AgentIDToPos = AgentPosMap,
+                    AgentIDToStep = AgentStepMap,
                     AgentToForcesBeingApplied = AgentToForcesBeingApplied.ToConcurrent(),
                     springs = springs
                 };
@@ -216,10 +226,10 @@ namespace BioCrowds
 
                 var ApplyForces = new ApplySpringForces
                 {
-                    AgentIDToPos = cellTagSystem.AgentIDToPos,
+                    AgentIDToPos = AgentPosMap,
                     AgentIDToPos2 = AgentPosMap2.ToConcurrent(),
                     AgentIDToStep2 = AgentStepMap2.ToConcurrent(),
-                    AgentIDToStep = agentMovementVectors.AgentIDToStep,
+                    AgentIDToStep = AgentStepMap,
                     AgentToForcesBeingApplied = AgentToForcesBeingApplied,
                     TimeStep = TimeStep,
                     AgentStep = agentGroup.AgentStep,
@@ -229,7 +239,7 @@ namespace BioCrowds
 
 
 
-                var ApplyForcesJobHandle = ApplyForces.Schedule(agentGroup.Length, Settings.BatchSize, ComputeForcesHandle); 
+                var ApplyForcesJobHandle = ApplyForces.Schedule(agentGroup.Length, Settings.BatchSize, ComputeForcesHandle);
 
                 ApplyForcesJobHandle.Complete();
 
@@ -243,7 +253,9 @@ namespace BioCrowds
 
             }
 
-            if(iters  % 2  == 1)
+            
+
+            if (iters % 2 == 1)
             {
                 var aux = AgentPosMap;
                 AgentPosMap = AgentPosMap2;
@@ -255,8 +267,14 @@ namespace BioCrowds
 
             }
 
-            AgentPosMap2.Dispose();
-            AgentStepMap2.Dispose();
+            //Debug.Log("1 " + AgentPosMap.Length + " " + AgentStepMap.Length);
+            //Debug.Log("2 " + cellTagSystem.AgentIDToPos.Length );
+
+
+           
+
+
+  
 
 
 
@@ -272,8 +290,8 @@ namespace BioCrowds
         public float CouplingDistance;
 
     }
-    //TODO DEFINE COUPLINGSYSTEM ORDER UUUUUUUUUUUUUUUUUUUUUUUURGENTLY
-    [DisableAutoCreation]
+    [UpdateAfter(typeof(SpringSystem))]
+    [UpdateBefore(typeof(FluidParticleToCell))]
     public class CouplingSystem : ComponentSystem
     {
 
@@ -293,7 +311,7 @@ namespace BioCrowds
         [Inject] public CouplingGroup CouplingData;
 
 
- 
+
         public struct CouplingDecisionJob : IJobParallelFor
         {
             [ReadOnly] public NativeMultiHashMap<int3, int> CellToAgents;
@@ -311,7 +329,7 @@ namespace BioCrowds
                                      (int)math.floor(agent_position.z / 2.0f) * 2 + 1);
 
                 float coupling_distance = CouplingData[index].CouplingDistance;
-               
+
 
 
                 NativeMultiHashMapIterator<int3> iter;
@@ -364,23 +382,23 @@ namespace BioCrowds
             public void Execute()
             {
                 //TODO CHECK HOW BIDIRECTIONAL SPRINGS SHOULD WORK
-                while(springConnectionsCandidates.Count > 0)
+                while (springConnectionsCandidates.Count > 0)
                 {
                     int2 candidate = springConnectionsCandidates.Dequeue();
 
                     //if (CheckInList(candidate, springs))
                     //    continue;
                     bool new_spring = true;
-                    for(int j = 0; j < springs.Length; j++)
+                    for (int j = 0; j < springs.Length; j++)
                     {
                         var elem = springs[j];
-                        if (elem.ID1 == candidate.x && elem.ID2 == candidate.y || 
+                        if (elem.ID1 == candidate.x && elem.ID2 == candidate.y ||
                             elem.ID2 == candidate.x && elem.ID1 == candidate.y)
                         {
                             new_spring = false;
                             break;
                         }
-                        
+
                     }
                     if (!new_spring)
                         continue;
@@ -388,7 +406,7 @@ namespace BioCrowds
                     int id1 = -1;
                     int id2 = -1;
 
-                    for( int i = 0; i < AgentData.Length; i++)
+                    for (int i = 0; i < AgentData.Length; i++)
                     {
                         if (candidate.x == AgentData[i].ID)
                             id1 = i;
@@ -474,10 +492,10 @@ namespace BioCrowds
         {
             springConnectionsCandidates = new NativeQueue<int2>(Allocator.Persistent);
 
-            foreach (int2 s in Settings.experiment.SpringConnections)
-            {
-                m_springSystem.springs.Add(new SpringSystem.Spring { k = m_springSystem.InitialK, kd = m_springSystem.InitialKD, ID1 = s.x, ID2 = s.y, l0 = 1f });
-            }
+            //foreach (int2 s in Settings.experiment.SpringConnections)
+            //{
+            //    m_springSystem.springs.Add(new SpringSystem.Spring { k = m_springSystem.InitialK, kd = m_springSystem.InitialKD, ID1 = s.x, ID2 = s.y, l0 = 1f });
+            //}
         }
 
 

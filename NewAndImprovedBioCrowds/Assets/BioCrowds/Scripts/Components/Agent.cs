@@ -144,6 +144,18 @@ namespace BioCrowds
 
             }
 
+
+            //string s = "[ ";
+
+            //for (int i = 0; i < agentGroup.AgentData.Length; i++)
+            //{
+            //    AgentIDToPos.TryGetValue(agentGroup.AgentData[i].ID, out float3 pos);
+            //    s += "(" + agentGroup.AgentData[i].ID + ", " + pos + "), ";
+            //}
+            //Debug.Log(s);
+
+
+
             return mapCellToAgentsJobDep;
         }
 

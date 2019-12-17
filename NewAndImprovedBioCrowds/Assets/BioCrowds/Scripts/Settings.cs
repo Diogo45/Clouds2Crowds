@@ -151,50 +151,37 @@ namespace BioCrowds
         //TODO: Change to a visualization script
         private void OnGUI()
         {
-            //var cellTagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
-            //for (int i = 0; i < cellTagSystem.agentGroup.Length; i++)
-            //{
-            //    Handles.Label(cellTagSystem.agentGroup.AgentPos[i].Value, cellTagSystem.agentGroup.AgentData[i].ID.ToString());
 
-            //}
-            //var cellTagSystem = World.Active.GetOrCreateManager<CouplingSystem>();
-            //for (int i = 0; i < cellTagSystem.CouplingData.Length; i++)
-            //{
-            //    Handles.Label(cellTagSystem.CouplingData.Position[i].Value, cellTagSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
-
-            //    //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
-            //}
-
-            var cellTagSystem = World.Active.GetOrCreateManager<SurvivalInstinctSystem>();
+            var CouplingSystem = World.Active.GetOrCreateManager<CouplingSystem>();
+            var celltagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
+            var springSystem = World.Active.GetOrCreateManager<SpringSystem>();
             var fluidSystem = World.Active.GetOrCreateManager<FluidMovementOnAgent>();
             var fluidSystem2 = World.Active.GetOrCreateManager<FluidParticleToCell>();
-            for (int i = 0; i < cellTagSystem.agentGroup.Length; i++)
+            for (int i = 0; i < CouplingSystem.CouplingData.Length; i++)
             {
                 //Handles.Label(cellTagSystem.agentGroup.Position[i].Value, cellTagSystem.agentGroup.SurvivalComponent[i].survival_state.ToString());
-
-                Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
+                Handles.Label(CouplingSystem.CouplingData.Position[i].Value, CouplingSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
+                //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
             }
 
-            //for (int i = 0; i < fluidSystem2.FluidPos.Length; i++)
-            //{
-            //    //if (i % 100 == 0) Debug.Log(fluidSystem2.FluidVel[i]);
-            //    Handles.DrawLine(fluidSystem2.FluidPos[i], fluidSystem2.FluidPos[i] + fluidSystem2.FluidVel[i]/100f);
-            //}
+            for (int i = 0; i < springSystem.springs.Length; i++)
+            {
+                int ag1 = springSystem.springs[i].ID1;
+                int ag2 = springSystem.springs[i].ID2;
+
+                springSystem.AgentPosMap2.TryGetValue(ag1, out float3 pos1);
+                springSystem.AgentPosMap2.TryGetValue(ag2, out float3 pos2);
+                Handles.DrawLine(pos1, pos2);
+                //Debug.DrawRay(pos1, pos2, Color.white);
+                //Debug.Log(pos1 + " " + pos2);
+
+            }
 
 
 
         }
 
-        private void Update()
-        {
-            //NavMeshPath path = new NavMeshPath();
-            //bool b = NavMesh.CalculatePath(new Vector3(0, 0.25f, 5f), new Vector3(10f, 0.25f, 100f), NavMesh.AllAreas, path);
-            //Debug.Log("b " + b + " L:" + path.corners.Length);
 
-            //Camera.main.transform.position = new Vector3(64.5f, 77.3f, 4.1f);
-
-
-        }
 
     }
 }

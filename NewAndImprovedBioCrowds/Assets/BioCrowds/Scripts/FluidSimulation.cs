@@ -44,7 +44,6 @@ namespace BioCrowds
         public int survival_state;
     }
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidMovementOnAgent))]
     public class AgentMassMapSystem : JobComponentSystem
@@ -337,7 +336,6 @@ namespace BioCrowds
         }
     }
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidBarrier))]
     [UpdateBefore(typeof(FluidMovementOnAgent))]
     public class FillBufferSystem : JobComponentSystem
@@ -544,7 +542,7 @@ namespace BioCrowds
             float volume = 0.8f * math.pow(particleDiameter, 3);
             float density = 1000f;
             //particleMass = volume * density;
-            particleMass = Settings.instance.getFluid().particleMass * 10f;
+            particleMass = Settings.instance.getFluid().particleMass /** 10f*/;
             Debug.Log("Particle Mass: " + particleMass);
 
         }
@@ -660,11 +658,11 @@ namespace BioCrowds
         //[timeSPH, timeBC, frameSize]
         private const string memMapControl = "unityMemMapControl";
 
-        private int Clones = 1;
+        private int Clones = 10;
 
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
-        private bool sync = true;       //turn of for performance
+        private bool sync = false;       //turn of for performance
 
         public struct AgentGroup
         {
@@ -842,7 +840,7 @@ namespace BioCrowds
                 //}
 
 
-                
+
 
 
 
@@ -894,7 +892,7 @@ namespace BioCrowds
         {
             //HACK: Write better sync between fluid sim and biocrowds
             // Actually giving control back to unity is hard to do here....
-            while (WaitForFluidSim()) { System.Threading.Thread.Sleep(10); }
+            while (WaitForFluidSim()) {}
 
             FluidPos.Clear();
             FluidVel.Clear();
@@ -1031,7 +1029,6 @@ namespace BioCrowds
 
     }
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidMovementOnAgent))]
     public class SurvivalInstinctSystem : JobComponentSystem
     {
