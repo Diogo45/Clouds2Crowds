@@ -15,6 +15,8 @@ public class FluidSettings : ISettings
 
     }
 
+    public bool randTau = false;
+    public bool randMass = false;
 
     public float thresholdDist = 0.01f;
     //1 g/cm3 = 1000 kg/m3

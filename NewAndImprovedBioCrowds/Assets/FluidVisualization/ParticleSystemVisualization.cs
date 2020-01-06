@@ -21,7 +21,7 @@ public class ParticleSystemVisualization : MonoBehaviour {
 
         fluidSimulation = World.Active.GetOrCreateManager<BioCrowds.FluidParticleToCell>();
 
-        particles = new ParticleSystem.Particle[fluidSimulation.frameSize * 1];
+        particles = new ParticleSystem.Particle[fluidSimulation.frameSize * 10];
 
     }
 

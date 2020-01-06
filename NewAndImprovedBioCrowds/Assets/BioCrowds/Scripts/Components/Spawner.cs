@@ -63,6 +63,105 @@ namespace BioCrowds
         }
         [Inject] public CellGroup m_CellGroup;
 
+        public struct InitialSpawnStructured : IJobParallelFor
+        {
+            [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
+            [ReadOnly] public int LastIDUsed;
+
+            [ReadOnly] public NativeList<Parameters> parBuffer;
+            public EntityCommandBuffer.Concurrent CommandBuffer;
+
+
+            public void Execute(int index)
+            {
+                int doNotFreeze = 0;
+
+                var spawnList = parBuffer[index];
+                float3 origin = spawnList.spawnOrigin;
+                float2 dim = spawnList.spawnDimensions;
+
+                int qtdAgtTotal = spawnList.qtdAgents;
+                int maxZ = (int)(origin.z + dim.y);
+                int maxX = (int)(origin.x + dim.x);
+                int minZ = (int)origin.z;
+                int minX = (int)origin.x;
+                float maxSpeed = spawnList.maxSpeed;
+
+                int startID = AgentAtCellQuantity[index] + LastIDUsed;
+
+                int CellX = minX + 1;
+                int CellZ = minZ + 1;
+                int CellY = 0;
+
+                System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
+
+                //Debug.Log(spawnList.goal);
+
+                float x = minX;
+                float z = minZ;
+
+                for (int i = startID; i < qtdAgtTotal + startID; i++)
+                {
+
+                    if (doNotFreeze > qtdAgtTotal)
+                    {
+                        doNotFreeze = 0;
+
+                    }
+
+                    if(x < maxX)
+                    {
+                        x += 5f;
+                    }
+                    else
+                    {
+                        if (z < maxZ)
+                        {
+                            x = minX;
+                            z += 5f;
+                        }
+                    }
+                    
+                    float y = 0;
+
+                    float3 g = spawnList.goal;
+                    //Debug.Log(i);
+
+                    CommandBuffer.CreateEntity(index, AgentArchetype);
+                    CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
+                    CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
+                    CommandBuffer.SetComponent(index, new AgentData
+                    {
+                        ID = i,
+                        MaxSpeed = maxSpeed / Settings.experiment.FramesPerSecond,
+                        Radius = 1f
+                    });
+                    CommandBuffer.SetComponent(index, new AgentStep
+                    {
+                        delta = float3.zero
+                    });
+                    CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
+                    CommandBuffer.SetComponent(index, new Counter { Value = 0 });
+                    CommandBuffer.SetComponent(index, new NormalLifeData
+                    {
+                        confort = 0,
+                        stress = 0,
+                        agtStrAcumulator = 0f,
+                        movStrAcumulator = 0f,
+                        incStress = 0f
+                    });
+
+
+                    CommandBuffer.AddSharedComponent(index, AgentRenderer);
+
+
+                }
+
+
+            }
+        }
+
+
         public struct InitialSpawn : IJobParallelFor
         {
             [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
@@ -110,10 +209,6 @@ namespace BioCrowds
                     float z = (float)r.NextDouble() * (maxZ - minZ) + minZ;
                     float y = 0;
 
-                    if(x > 80f)
-                    {
-                        Debug.Log(minX + " " + maxX);
-                    }
 
                     float3 g = spawnList.goal;
                     //Debug.Log(i);
@@ -228,19 +323,41 @@ namespace BioCrowds
                 lastValue = spawnList.qtdAgents;
 
             }
-            var job = new InitialSpawn
+            if (Settings.SpawnAgentStructured)
             {
-                AgentAtCellQuantity = AgentAtGroupQuantity,
-                CommandBuffer = command_buffer.ToConcurrent(),
-                parBuffer = parBuffer
-            };
+                var job = new InitialSpawnStructured
+                {
+                    AgentAtCellQuantity = AgentAtGroupQuantity,
+                    CommandBuffer = command_buffer.ToConcurrent(),
+                    parBuffer = parBuffer
+                };
 
-            lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
+                var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+                lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
+                handle.Complete();
+                this.Enabled = false;
+                return handle;
 
-            var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
-            handle.Complete();
-            this.Enabled = false;
-            return handle;
+            }
+            else
+            {
+                var job = new InitialSpawn
+                {
+                    AgentAtCellQuantity = AgentAtGroupQuantity,
+                    CommandBuffer = command_buffer.ToConcurrent(),
+                    parBuffer = parBuffer
+                };
+
+                var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+                lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
+                handle.Complete();
+                this.Enabled = false;
+                return handle;
+
+            }
+
+
+
 
 
 

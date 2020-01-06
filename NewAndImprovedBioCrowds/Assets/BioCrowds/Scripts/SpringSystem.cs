@@ -48,6 +48,10 @@ namespace BioCrowds
         public NativeHashMap<int, float3> AgentStepMap;
         public NativeHashMap<int, float3> AgentStepMap2;
 
+        protected override void OnCreateManager()
+        {
+            
+        }
 
         protected override void OnStopRunning()
         {
@@ -59,8 +63,16 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
 
+            if (!Settings.experiment.SpringSystem)
+            {
+                this.Enabled = false;
+                World.Active.GetExistingManager<CouplingSystem>().Enabled = false;
+                World.Active.GetExistingManager<DecouplingSystem>().Enabled = false;
+                return;
+            }
+
             AgentToForcesBeingApplied = new NativeMultiHashMap<int, float3>(Settings.agentQuantity * 5, Allocator.Persistent);
-            springs = new NativeList<Spring>(Settings.experiment.SpringConnections.Length, Allocator.Persistent);
+            springs = new NativeList<Spring>(Settings.agentQuantity * 2, Allocator.Persistent);
             AgentPosMap = cellTagSystem.AgentIDToPos;
             AgentPosMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
             AgentStepMap = agentMovementVectors.AgentIDToStep;
@@ -77,6 +89,16 @@ namespace BioCrowds
             [ReadOnly] public readonly int Length;
         }
         [Inject] AgentGroup agentGroup;
+
+
+        public struct ObstacleGroup
+        {
+            [ReadOnly] public ComponentDataArray<Position> AgentPos;
+            public SubtractiveComponent<AgentStep> AgentStep;
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] ObstacleGroup obstacleGroup;
 
         struct SolveSpringForces : IJobParallelFor
         {
@@ -189,6 +211,28 @@ namespace BioCrowds
             }
         }
 
+        struct ShittyJob : IJobParallelFor
+        {
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            public NativeHashMap<int, float3>.Concurrent AgentIDToPos2;
+            [ReadOnly] public NativeHashMap<int, float3> AgentIDToPos;
+
+
+
+            public void Execute(int index)
+            {
+                int id = AgentData[index].ID;
+
+                float3 pos;
+                AgentIDToPos.TryGetValue(id, out pos);
+                AgentIDToPos2.TryAdd(id, pos);
+
+
+
+
+            }
+        }
+
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             int iters = (int)math.ceil((1f / Settings.experiment.FramesPerSecond) * TimeStep);
@@ -197,15 +241,22 @@ namespace BioCrowds
             AgentStepMap2.Dispose();
 
             AgentPosMap = cellTagSystem.AgentIDToPos;
-            AgentPosMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
+            AgentPosMap2 = new NativeHashMap<int, float3>(agentGroup.Length + obstacleGroup.Length, Allocator.TempJob);
 
-           
+            var shittyJob = new ShittyJob
+            {
+                AgentData = obstacleGroup.AgentData,
+                AgentIDToPos = AgentPosMap,
+                AgentIDToPos2 = AgentPosMap2.ToConcurrent()
+            };
+
+            var shittyHandle = shittyJob.Schedule(obstacleGroup.Length, Settings.BatchSize, inputDeps);
 
 
             AgentStepMap = agentMovementVectors.AgentIDToStep;
             AgentStepMap2 = new NativeHashMap<int, float3>(AgentStepMap.Capacity, Allocator.TempJob);
 
-
+            shittyHandle.Complete();
 
 
             for (int i = 0; i < iters; i++)
@@ -290,6 +341,7 @@ namespace BioCrowds
         public float CouplingDistance;
 
     }
+
     [UpdateAfter(typeof(SpringSystem))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class CouplingSystem : ComponentSystem
@@ -299,6 +351,7 @@ namespace BioCrowds
         {
             public ComponentDataArray<Position> Position;
             public ComponentDataArray<CouplingComponent> CouplingData;
+            public ComponentDataArray<SurvivalComponent> Survival;
             public ComponentDataArray<AgentData> AgentData;
 
             [ReadOnly] public readonly int Length;
@@ -316,6 +369,7 @@ namespace BioCrowds
         {
             [ReadOnly] public NativeMultiHashMap<int3, int> CellToAgents;
             [ReadOnly] public NativeHashMap<int, float3> AgentToPosition;
+            [ReadOnly] public ComponentDataArray<SurvivalComponent> Survival;
             [ReadOnly] public ComponentDataArray<Position> Position;
             [ReadOnly] public ComponentDataArray<CouplingComponent> CouplingData;
             [ReadOnly] public ComponentDataArray<AgentData> AgentData;
@@ -324,12 +378,15 @@ namespace BioCrowds
             public void Execute(int index)
             {
                 int agent_id = AgentData[index].ID;
+
+                if (Survival[index].survival_state == 0)
+                    return;
+
                 float3 agent_position = Position[index].Value;
                 int3 cell = new int3((int)math.floor(agent_position.x / 2.0f) * 2 + 1, 0,
                                      (int)math.floor(agent_position.z / 2.0f) * 2 + 1);
 
                 float coupling_distance = CouplingData[index].CouplingDistance;
-
 
 
                 NativeMultiHashMapIterator<int3> iter;
@@ -464,6 +521,7 @@ namespace BioCrowds
                 CellToAgents = m_cellTagSystem.CellToMarkedAgents,
                 CouplingData = CouplingData.CouplingData,
                 Position = CouplingData.Position,
+                Survival = CouplingData.Survival,
                 springConnectionsCandidates = springConnectionsCandidates.ToConcurrent()
             };
 
@@ -499,5 +557,114 @@ namespace BioCrowds
         }
 
 
+    }
+
+    [UpdateAfter(typeof(SpringSystem))]
+    [UpdateBefore(typeof(CouplingSystem))]
+    public class DecouplingSystem : JobComponentSystem
+    {
+
+        public struct CouplingGroup
+        {
+            public ComponentDataArray<Position> Position;
+            public ComponentDataArray<CouplingComponent> CouplingData;
+            public ComponentDataArray<AgentData> AgentData;
+
+            [ReadOnly] public readonly int Length;
+        }
+        [Inject] CouplingGroup couplingGroup;
+
+        [Inject] SpringSystem springSystem;
+
+
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+        }
+
+        protected override void OnStopRunning()
+        {
+            base.OnStopRunning();
+        }
+
+        struct DecoupleJob : IJob
+        {
+
+            public ComponentDataArray<CouplingComponent> CouplingData;
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            public ComponentDataArray<Position> Position;
+            public NativeList<SpringSystem.Spring> springs;
+
+            public void Execute()
+            {
+
+                for (int i = 0; i < springs.Length; i++)
+                {
+                    int id1 = springs[i].ID1;
+                    int id2 = springs[i].ID2;
+
+                    int dataID1 = -1;
+                    int dataID2 = -1;
+
+                    for (int j = 0; j < AgentData.Length; j++)
+                    {
+                        if (id1 == AgentData[j].ID)
+                            dataID1 = j;
+                        if (id2 == AgentData[j].ID)
+                            dataID2 = j;
+                    }
+
+                    float3 pos1 = Position[dataID1].Value;
+                    float3 pos2 = Position[dataID2].Value;
+
+                    float couplingDist = CouplingData[dataID1].CouplingDistance;
+
+                    if (math.distance(pos1, pos2) > couplingDist)
+                    {
+                        springs.RemoveAtSwapBack(i);
+
+                        CouplingData[dataID1] = new CouplingComponent
+                        {
+                            CouplingDistance = CouplingData[dataID1].CouplingDistance,
+                            CurrentCouplings = CouplingData[dataID1].CurrentCouplings - 1,
+                            MaxCouplings = CouplingData[dataID1].MaxCouplings
+                        };
+
+                        CouplingData[dataID2] = new CouplingComponent
+                        {
+                            CouplingDistance = CouplingData[dataID2].CouplingDistance,
+                            CurrentCouplings = CouplingData[dataID2].CurrentCouplings - 1,
+                            MaxCouplings = CouplingData[dataID2].MaxCouplings
+                        };
+
+
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                }
+
+
+            }
+        }
+
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
+            var DecoupleJob = new DecoupleJob
+            {
+                AgentData = couplingGroup.AgentData,
+                CouplingData = couplingGroup.CouplingData,
+                Position = couplingGroup.Position,
+                springs = springSystem.springs
+            };
+
+            var DecoupleJobHandle = DecoupleJob.Schedule(inputDeps);
+
+
+            return DecoupleJobHandle;
+
+        }
     }
 }

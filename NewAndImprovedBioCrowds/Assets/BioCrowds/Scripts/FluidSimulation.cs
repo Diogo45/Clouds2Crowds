@@ -27,368 +27,7 @@ namespace BioCrowds
         public float mass;
     }
 
-    //int how_many_frames_to_store = 10;
-    [InternalBufferCapacity(10)]
-    public struct DotElement : IBufferElementData
-    {
-        public static implicit operator float(DotElement e) { return e.dot; }
-        public static implicit operator DotElement(float e) { return new DotElement { dot = e }; }
-        public float dot;
-    }
-
-    public struct SurvivalComponent : IComponentData
-    {
-        public float threshold;
-
-        // 0 = calm, 1 = panicked
-        public int survival_state;
-    }
-
-    [UpdateAfter(typeof(FluidInitializationSystem))]
-    [UpdateBefore(typeof(FluidMovementOnAgent))]
-    public class AgentMassMapSystem : JobComponentSystem
-    {
-
-        public struct AgentGroup
-        {
-            [ReadOnly] public ComponentDataArray<PhysicalData> PhysicalData;
-            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
-            [ReadOnly] public readonly int Length;
-        }
-
-
-
-        public NativeHashMap<int, float> AgentID2MassMap;
-        [Inject] AgentGroup m_agentGroup;
-
-        public struct FillMassMapJob : IJobParallelFor
-        {
-            [ReadOnly]  public ComponentDataArray<PhysicalData> PhysicalData;
-            [ReadOnly]  public ComponentDataArray<AgentData> AgentData;
-            [WriteOnly] public NativeHashMap<int, float>.Concurrent AgentMassMap;
-
-
-            public void Execute(int index)
-            {
-                AgentMassMap.TryAdd(AgentData[index].ID, PhysicalData[index].mass);
-            }
-        }
-
-
-        protected override void OnStartRunning()
-        {
-            AgentID2MassMap = new NativeHashMap<int, float>(0, Allocator.Persistent);
-            Debug.Log("MapCreated");
-        }
-
-        protected override void OnStopRunning()
-        {
-            AgentID2MassMap.Dispose();
-        }
-
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
-        {
-            if (AgentID2MassMap.Length != m_agentGroup.Length)
-            {
-                Debug.Log("Map Is Created");
-                AgentID2MassMap.Dispose();
-                AgentID2MassMap = new NativeHashMap<int, float>(m_agentGroup.Length, Allocator.Persistent);
-
-                var massJob = new FillMassMapJob()
-                {
-                    AgentData = m_agentGroup.AgentData,
-                    AgentMassMap = AgentID2MassMap.ToConcurrent(),
-                    PhysicalData = m_agentGroup.PhysicalData
-                };
-
-                var massjob_handle = massJob.Schedule(m_agentGroup.Length, Settings.BatchSize);
-                massjob_handle.Complete();
-                return massjob_handle;
-
-            }
-
-
-
-            return inputDeps;
-
-
-        }
-    }
-
-
-    [UpdateAfter(typeof(FluidInitializationSystem))]
-    [UpdateAfter(typeof(FluidInitializationSystem))]
-    [UpdateBefore(typeof(FluidParticleToCell))]
-    public class FluidBarrier : BarrierSystem { }
-
-    [UpdateAfter(typeof(SpawnAgentBarrier))]
-    [UpdateBefore(typeof(FluidParticleToCell))]
-    public class FluidInitializationSystem : JobComponentSystem
-    {
-        [Inject] public AgentSpawner agentSpawner;
-        [Inject] public FluidBarrier spawnerBarrier;
-
-        NativeArray<CubeObstacleData> data;
-        public static EntityArchetype AgentArchetype;
-        public static MeshInstanceRenderer AgentRenderer;
-
-        public NativeArray<int> AgentAtObstacle;
-        public int LastIDUsed;
-
-        public static FluidSettings settings;
-
-
-        public struct AgentGroup
-        {
-            [ReadOnly] public ComponentDataArray<Position> AgentPos;
-            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
-            [ReadOnly] public ComponentDataArray<AgentStep> AgentStep;
-            [ReadOnly] public EntityArray entities;
-            [ReadOnly] public readonly int Length;
-        }
-        [Inject] AgentGroup agentGroup;
-
-        public struct AddFluidData : IJobParallelFor
-        {
-            public EntityCommandBuffer.Concurrent CommandBuffer;
-            [ReadOnly] public EntityArray entities;
-
-            public void Execute(int index)
-            {
-
-                System.Random r = new System.Random(index);
-
-                float tau = (float)r.NextDouble() * 0.4f + 0.4f;
-
-                CommandBuffer.AddComponent<FluidData>(index, entities[index], new FluidData { tau = 1f });
-                CommandBuffer.AddComponent<PhysicalData>(index, entities[index], new PhysicalData { mass = 70f });
-                CommandBuffer.AddComponent<CouplingComponent>(index, entities[index], new CouplingComponent { CouplingDistance = 3f, CurrentCouplings = 0, MaxCouplings = 2 });
-                CommandBuffer.AddComponent<SurvivalComponent>(index, entities[index], new SurvivalComponent { threshold = 0.8f, survival_state = 0 });
-
-                //Survival Buffer
-                CommandBuffer.AddBuffer<DotElement>(index, entities[index]);
-
-                //End Survival Buffer
-            }
-        }
-
-        public struct SpawnFluidObstacles : IJobParallelFor
-        {
-            public NativeArray<CubeObstacleData> data;
-            public EntityCommandBuffer.Concurrent CommandBuffer;
-
-            [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
-            [ReadOnly] public int LastIDUsed;
-
-            
-
-            public void Execute(int index)
-            {
-                //TODO: Make cube size by dimension
-                float halfCubeSizeX = (1f * settings.scale.x) / 2f;
-                float halfCubeSizeZ = (1f * settings.scale.z) / 2f;
-
-                float xi = (data[index].position.x * settings.scale.x + settings.translate.x);
-                float zi = (data[index].position.z * settings.scale.z + settings.translate.z);
-
-                float maxX = xi + halfCubeSizeX;
-                float maxZ = zi + halfCubeSizeZ;
-
-                float minX = xi - halfCubeSizeX;
-                float minZ = zi - halfCubeSizeZ;
-
-                int i = AgentAtCellQuantity[index] + LastIDUsed;
-
-                for (float x = minX ; x < maxX; x++)
-                {
-                    for (float z = minZ; z < maxZ; z++)
-                    {
-                        float3 pos = new float3(x, 0f, z);
-                        float3 g = pos;
-                        CommandBuffer.CreateEntity(index, AgentArchetype);
-                        CommandBuffer.SetComponent(index, new Position { Value = pos });
-                        CommandBuffer.SetComponent(index, new AgentData
-                        {
-                            ID = i,
-                            MaxSpeed = 0f,
-                            Radius = 1f
-                        });
-                        CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
-                        CommandBuffer.AddSharedComponent(index, AgentRenderer);
-
-
-                        i++;
-                    }
-                }
-            }
-        }
-
-
-        protected override void OnCreateManager()
-        {
-            var entityManager = World.Active.GetOrCreateManager<EntityManager>();
-
-
-            AgentArchetype = entityManager.CreateArchetype(
-               ComponentType.Create<Position>(),
-               ComponentType.Create<Rotation>(),
-               ComponentType.Create<AgentData>(),
-               ComponentType.Create<AgentGoal>(),
-               ComponentType.Create<Counter>());
-        }
-
-        protected override void OnStartRunning()
-        {
-            settings = Settings.instance.getFluid();
-            data = new NativeArray<CubeObstacleData>(GetObstacleData(), Allocator.Persistent);
-            
-            AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("AgentRenderer");
-            AgentAtObstacle = new NativeArray<int>(data.Length, Allocator.Persistent);
-            LastIDUsed = agentSpawner.lastAgentId;
-        }
-
-        protected override void OnStopRunning()
-        {
-            data.Dispose();
-            AgentAtObstacle.Dispose();
-        }
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
-        {
-            var commandBuffer = spawnerBarrier.CreateCommandBuffer();
-
-
-            if (data.Length > 0)
-            {
-                //HACK: Get cube size from .obj
-                //This is in meters
-                //TODO: Make cube size by dimension
-                float halfCubeSizeX = (1f * settings.scale.x) / 2f;
-                float halfCubeSizeZ = (1f * settings.scale.z) / 2f;
-
-                float x = (data[0].position.x * settings.scale.x + settings.translate.x);
-                float z = (data[0].position.z * settings.scale.z + settings.translate.z);
-
-                float maxX = x + halfCubeSizeX;
-                float maxZ = z + halfCubeSizeZ;
-
-                float minX = x - halfCubeSizeX;
-                float minZ = z - halfCubeSizeZ;
-
-
-
-                int lastValue = (int)(math.floor(halfCubeSizeX * 2) * math.floor(halfCubeSizeZ * 2));
-                AgentAtObstacle[0] = 0;
-                for (int i = 1; i < data.Length; i++)
-                {
-                    halfCubeSizeX = (1f * settings.scale.x) / 2f;
-                    halfCubeSizeZ = (1f * settings.scale.z) / 2f;
-
-                    x = (data[i].position.x * settings.scale.x + settings.translate.x);
-                    z = (data[i].position.z * settings.scale.z + settings.translate.z);
-
-                    maxX = x + halfCubeSizeX;
-                    maxZ = z + halfCubeSizeZ;
-
-                    minX = x - halfCubeSizeX;
-                    minZ = z - halfCubeSizeZ;
-
-
-                    AgentAtObstacle[i] = lastValue + AgentAtObstacle[i - 1];
-                    CubeObstacleData spawnList = data[i - 1];
-                    lastValue = (int)(math.floor(halfCubeSizeX * 2) * math.floor(halfCubeSizeZ * 2));
-
-                }
-
-                var SpawnFluidObstaclesJob = new SpawnFluidObstacles
-                {
-                    AgentAtCellQuantity = AgentAtObstacle,
-                    CommandBuffer = commandBuffer.ToConcurrent(),
-                    LastIDUsed = LastIDUsed,
-                    data = data
-                };
-                var SpawnFluidObstaclesJobHandle = SpawnFluidObstaclesJob.Schedule(data.Length, Settings.BatchSize, inputDeps);
-                SpawnFluidObstaclesJobHandle.Complete();
-            }
-
-
-
-            
-
-            var FluidDataJob = new AddFluidData
-            {
-                CommandBuffer = commandBuffer.ToConcurrent(),
-                entities = agentGroup.entities
-            };
-            var FluidDataHandle = FluidDataJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-            FluidDataHandle.Complete();
-
-           
-
-            this.Enabled = false;
-            return FluidDataHandle;
-
-        }
-
-        private CubeObstacleData[] GetObstacleData()
-        {
-            return Settings.instance.getFluid().cubeObstacleDatas;
-
-        }
-    }
-
-    [UpdateAfter(typeof(FluidBarrier))]
-    [UpdateBefore(typeof(FluidMovementOnAgent))]
-    public class FillBufferSystem : JobComponentSystem
-    {
-        [RequireComponentTag(typeof(DotElement))]
-        public struct AgentGroup
-        {
-            public ComponentDataArray<SurvivalComponent> SurvivalComponent;
-
-            [ReadOnly] public EntityArray Entities;
-            [ReadOnly] public readonly int Length;
-
-        }
-
-        [Inject] AgentGroup agentGroup;
-
-        public struct FillBufferJob : IJobParallelFor
-        {
-            [NativeDisableParallelForRestriction] public BufferFromEntity<DotElement> AgentDotBuffer;
-            [ReadOnly] public EntityArray entities;
-
-
-            public void Execute(int index)
-            {
-                var buffer = AgentDotBuffer[entities[index]];
-                for(int i = 0; i < 10; i++)
-                {
-                    buffer.Add(1.0f);
-                }
-
-                
-            }
-        }
-
-        protected override JobHandle OnUpdate(JobHandle inputDeps)
-        {
-            // FRAMECOUNT IS UPDATED IN JOB INSTANCING
-            var survival_job = new FillBufferJob
-            {
-                entities = agentGroup.Entities,
-                AgentDotBuffer = GetBufferFromEntity<DotElement>(false)
-            };
-
-            var handle = survival_job.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
-            this.Enabled = false;
-            return handle;
-        }
-
-
-
-    }
-
-
+    
     [UpdateAfter(typeof(FluidParticleToCell)), UpdateAfter(typeof(AgentMassMapSystem))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidMovementOnAgent : JobComponentSystem
@@ -650,6 +289,7 @@ namespace BioCrowds
         public int bufferSize;// number of particles times the number of floats of data of each particle, for now 3 for 3 floats
 
         public int frame = 0;
+        public float timeSplish = 0f;
         private int last = 0;
         private bool first = true;
         private static float thresholdHeigth = 1.7f;
@@ -662,7 +302,7 @@ namespace BioCrowds
 
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
-        private bool sync = false;       //turn of for performance
+        private bool sync = true;       //turn of for performance
 
         public struct AgentGroup
         {
@@ -714,15 +354,8 @@ namespace BioCrowds
         #region ON...
         protected override void OnStartRunning()
         {
-            if (!Settings.experiment.FluidSim)
-            {
-                Debug.Log(Settings.experiment.FluidSim);
-                this.Enabled = false;
-                World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                return;
-            }
 
-
+            var dirInfo = System.IO.Directory.CreateDirectory(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0]);
             fluidBuffer = GameObject.FindObjectOfType<MeshGenerator>().pointsBuffer;
             marchingCubes = new Dictionary<int3, List<float3>>();
             numPointsPerAxis = GameObject.FindObjectOfType<MeshGenerator>().numPointsPerAxis;
@@ -740,7 +373,9 @@ namespace BioCrowds
             FluidPos.Dispose();
             FluidVel.Dispose();
             CellToParticles.Dispose();
-
+            AcessDLL.CloseMemoryShare(memMapControl);
+            AcessDLL.CloseMemoryShare(memMapName);
+            AcessDLL.CloseMemoryShare(memMapNameVel);
         }
 
 
@@ -756,6 +391,8 @@ namespace BioCrowds
             OpenMemoryMap(memMapName, bufferSize);
 
             OpenMemoryMap(memMapNameVel, bufferSize);
+
+            
 
 
             Debug.Log("Fluid Simulation Initialized");
@@ -868,8 +505,20 @@ namespace BioCrowds
 
             float[] ControlData = new float[3];
             AcessDLL.ReadMemoryShare(memMapControl, ControlData);
+            timeSplish = ControlData[0];
+
 
             ControlData[1] = frame / Settings.experiment.FramesPerSecond;
+
+
+            if (ControlData[0] > Settings.SimThreshold)
+            {
+                AcessDLL.CloseMemoryShare(memMapControl);
+                AcessDLL.CloseMemoryShare(memMapName);
+                AcessDLL.CloseMemoryShare(memMapNameVel);
+                Application.Quit();
+            }
+
             AcessDLL.WriteMemoryShare(memMapControl, ControlData);
             //Debug.Log(ControlData[0]);
 
@@ -929,11 +578,11 @@ namespace BioCrowds
 
 
             string s = frame.ToString();
-            if (s.Length == 1) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0000" + frame + ".png");
-            if (s.Length == 2) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame000" + frame + ".png");
-            if (s.Length == 3) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame00" + frame + ".png");
-            if (s.Length == 4) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame0" + frame + ".png");
-            if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../Prints/frame" + frame + ".png");
+            if (s.Length == 1) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame0000" + frame + ".png");
+            if (s.Length == 2) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame000" + frame + ".png");
+            if (s.Length == 3) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame00" + frame + ".png");
+            if (s.Length == 4) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame0" + frame + ".png");
+            if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "frame" + frame + ".png");
 
 
 
@@ -1029,79 +678,328 @@ namespace BioCrowds
 
     }
 
-    [UpdateAfter(typeof(FluidMovementOnAgent))]
-    public class SurvivalInstinctSystem : JobComponentSystem
+
+    [UpdateAfter(typeof(FluidInitializationSystem))]
+    [UpdateAfter(typeof(FluidInitializationSystem))]
+    [UpdateBefore(typeof(FluidParticleToCell))]
+    public class FluidBarrier : BarrierSystem { }
+
+    [UpdateAfter(typeof(SpawnAgentBarrier))]
+    [UpdateBefore(typeof(FluidParticleToCell))]
+    public class FluidInitializationSystem : JobComponentSystem
     {
-        //[RequireComponentTag(typeof(DotElement))]
+        [Inject] public AgentSpawner agentSpawner;
+        [Inject] public FluidBarrier spawnerBarrier;
+
+        NativeArray<CubeObstacleData> data;
+        public static EntityArchetype AgentArchetype;
+        public static MeshInstanceRenderer AgentRenderer;
+
+        public NativeArray<int> AgentAtObstacle;
+        public int LastIDUsed;
+
+        public static FluidSettings settings;
+
+
         public struct AgentGroup
         {
-            [ReadOnly] public ComponentDataArray<Position> Position;
-            [ReadOnly] public ComponentDataArray<AgentGoal> AgentGoal;
+            [ReadOnly] public ComponentDataArray<Position> AgentPos;
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
             [ReadOnly] public ComponentDataArray<AgentStep> AgentStep;
-            public ComponentDataArray<SurvivalComponent> SurvivalComponent;
-
-            [ReadOnly] public EntityArray Entities;
+            [ReadOnly] public EntityArray entities;
             [ReadOnly] public readonly int Length;
+        }
+        [Inject] AgentGroup agentGroup;
 
+        public struct AddFluidData : IJobParallelFor
+        {
+            public EntityCommandBuffer.Concurrent CommandBuffer;
+            [ReadOnly] public EntityArray entities;
+
+            public void Execute(int index)
+            {
+
+                System.Random r = new System.Random(index);
+                float tau = (float)r.NextDouble() * 0.4f + 0.4f;
+                if (!settings.randTau)
+                {
+                    tau = 1f;
+                }
+                
+                
+                float mass = (float)r.NextDouble() * 60f + 40f;
+                if (!settings.randMass)
+                {
+                    mass = 65f;
+                }
+
+                CommandBuffer.AddComponent<FluidData>(index, entities[index], new FluidData { tau = tau });
+                CommandBuffer.AddComponent<PhysicalData>(index, entities[index], new PhysicalData { mass = mass });
+                CommandBuffer.AddComponent<CouplingComponent>(index, entities[index], new CouplingComponent { CouplingDistance = 3f, CurrentCouplings = 0, MaxCouplings = 2 });
+                CommandBuffer.AddComponent<SurvivalComponent>(index, entities[index], new SurvivalComponent { threshold = 0.5f, survival_state = 0 });
+
+                //Survival Buffer
+                CommandBuffer.AddBuffer<DotElement>(index, entities[index]);
+
+                //End Survival Buffer
+            }
         }
 
-        private int frameCount = 0;
-        private int bufferLength = 10;
-
-        [Inject] public AgentGroup agentGroup;
-
-        public struct SurvivalInstinctUpdateJob : IJobParallelFor
+        public struct SpawnFluidObstacles : IJobParallelFor
         {
-            [ReadOnly] public ComponentDataArray<Position> Position;
-            [ReadOnly] public ComponentDataArray<AgentGoal> AgentGoal;
-            [ReadOnly] public ComponentDataArray<AgentStep> AgentStep;
-            public ComponentDataArray<SurvivalComponent> SurvivalComponent;
-            [NativeDisableParallelForRestriction] public BufferFromEntity<DotElement> AgentDotBuffer;
-            [ReadOnly] public EntityArray entities;
-            [ReadOnly] public int buffer_index;
+            public NativeArray<CubeObstacleData> data;
+            public EntityCommandBuffer.Concurrent CommandBuffer;
+
+            [ReadOnly] public NativeArray<int> AgentAtCellQuantity;
+            [ReadOnly] public int LastIDUsed;
+
 
 
             public void Execute(int index)
             {
-                var buffer = AgentDotBuffer[entities[index]];
-                buffer[buffer_index] = math.dot(math.normalize(AgentGoal[index].SubGoal - Position[index].Value), math.normalize(AgentStep[index].delta));
+                //TODO: Make cube size by dimension
+                float halfCubeSizeX = (1f * settings.scale.x) / 2f;
+                float halfCubeSizeZ = (1f * settings.scale.z) / 2f;
 
+                float xi = (data[index].position.x * settings.scale.x + settings.translate.x);
+                float zi = (data[index].position.z * settings.scale.z + settings.translate.z);
 
-                float[] dot_sort = buffer.Reinterpret<float>().ToNativeArray().ToArray() ;
+                float maxX = xi + halfCubeSizeX;
+                float maxZ = zi + halfCubeSizeZ;
 
-                Array.Sort(dot_sort);
-                float median = (buffer[5] + buffer[6]) / 2.0f;
-                
-                if(median < SurvivalComponent[index].threshold && SurvivalComponent[index].survival_state == 0)
+                float minX = xi - halfCubeSizeX;
+                float minZ = zi - halfCubeSizeZ;
+
+                int i = AgentAtCellQuantity[index] + LastIDUsed;
+
+                for (float x = minX; x < maxX; x++)
                 {
-                    SurvivalComponent[index] = new SurvivalComponent { threshold = SurvivalComponent[index].threshold, survival_state = 1 };
+                    for (float z = minZ; z < maxZ; z++)
+                    {
+
+                        if(x > minX + 1 && z > minZ + 1 && z < maxZ - 2 && x < maxX - 2)
+                        {
+                            continue;
+                        }
+
+                        float3 pos = new float3(x, 0f, z);
+                        float3 g = pos;
+                        CommandBuffer.CreateEntity(index, AgentArchetype);
+                        CommandBuffer.SetComponent(index, new Position { Value = pos });
+                        CommandBuffer.SetComponent(index, new AgentData
+                        {
+                            ID = i,
+                            MaxSpeed = 0f,
+                            Radius = 1f
+                        });
+                        CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
+                        CommandBuffer.AddComponent(index, new CouplingComponent { CouplingDistance = 1f, CurrentCouplings = 0, MaxCouplings = 7 });
+
+                        CommandBuffer.AddSharedComponent(index, AgentRenderer);
+
+                        i++;
+                    }
                 }
-                
             }
         }
 
 
+        protected override void OnCreateManager()
+        {
+
+            
+
+
+            var entityManager = World.Active.GetOrCreateManager<EntityManager>();
+
+
+            AgentArchetype = entityManager.CreateArchetype(
+               ComponentType.Create<Position>(),
+               ComponentType.Create<Rotation>(),
+               ComponentType.Create<AgentData>(),
+               ComponentType.Create<AgentGoal>(),
+               ComponentType.Create<Counter>());
+        }
+
+        protected override void OnStartRunning()
+        {
+            if (!Settings.experiment.FluidSim)
+            {
+                this.Enabled = false;
+                World.Active.GetExistingManager<FluidParticleToCell>().Enabled = false;
+                World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                World.Active.GetExistingManager<FluidBarrier>().Enabled = false;
+                return;
+            }
+
+            settings = Settings.instance.getFluid();
+            data = new NativeArray<CubeObstacleData>(GetObstacleData(), Allocator.Persistent);
+
+            AgentRenderer = BioCrowdsBootStrap.GetLookFromPrototype("ObstacleRenderer");
+            AgentAtObstacle = new NativeArray<int>(data.Length, Allocator.Persistent);
+            LastIDUsed = agentSpawner.lastAgentId;
+        }
+
+        protected override void OnStopRunning()
+        {
+            data.Dispose();
+            AgentAtObstacle.Dispose();
+        }
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            // FRAMECOUNT IS UPDATED IN JOB INSTANCING
-            var survival_job = new SurvivalInstinctUpdateJob
+            var commandBuffer = spawnerBarrier.CreateCommandBuffer();
+
+
+            if (data.Length > 0)
             {
-                Position = agentGroup.Position,
-                AgentGoal = agentGroup.AgentGoal,
-                AgentStep = agentGroup.AgentStep,
-                SurvivalComponent = agentGroup.SurvivalComponent,
-                buffer_index = frameCount++ % bufferLength,
-                entities = agentGroup.Entities,
-                AgentDotBuffer = GetBufferFromEntity<DotElement>(false)
+                //HACK: Get cube size from .obj
+                //This is in meters
+                //TODO: Make cube size by dimension
+                float halfCubeSizeX = (1f * settings.scale.x) / 2f;
+                float halfCubeSizeZ = (1f * settings.scale.z) / 2f;
+
+                float x = (data[0].position.x * settings.scale.x + settings.translate.x);
+                float z = (data[0].position.z * settings.scale.z + settings.translate.z);
+
+                float maxX = x + halfCubeSizeX;
+                float maxZ = z + halfCubeSizeZ;
+
+                float minX = x - halfCubeSizeX;
+                float minZ = z - halfCubeSizeZ;
+
+
+
+                int lastValue = (int)(math.floor(halfCubeSizeX * 2) * math.floor(halfCubeSizeZ * 2));
+                AgentAtObstacle[0] = 0;
+                for (int i = 1; i < data.Length; i++)
+                {
+                    halfCubeSizeX = (1f * settings.scale.x) / 2f;
+                    halfCubeSizeZ = (1f * settings.scale.z) / 2f;
+
+                    x = (data[i].position.x * settings.scale.x + settings.translate.x);
+                    z = (data[i].position.z * settings.scale.z + settings.translate.z);
+
+                    maxX = x + halfCubeSizeX;
+                    maxZ = z + halfCubeSizeZ;
+
+                    minX = x - halfCubeSizeX;
+                    minZ = z - halfCubeSizeZ;
+
+
+                    AgentAtObstacle[i] = lastValue + AgentAtObstacle[i - 1];
+                    CubeObstacleData spawnList = data[i - 1];
+                    lastValue = (int)(math.floor(halfCubeSizeX * 2) * math.floor(halfCubeSizeZ * 2));
+
+                }
+
+                var SpawnFluidObstaclesJob = new SpawnFluidObstacles
+                {
+                    AgentAtCellQuantity = AgentAtObstacle,
+                    CommandBuffer = commandBuffer.ToConcurrent(),
+                    LastIDUsed = LastIDUsed,
+                    data = data
+                };
+                var SpawnFluidObstaclesJobHandle = SpawnFluidObstaclesJob.Schedule(data.Length, Settings.BatchSize, inputDeps);
+                SpawnFluidObstaclesJobHandle.Complete();
+            }
+
+
+
+
+
+            var FluidDataJob = new AddFluidData
+            {
+                CommandBuffer = commandBuffer.ToConcurrent(),
+                entities = agentGroup.entities
             };
+            var FluidDataHandle = FluidDataJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            FluidDataHandle.Complete();
 
-            var survival_update_handle = survival_job.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
 
 
-            return survival_update_handle;
+            this.Enabled = false;
+            return FluidDataHandle;
+
         }
-        
+
+        private CubeObstacleData[] GetObstacleData()
+        {
+            return Settings.instance.getFluid().cubeObstacleDatas;
+
+        }
     }
+
+    [UpdateAfter(typeof(FluidInitializationSystem))]
+    [UpdateBefore(typeof(FluidMovementOnAgent))]
+    public class AgentMassMapSystem : JobComponentSystem
+    {
+
+        public struct AgentGroup
+        {
+            [ReadOnly] public ComponentDataArray<PhysicalData> PhysicalData;
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            [ReadOnly] public readonly int Length;
+        }
+
+
+
+        public NativeHashMap<int, float> AgentID2MassMap;
+        [Inject] AgentGroup m_agentGroup;
+
+        public struct FillMassMapJob : IJobParallelFor
+        {
+            [ReadOnly] public ComponentDataArray<PhysicalData> PhysicalData;
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            [WriteOnly] public NativeHashMap<int, float>.Concurrent AgentMassMap;
+
+
+            public void Execute(int index)
+            {
+                AgentMassMap.TryAdd(AgentData[index].ID, PhysicalData[index].mass);
+            }
+        }
+
+
+        protected override void OnStartRunning()
+        {
+            AgentID2MassMap = new NativeHashMap<int, float>(0, Allocator.Persistent);
+            Debug.Log("MapCreated");
+        }
+
+        protected override void OnStopRunning()
+        {
+            AgentID2MassMap.Dispose();
+        }
+
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
+        {
+            if (AgentID2MassMap.Length != m_agentGroup.Length)
+            {
+                Debug.Log("Map Is Created");
+                AgentID2MassMap.Dispose();
+                AgentID2MassMap = new NativeHashMap<int, float>(m_agentGroup.Length, Allocator.Persistent);
+
+                var massJob = new FillMassMapJob()
+                {
+                    AgentData = m_agentGroup.AgentData,
+                    AgentMassMap = AgentID2MassMap.ToConcurrent(),
+                    PhysicalData = m_agentGroup.PhysicalData
+                };
+
+                var massjob_handle = massJob.Schedule(m_agentGroup.Length, Settings.BatchSize);
+                massjob_handle.Complete();
+                return massjob_handle;
+
+            }
+
+
+
+            return inputDeps;
+
+
+        }
+    }
+
 
     public static class AcessDLL
     {

@@ -102,12 +102,12 @@ public class VisualizationSystem : ComponentSystem
 
         //if (inst.MaxSimulationFrames == CurrentFrame - 1)
         //{
-        using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter("Agents.txt", true))
-        {
-            file.Write(complete.ToString() + '\n');
-        }
+        //using (System.IO.StreamWriter file =
+        //new System.IO.StreamWriter("Agents.txt", true))
+        //{
+        //    file.Write(complete.ToString() + '\n');
         //}
+        ////}
 
         #endregion
 
@@ -118,20 +118,20 @@ public class VisualizationSystem : ComponentSystem
     {
 
 
-        base.OnCreateManager();
+        //base.OnCreateManager();
 
-        using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter("Agents.txt", false))
-        {
-            file.Write("#This file stores the Agent Data for each Agent." + '\n' +
-            "#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;" + '\n');
-        }
+        //using (System.IO.StreamWriter file =
+        //new System.IO.StreamWriter("Agents.txt", false))
+        //{
+        //    file.Write("#This file stores the Agent Data for each Agent." + '\n' +
+        //    "#CurrentFrame;AgentsInFrame;AgentID1;CloudID;AgentPositionx1;AgentPositiony1;AgentID2;AgentPositionx2;AgentPositiony2;...;" + '\n');
+        //}
 
-        using (System.IO.StreamWriter file =
-        new System.IO.StreamWriter("FrameTimes.txt", false))
-        {
-            file.Write("#This file stores the processing time for each frame. Measured in Seconds." + '\n');
-        }
+        //using (System.IO.StreamWriter file =
+        //new System.IO.StreamWriter("FrameTimes.txt", false))
+        //{
+        //    file.Write("#This file stores the processing time for each frame. Measured in Seconds." + '\n');
+        //}
 
     }
 
