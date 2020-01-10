@@ -109,18 +109,7 @@ namespace BioCrowds
 
                     }
 
-                    if(x < maxX)
-                    {
-                        x += 5f;
-                    }
-                    else
-                    {
-                        if (z < maxZ)
-                        {
-                            x = minX;
-                            z += 5f;
-                        }
-                    }
+                    
                     
                     float y = 0;
 
@@ -153,6 +142,19 @@ namespace BioCrowds
 
 
                     CommandBuffer.AddSharedComponent(index, AgentRenderer);
+
+                    if (x < maxX)
+                    {
+                        x += 5f;
+                    }
+                    else
+                    {
+                        if (z < maxZ)
+                        {
+                            x = minX;
+                            z++;
+                        }
+                    }
 
 
                 }

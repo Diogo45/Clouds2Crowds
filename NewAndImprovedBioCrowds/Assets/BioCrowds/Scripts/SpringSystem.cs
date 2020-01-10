@@ -35,6 +35,12 @@ namespace BioCrowds
             public float kd;
 
             public float l0;
+
+            public override string ToString()
+            {
+                return "(" + ID1 + "," + ID2 + ")"; 
+            }
+
         }
 
 
@@ -48,15 +54,13 @@ namespace BioCrowds
         public NativeHashMap<int, float3> AgentStepMap;
         public NativeHashMap<int, float3> AgentStepMap2;
 
-        protected override void OnCreateManager()
-        {
-            
-        }
 
         protected override void OnStopRunning()
         {
             springs.Dispose();
             AgentToForcesBeingApplied.Dispose();
+
+        
         }
 
 
@@ -233,6 +237,7 @@ namespace BioCrowds
             }
         }
 
+
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             int iters = (int)math.ceil((1f / Settings.experiment.FramesPerSecond) * TimeStep);
@@ -321,11 +326,20 @@ namespace BioCrowds
             //Debug.Log("1 " + AgentPosMap.Length + " " + AgentStepMap.Length);
             //Debug.Log("2 " + cellTagSystem.AgentIDToPos.Length );
 
+            ////////////  LOGGER  ////////////
 
-           
+     
+
+            var log = FluidLogger.currentLog;
+
+            for (int i = 0; i < springs.Length; i++)
+            {
+                log.currentSprings[i] = springs[i];
+            }
+
+            FluidLogger.WriteFrame(log);
 
 
-  
 
 
 

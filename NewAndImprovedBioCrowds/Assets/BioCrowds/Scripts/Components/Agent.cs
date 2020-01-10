@@ -389,9 +389,15 @@ namespace BioCrowds
                 {
                     Debug.Log("Crap");
                 }
+
+
+
+
             }
         }
-        
+
+        private int frame = 0;
+
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
 
@@ -412,6 +418,26 @@ namespace BioCrowds
             var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
 
             calculateMoveStepDeps.Complete();
+
+
+            ////////////  LOGGER  ////////////
+
+            
+            FluidLog log = new FluidLog { frame = frame, agentPos = new float3[Settings.agentQuantity], agentVel = new float3[Settings.agentQuantity], currentSprings = new SpringSystem.Spring[Settings.agentQuantity * 2] };
+
+
+            for (int i = 0; i < agentGroup.Length; i++)
+            {
+                log.agentPos[i] = agentGroup.Position[i].Value;
+                log.agentVel[i] = agentGroup.AgentStep[i].delta;
+
+            }
+
+            FluidLogger.currentLog = log;
+
+            if (!Settings.experiment.SpringSystem) FluidLogger.WriteFrame(log);
+
+            frame++;
 
             return calculateMoveStepDeps;
             

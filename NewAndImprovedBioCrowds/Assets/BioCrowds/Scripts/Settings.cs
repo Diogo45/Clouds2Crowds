@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
-using UnityEditor;
 //using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace BioCrowds
 {
@@ -74,7 +73,7 @@ namespace BioCrowds
 
     }
 
-    
+
     public class Settings : MonoBehaviour
     {
         public static Settings instance;
@@ -94,6 +93,8 @@ namespace BioCrowds
         public int treeHeight = 4;
         public static bool QuadTreeActive = true;
         public static bool SpawnAgentStructured = true;
+        public static bool record = true;
+
 
         [SerializeField]
         public List<ISettings> ModuleSettings;
@@ -108,15 +109,20 @@ namespace BioCrowds
 
         private LineRenderer line;
 
+        public void OnApplicationQuit()
+        {
+            FluidLogger.WriteToFile(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/log.txt");
+        }
+
         public void Awake()
         {
             var args = System.Environment.GetCommandLineArgs();
-            if (args.Length > 0)
-            {
-                ExperimentName = args[1];
-                simIndex = int.Parse(args[2]);
-                FluidExpName = args[3];
-            }
+            //if (args.Length > 0)
+            //{
+            //    ExperimentName = args[1];
+            //    simIndex = int.Parse(args[2]);
+            //    FluidExpName = args[3];
+            //}
 
             //line = gameObject.AddComponent<LineRenderer>();
             lineRenderers = new List<LineRenderer>();
@@ -164,56 +170,65 @@ namespace BioCrowds
             }
 
             var fluidSystem = World.Active.GetOrCreateManager<FluidParticleToCell>();
-            
+
 
         }
 
         public List<LineRenderer> lineRenderers;
         public List<LineRenderer> agentsPath;
 
-
-        private void Update()
+        IEnumerator DrawPaths()
         {
             var tagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
-            if(tagSystem.agentGroup.Length > 0)
+            line = gameObject.GetComponent<LineRenderer>();
+
+            if (tagSystem.agentGroup.Length > 0)
             {
                 for (int i = 0; i < tagSystem.agentGroup.Length; i++)
                 {
                     LineRenderer lineRend;
-                    if (agentsPath.Count < i)
+                    if (i < agentsPath.Count)
                     {
-                        var g = new GameObject("LineRenderer" + i);
-                        lineRend = g.AddComponent<LineRenderer>();
-                        lineRend.material = line.material;
-                        lineRend.SetVertexCount(5);
-                        lineRend.SetColors(Color.black, Color.black);
-                        lineRend.SetWidth(line.startWidth / 3f, line.endWidth / 3f);
-                        float3 posInit = tagSystem.agentGroup.AgentPos[i].Value;
-                        lineRend.SetPosition(0, posInit + (float3)Vector3.up * 2f);
-                        lineRend.SetPosition(1, posInit + (float3)Vector3.up * 2f);
-                        lineRend.SetPosition(2, posInit + (float3)Vector3.up * 2f);
-                        lineRend.SetPosition(3, posInit + (float3)Vector3.up * 2f);
-                        lineRend.SetPosition(4, posInit + (float3)Vector3.up * 2f);
+                        lineRend = agentsPath[i];
+
 
                     }
                     else
                     {
-                        lineRend = agentsPath[i];
+                        var g = new GameObject("LineRenderer" + i);
+                        lineRend = g.AddComponent<LineRenderer>();
+                        lineRend.material = line.material;
+                        lineRend.SetVertexCount(500);
+                        lineRend.SetColors(Color.black, Color.black);
+                        lineRend.SetWidth(line.startWidth / 4f, line.endWidth / 5f);
+                        lineRend.numCornerVertices = line.numCornerVertices;
+                        lineRend.numCapVertices = line.numCapVertices;
+                        float3 posInit = tagSystem.agentGroup.AgentPos[i].Value;
+                        for (int j = 0; j < lineRend.positionCount; j++)
+                        {
+                            lineRend.SetPosition(j, posInit + (float3)Vector3.up * 2f);
+                        }
+
+                        agentsPath.Add(lineRend);
                     }
                     float3 pos = tagSystem.agentGroup.AgentPos[i].Value;
 
-                    lineRend.SetPosition(4, lineRend.GetPosition(3) + Vector3.up * 2f);
-                    lineRend.SetPosition(3, lineRend.GetPosition(2) + Vector3.up * 2f);
-                    lineRend.SetPosition(2, lineRend.GetPosition(1) + Vector3.up * 2f);
-                    lineRend.SetPosition(1, lineRend.GetPosition(0) + Vector3.up * 2f);
-                    lineRend.SetPosition(0, pos + (float3)Vector3.up * 2f);
+                    for (int j = lineRend.positionCount - 1; j > 0; j--)
+                    {
+                        lineRend.SetPosition(j, lineRend.GetPosition(j - 1));
+                    }
+
+                    lineRend.SetPosition(0, pos + (float3)Vector3.up * 2);
 
 
                 }
             }
-            
+            yield return new WaitForSeconds(1500);
 
+        }
 
+        private void DrawSprings()
+        {
             var springSystem = World.Active.GetOrCreateManager<SpringSystem>();
             if (!springSystem.Enabled || springSystem.springs.Length <= 0) return;
             line = gameObject.GetComponent<LineRenderer>();
@@ -245,39 +260,50 @@ namespace BioCrowds
                 lineI.SetPosition(0, pos1 + (float3)Vector3.up * 2f);
                 lineI.SetPosition(1, pos2 + (float3)Vector3.up * 2f);
 
-                
+
             }
         }
 
 
-        //TODO: Change to a visualization script
-        //private void OnGUI()
-        //{
 
-        //    var CouplingSystem = World.Active.GetOrCreateManager<CouplingSystem>();
-        //    var celltagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
-        //    var fluidSystem = World.Active.GetOrCreateManager<FluidMovementOnAgent>();
-        //    if (experiment.SpringSystem)
-        //    {
-        //        for (int i = 0; i < CouplingSystem.CouplingData.Length; i++)
-        //        {
-        //            //Handles.Label(cellTagSystem.agentGroup.Position[i].Value, cellTagSystem.agentGroup.SurvivalComponent[i].survival_state.ToString());
-        //            Handles.Label(CouplingSystem.CouplingData.Position[i].Value, CouplingSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
-        //            //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
-        //        }
-        //    }
-
-        //    if (experiment.SpringSystem)
-        //    {
+        private void Update()
+        {
 
 
-        //       
+            StartCoroutine(DrawPaths());
+            DrawSprings();
 
 
-        //    }
-        //}
+            //TODO: Change to a visualization script
+            //private void OnGUI()
+            //{
+
+            //    var CouplingSystem = World.Active.GetOrCreateManager<CouplingSystem>();
+            //    var celltagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
+            //    var fluidSystem = World.Active.GetOrCreateManager<FluidMovementOnAgent>();
+            //    if (experiment.SpringSystem)
+            //    {
+            //        for (int i = 0; i < CouplingSystem.CouplingData.Length; i++)
+            //        {
+            //            //Handles.Label(cellTagSystem.agentGroup.Position[i].Value, cellTagSystem.agentGroup.SurvivalComponent[i].survival_state.ToString());
+            //            Handles.Label(CouplingSystem.CouplingData.Position[i].Value, CouplingSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
+            //            //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
+            //        }
+            //    }
+
+            //    if (experiment.SpringSystem)
+            //    {
 
 
+            //       
+
+
+            //    }
+            //}
+
+
+
+        }
 
     }
 }

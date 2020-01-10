@@ -1,0 +1,4 @@
+﻿  pch.cpp
+  useUnityComCpp.cpp
+d:\unitycomdll\unitycom\useunitycomcpp\useunitycomcpp.cpp(122): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  useUnityComCpp.vcxproj -> D:\UnityComDLL\UnityCom\x64\Debug\useUnityComCpp.exe

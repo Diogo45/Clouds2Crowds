@@ -27,7 +27,7 @@ namespace BioCrowds
         public float mass;
     }
 
-    
+
     [UpdateAfter(typeof(FluidParticleToCell)), UpdateAfter(typeof(AgentMassMapSystem))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidMovementOnAgent : JobComponentSystem
@@ -76,6 +76,7 @@ namespace BioCrowds
             [ReadOnly] public readonly int Length;
         }
         [Inject] public CellGroup cellGroup;
+        private bool wroteInitialParam = false;
         #endregion
 
         struct CalculateFluidMomenta : IJobParallelFor
@@ -237,7 +238,25 @@ namespace BioCrowds
             applyMomentaHandle.Complete();
 
 
+            if (!wroteInitialParam)
+            {
+                InitialParameters par = new InitialParameters { mass = new float[Settings.agentQuantity], tau = new float[Settings.agentQuantity] };
 
+
+                for (int i = 0; i < agentGroup.Length; i++)
+                {
+                    var tau = agentGroup.FluidData[i];
+                    var mass = agentGroup.PhysicalData[i];
+
+                    par.tau[i] = tau.tau;
+                    par.mass[i] = mass.mass;
+
+
+                }
+
+                wroteInitialParam = true;
+                FluidLogger.WriteInitalParam(par);
+            }
 
             return applyMomentaHandle;
         }
@@ -302,7 +321,7 @@ namespace BioCrowds
 
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
-        private bool sync = true;       //turn of for performance
+        private bool sync = false;       //turn of for performance
 
         public struct AgentGroup
         {
@@ -356,9 +375,9 @@ namespace BioCrowds
         {
 
             var dirInfo = System.IO.Directory.CreateDirectory(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0]);
-            fluidBuffer = GameObject.FindObjectOfType<MeshGenerator>().pointsBuffer;
-            marchingCubes = new Dictionary<int3, List<float3>>();
-            numPointsPerAxis = GameObject.FindObjectOfType<MeshGenerator>().numPointsPerAxis;
+            //fluidBuffer = GameObject.FindObjectOfType<MeshGenerator>().pointsBuffer;
+            //marchingCubes = new Dictionary<int3, List<float3>>();
+            //numPointsPerAxis = GameObject.FindObjectOfType<MeshGenerator>().numPointsPerAxis;
             stride = 1f / numPointsPerAxis;
 
             CellToParticles = new NativeMultiHashMap<int3, int>(frameSize * Clones + ((Settings.experiment.TerrainX) / 2 * (Settings.experiment.TerrainZ) / 2), Allocator.Persistent);
@@ -392,7 +411,7 @@ namespace BioCrowds
 
             OpenMemoryMap(memMapNameVel, bufferSize);
 
-            
+
 
 
             Debug.Log("Fluid Simulation Initialized");
@@ -536,12 +555,11 @@ namespace BioCrowds
 
 
 
-
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             //HACK: Write better sync between fluid sim and biocrowds
             // Actually giving control back to unity is hard to do here....
-            while (WaitForFluidSim()) {}
+            while (WaitForFluidSim()) { }
 
             FluidPos.Clear();
             FluidVel.Clear();
@@ -585,8 +603,8 @@ namespace BioCrowds
             if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "frame" + frame + ".png");
 
 
+          
 
-            
             //DebugFluid();
             //DrawFluid();
             frame++;
@@ -682,7 +700,7 @@ namespace BioCrowds
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidParticleToCell))]
-    public class FluidBarrier : BarrierSystem { }
+    public class FluidBarrier : BarrierSystem {}
 
     [UpdateAfter(typeof(SpawnAgentBarrier))]
     [UpdateBefore(typeof(FluidParticleToCell))]
@@ -725,8 +743,8 @@ namespace BioCrowds
                 {
                     tau = 1f;
                 }
-                
-                
+
+
                 float mass = (float)r.NextDouble() * 60f + 40f;
                 if (!settings.randMass)
                 {
@@ -777,7 +795,7 @@ namespace BioCrowds
                     for (float z = minZ; z < maxZ; z++)
                     {
 
-                        if(x > minX + 1 && z > minZ + 1 && z < maxZ - 2 && x < maxX - 2)
+                        if (x > minX + 1 && z > minZ + 1 && z < maxZ - 2 && x < maxX - 2)
                         {
                             continue;
                         }
@@ -807,7 +825,7 @@ namespace BioCrowds
         protected override void OnCreateManager()
         {
 
-            
+
 
 
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
@@ -915,6 +933,9 @@ namespace BioCrowds
             var FluidDataHandle = FluidDataJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
             FluidDataHandle.Complete();
 
+
+
+           
 
 
             this.Enabled = false;
