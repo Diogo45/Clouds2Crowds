@@ -69,7 +69,7 @@ namespace BioClouds
         public GameObject mainCamera;
 
         public Texture2D EnvironmentTexture;
-
+        public Material MetaCloudsMaterial;
 
         public List<CloudLateSpawn> cloudLateSpawns = new List<CloudLateSpawn>();
         public List<Entity> entitiesToDestroy = new List<Entity>();
@@ -201,8 +201,10 @@ namespace BioClouds
             CloudHeatMap.DensityRenderer.material.SetFloat("_CellWidth", inst.CellWidth);
             CloudHeatMap.DensityRenderer.material.SetTexture("_HeatMapScaleTex", inst.GetHeatScaleTexture());
 
-            
-            
+            //TODO fix
+            var mat_fix = World.Active.GetOrCreateManager<MaterialFixer>();
+            mat_fix.renderer = CloudHeatMap.DensityRenderer;
+
             if (!city.BioParameters.DrawCloudToMarkerLines)
                 World.Active.GetExistingManager<CloudCellDrawLineSystem>().Enabled = false;
 
@@ -371,8 +373,8 @@ namespace BioClouds
 
             entityManager.SetComponentData<CloudSplitData>(newCloud, new CloudSplitData { splitCount = splitCout, fatherID = fatherID, CloudSplitLimit = exp.CloudDivisionLimit, CloudSizeLimit = exp.CloudSizeLimit, CloudSplitTimer=exp.CloudSplitTimer});
 
-            if (Parameters.Instance.RenderClouds)
-                entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType % city.CloudMeshes.Count]);
+            //if (Parameters.Instance.RenderClouds)
+            //    entityManager.AddSharedComponentData<MeshInstanceRenderer>(newCloud, city.CloudMeshes[cloudType % city.CloudMeshes.Count]);
 
         }
         public void DestroyCloud(Entity entity)

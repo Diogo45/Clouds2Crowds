@@ -576,6 +576,21 @@ Prefab:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 5fe137fcdffd0f24fba0b3e24823b8ef, type: 2}
+    - target: {fileID: 114417955130599368, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: MetaCloudsMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: c51695f06c97f174db04da9a2a560afb, type: 2}
+    - target: {fileID: 23615116005292162, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: c51695f06c97f174db04da9a2a560afb, type: 2}
+    - target: {fileID: 114879114376412670, guid: 008ae5c67752e274da812237df40a6d4,
+        type: 2}
+      propertyPath: RenderClouds
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 008ae5c67752e274da812237df40a6d4, type: 2}
   m_IsPrefabAsset: 0
@@ -658,11 +673,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4182070476685430, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
       propertyPath: m_LocalScale.x
-      value: 50
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 4182070476685430, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
       propertyPath: m_LocalScale.y
-      value: 50
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 1320356715142610, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
       propertyPath: m_IsActive
@@ -674,7 +689,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1597742354917918, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d30a199632d608d4da4c906ea9f76b6e, type: 2}

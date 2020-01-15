@@ -2,16 +2,15 @@
 	Properties{
 		_Color("Color", Color) = (1,1,1,1)
 		_MainTex("Albedo (RGB)", 2D) = "white" {}
-	_DensityTex("DensityTexture", 2D) = "white"{}
-	_NoiseTex("NoiseTexture", 2D) = "white" {}
-	_Glossiness("Smoothness", Range(0,1)) = 0.5
+		_DensityTex("DensityTexture", 2D) = "white"{}
+		_NoiseTex("NoiseTexture", 2D) = "white" {}
+		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
 		_NoiseStrength("NoiseStrength", Range(0,1)) = 0.0
 		_HeatMapScaleTex("HeatMapScale", 2D) = "white" { }
-	_CellWidth("CellWidth", Float) = 2.0
+		_CellWidth("CellWidth", Float) = 2.0
 		_Rows("Rows", Int) = 500
 		_Cols("Cols", Int) = 500
-		//_NoiseWoo("NoiseWooo", Range(0,1000)) = 0.0
 	}
 		SubShader{
 		Tags{ "Queue" = "Transparent" "RenderType" = "Transparent" }
@@ -69,17 +68,8 @@
 			void surf(Input IN, inout SurfaceOutputStandard o) {
 			// Albedo comes from a texture tinted by color
 
-			//float2 currentCell = IN.worldPos.rg / _CellWidth;
 			float2 currentCell = IN.uv_MainTex ;
-			//Limit the world
-			//clip((IN.worldPos.rg / _CellWidth).r);
-			//clip(-(currentCell.r - _Rows-10));
-			//clip((IN.worldPos.rg / _CellWidth).g);
-			//clip(-(currentCell.g - _Cols-10));
-			//clip(abs(sin(IN.worldPos.rg  * PI / _CellWidth)) - 0.3);
-			//Limit the world Draw the grid
-			
-
+		
 			half densityValue = tex2D(_DensityTex, currentCell.rg).r;
 			clip(densityValue-0.000001);
 
@@ -105,8 +95,6 @@
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = 0.8f;
-
-
 
 	}
 	ENDCG
