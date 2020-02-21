@@ -15,6 +15,7 @@ namespace BioCrowds
     public class SpringSystem : JobComponentSystem
     {
 
+        //public float InitialK = Settings.instance.getFluid().springForce;
         public float InitialK = -500f;
         public float InitialKD = 3f;
         private float TimeStep = 0.0005f;
@@ -81,7 +82,7 @@ namespace BioCrowds
             AgentPosMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
             AgentStepMap = agentMovementVectors.AgentIDToStep;
             AgentStepMap2 = new NativeHashMap<int, float3>(AgentStepMap.Capacity, Allocator.TempJob);
-
+            //InitialK = Settings.instance.getFluid().springForce;
 
         }
 
@@ -548,7 +549,7 @@ namespace BioCrowds
                 AgentData = CouplingData.AgentData,
                 k = m_springSystem.InitialK,
                 kd = m_springSystem.InitialKD,
-                l0 = 1f,
+                l0 = 0.1f,
                 CouplingData = CouplingData.CouplingData,
                 springConnectionsCandidates = springConnectionsCandidates,
                 springs = m_springSystem.springs

@@ -44,7 +44,7 @@ namespace BioCrowds
         //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
         private static float particleMass;//kg
         //private static float agentMass = 65f; 
-        private static float timeStep = 1f / Settings.experiment.FramesPerSecond;
+        private static float timeStep = Settings.experiment.FramesPerSecond;
         //particleRadius in decimeters = 0.025f; in meters = 0.0025f
         private float particleRadius = 0.0025f;
 
@@ -115,16 +115,26 @@ namespace BioCrowds
                 while (CellToParticles.TryGetNextValue(out particleID, ref it))
                 {
                     vel = FluidVel[particleID] / (timeStep);
-
                     P = vel * particleMass;
                     M_r += P;
                     numPart++;
                 }
+                //TODO: Testar com massa *6% tbmmmm
                 ParticleSetMass.TryAdd(key, numPart * particleMass);
-                CellMomenta.TryAdd(key, M_r);
+                CellMomenta.TryAdd(key, M_r * 100f /** 0.06f*/);
 
             }
         }
+
+        public struct AgentFluidCollisionData
+        {
+            public int frame;
+            public float fluidVel;
+            public float fluidMass;
+            public int qtdParticles;
+        }
+
+        public NativeHashMap<int, AgentFluidCollisionData> AgentFluidCollisionDataMap;
 
         struct ApplyFluidMomentaOnAgents : IJobParallelFor
         {
@@ -174,7 +184,7 @@ namespace BioCrowds
 
             CellMomenta = new NativeHashMap<int3, float3>((Settings.experiment.TerrainX * Settings.experiment.TerrainZ) / 4, Allocator.Persistent);
             ParticleSetMass = new NativeHashMap<int3, float3>((Settings.experiment.TerrainX * Settings.experiment.TerrainZ) / 4, Allocator.Persistent);
-
+            AgentFluidCollisionDataMap = new NativeHashMap<int, AgentFluidCollisionData>(Settings.agentQuantity, Allocator.Persistent);
             //1 g/cm3 = 1000 kg/m3
             //Calculate based on the original SplishSplash code, mass = volume * density
             //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
@@ -189,6 +199,7 @@ namespace BioCrowds
 
         protected override void OnDestroyManager()
         {
+            AgentFluidCollisionDataMap.Dispose();
             CellMomenta.Dispose();
             ParticleSetMass.Dispose();
         }
@@ -234,6 +245,10 @@ namespace BioCrowds
             };
 
             var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, Settings.BatchSize, momentaJobHandle);
+
+
+
+
 
             applyMomentaHandle.Complete();
 
@@ -321,7 +336,7 @@ namespace BioCrowds
 
         public int numPointsPerAxis = 30;
         public float stride = 1 / 30f;
-        private bool sync = false;       //turn of for performance
+        private bool sync = true;       //turn of for performance
 
         public struct AgentGroup
         {
@@ -434,7 +449,6 @@ namespace BioCrowds
             float[] floatStream = new float[bufferSize];
             AcessDLL.ReadMemoryShare(memMapName, floatStream);
 
-            if (floatStream.Length != floatStreamVel.Length) Debug.Log("WTF");
 
             for (int i = 0; i < floatStream.Length - 2; i += 3)
             {
@@ -535,6 +549,10 @@ namespace BioCrowds
                 AcessDLL.CloseMemoryShare(memMapControl);
                 AcessDLL.CloseMemoryShare(memMapName);
                 AcessDLL.CloseMemoryShare(memMapNameVel);
+
+                FluidLogger.WriteToFile(dataPath + "/log.txt");
+
+
                 Application.Quit();
             }
 
@@ -553,7 +571,7 @@ namespace BioCrowds
         }
 
 
-
+        public string dataPath = Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0];
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
@@ -595,15 +613,11 @@ namespace BioCrowds
 
 
 
-            string s = frame.ToString();
-            if (s.Length == 1) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame0000" + frame + ".png");
-            if (s.Length == 2) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame000" + frame + ".png");
-            if (s.Length == 3) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame00" + frame + ".png");
-            if (s.Length == 4) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/frame0" + frame + ".png");
-            if (s.Length == 5) ScreenCapture.CaptureScreenshot(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "frame" + frame + ".png");
-
-
           
+            ScreenCapture.CaptureScreenshot(dataPath + "/frame" + frame.ToString().PadLeft(8,'0') + ".png");
+            
+
+
 
             //DebugFluid();
             //DrawFluid();
@@ -700,7 +714,7 @@ namespace BioCrowds
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidParticleToCell))]
-    public class FluidBarrier : BarrierSystem {}
+    public class FluidBarrier : BarrierSystem { }
 
     [UpdateAfter(typeof(SpawnAgentBarrier))]
     [UpdateBefore(typeof(FluidParticleToCell))]
@@ -741,7 +755,7 @@ namespace BioCrowds
                 float tau = (float)r.NextDouble() * 0.4f + 0.4f;
                 if (!settings.randTau)
                 {
-                    tau = 1f;
+                    tau = settings.initialTau;
                 }
 
 
@@ -935,7 +949,7 @@ namespace BioCrowds
 
 
 
-           
+
 
 
             this.Enabled = false;

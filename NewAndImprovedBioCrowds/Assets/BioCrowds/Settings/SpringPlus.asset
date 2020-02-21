@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f8a49efc853fa348b6662e755f77568, type: 3}
+  m_Name: SpringPlus
+  m_EditorClassIdentifier: 
+  randTau: 0
+  randMass: 0
+  initialTau: 1
+  springForce: -15000
+  thresholdDist: 0.01
+  particleMass: 0.0001
+  timeStep: 0.033333335
+  particleRadius: 0.025
+  RestitutionCoef: 0
+  scale:
+    x: 10
+    y: 10
+    z: 10
+  translate:
+    x: 50
+    y: 0
+    z: 25
+  FluidSimPath: D:\BackUp\SPlisHSPlasH\data\Scenes\Emitter.json
+  cubeObstacleDatas: []

@@ -93,7 +93,8 @@ namespace BioCrowds
                 int CellZ = minZ + 1;
                 int CellY = 0;
 
-                System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
+                int seed = DateTime.UtcNow.Millisecond;
+                System.Random r = new System.Random(seed);
 
                 //Debug.Log(spawnList.goal);
 
@@ -221,7 +222,7 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed / Settings.experiment.FramesPerSecond,
+                        MaxSpeed = maxSpeed/ Settings.experiment.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -325,6 +326,9 @@ namespace BioCrowds
                 lastValue = spawnList.qtdAgents;
 
             }
+
+            JobHandle handle;
+
             if (Settings.SpawnAgentStructured)
             {
                 var job = new InitialSpawnStructured
@@ -334,11 +338,10 @@ namespace BioCrowds
                     parBuffer = parBuffer
                 };
 
-                var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+                handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
                 lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
                 handle.Complete();
-                this.Enabled = false;
-                return handle;
+               
 
             }
             else
@@ -350,15 +353,15 @@ namespace BioCrowds
                     parBuffer = parBuffer
                 };
 
-                var handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+                handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
                 lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
                 handle.Complete();
-                this.Enabled = false;
-                return handle;
+
 
             }
 
-
+            this.Enabled = false;
+            return handle;
 
 
 
@@ -366,6 +369,9 @@ namespace BioCrowds
         }
 
     }
+
+
+    
 
 
     [UpdateAfter(typeof(AgentDespawner))]

@@ -49,6 +49,7 @@ namespace BioCrowds
         public static MeshInstanceRenderer MarkerRenderer;
 
         public static NativeMultiHashMap<int3, int> CellMarkers;
+        public NativeArray<int> Seeds;
 
         public static EntityArchetype MakerArchetype;
 
@@ -77,7 +78,7 @@ namespace BioCrowds
             [ReadOnly] public ComponentDataArray<CellName> cellNames;
             public EntityCommandBuffer.Concurrent CommandBuffer;
             [ReadOnly] public ComponentDataArray<SpawnData> SpawnData;
-
+            //[ReadOnly] public NativeArray<int> Seeds;
 
             public void Execute(int index)
             {
@@ -85,7 +86,9 @@ namespace BioCrowds
                 int flag = 0;
                 int markersAdded = 0;
                 NativeList<Position> tempCellMarkers = new NativeList<Position>(qtdMarkers, Allocator.Persistent);
+
                 System.Random r = new System.Random(DateTime.UtcNow.Millisecond);
+                //System.Random r = new System.Random(Seeds[index]);
 
                 for (int i = 0; i < qtdMarkers; i++)
                 {
@@ -156,17 +159,32 @@ namespace BioCrowds
                ComponentType.Create<MarkerData>());
             MarkerRenderer = BioCrowdsBootStrap.GetLookFromPrototype("MarkerMesh");
 
+            //if (!Settings.instance.markerSettings || Settings.instance.markerSettings.seeds.Length != cellData.Length)
+            //{
+            //    Settings.instance.markerSettings.seeds = new int[cellData.Length];
+
+            //    for (int i = 0; i < cellData.Length; i++)
+            //    {
+            //        Settings.instance.markerSettings.seeds[i] = DateTime.UtcNow.Millisecond;
+            //    }
+
+            //}
+
+            //Seeds = new NativeArray<int>(Settings.instance.markerSettings.seeds, Allocator.Persistent);
+
+
         }
 
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            var SpawnJob =  new SpawnMarkers
+            var SpawnJob = new SpawnMarkers
             {
                 cellNames = cellData.CellName,
                 CellPos = cellData.CellPos,
                 CommandBuffer = m_SpawnerBarrier.CreateCommandBuffer().ToConcurrent(),
                 SpawnData = spawnParameters.SpawnData
+                //Seeds = Seeds
             };
 
             var SpawnJobHandle = SpawnJob.Schedule(cellData.Length, Settings.BatchSize, inputDeps);

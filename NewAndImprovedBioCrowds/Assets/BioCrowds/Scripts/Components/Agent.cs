@@ -8,6 +8,7 @@ using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using UnityEditor;
 
 namespace BioCrowds
 {
@@ -508,10 +509,23 @@ namespace BioCrowds
         }
 
 
-
+        private float frame = 0f;
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+
+            
+
+            var waitForMove = Settings.waitFor;
+
+            if(frame / Settings.experiment.FramesPerSecond < waitForMove)
+            {
+                frame+=1f;
+                return inputDeps;
+            }
+
+
+
             MoveCloudsJob moveJob = new MoveCloudsJob()
             {
                 Positions = markersGroup.Position,
@@ -522,6 +536,7 @@ namespace BioCrowds
             var deps = moveJob.Schedule(markersGroup.Length, Settings.BatchSize, inputDeps);
 
             deps.Complete();
+
 
             return deps;
         }

@@ -9,8 +9,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f8a49efc853fa348b6662e755f77568, type: 3}
-  m_Name: NoObstacle
+  m_Name: SpringNormal
   m_EditorClassIdentifier: 
+  randTau: 0
+  randMass: 0
+  initialTau: 1
+  springForce: -5000
   thresholdDist: 0.01
   particleMass: 0.0001
   timeStep: 0.033333335

@@ -18,6 +18,11 @@ public class FluidSettings : ISettings
     public bool randTau = false;
     public bool randMass = false;
 
+    public float initialTau = 1f;
+
+    public float springForce = -500f;
+
+
     public float thresholdDist = 0.01f;
     //1 g/cm3 = 1000 kg/m3
     //Calculate based on the original SplishSplash code, mass = volume * density
@@ -35,6 +40,9 @@ public class FluidSettings : ISettings
     public float3 translate = new float3(50f, 0f, 25f);
 
     public string FluidSimPath = @"D:\BackUp\SPlisHSPlasH\data\Scenes\Emitter.json";
+
+
+
 
     [SerializeField]
     public CubeObstacleData[] cubeObstacleDatas =

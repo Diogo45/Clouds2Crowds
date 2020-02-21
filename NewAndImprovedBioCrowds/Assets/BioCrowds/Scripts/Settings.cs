@@ -94,6 +94,7 @@ namespace BioCrowds
         public static bool QuadTreeActive = true;
         public static bool SpawnAgentStructured = true;
         public static bool record = true;
+        public static float waitFor = 30f;
 
 
         [SerializeField]
@@ -109,21 +110,19 @@ namespace BioCrowds
 
         private LineRenderer line;
 
-        public void OnApplicationQuit()
-        {
-            FluidLogger.WriteToFile(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0] + "/log.txt");
-        }
+        public MarkerSettings markerSettings;
 
         public void Awake()
         {
             var args = System.Environment.GetCommandLineArgs();
-            //if (args.Length > 0)
-            //{
-            //    ExperimentName = args[1];
-            //    simIndex = int.Parse(args[2]);
-            //    FluidExpName = args[3];
-            //}
-
+#if UNITY_STANDALONE
+            if (args.Length > 0)
+            {
+                ExperimentName = args[1];
+                simIndex = int.Parse(args[2]);
+                FluidExpName = args[3];
+            }
+#endif
             //line = gameObject.AddComponent<LineRenderer>();
             lineRenderers = new List<LineRenderer>();
             agentsPath = new List<LineRenderer>();
@@ -206,7 +205,7 @@ namespace BioCrowds
                         float3 posInit = tagSystem.agentGroup.AgentPos[i].Value;
                         for (int j = 0; j < lineRend.positionCount; j++)
                         {
-                            lineRend.SetPosition(j, posInit + (float3)Vector3.up * 2f);
+                            lineRend.SetPosition(j, posInit + (float3)Vector3.up * 25f);
                         }
 
                         agentsPath.Add(lineRend);
@@ -218,7 +217,7 @@ namespace BioCrowds
                         lineRend.SetPosition(j, lineRend.GetPosition(j - 1));
                     }
 
-                    lineRend.SetPosition(0, pos + (float3)Vector3.up * 2);
+                    lineRend.SetPosition(0, pos + (float3)Vector3.up * 25f);
 
 
                 }
@@ -230,7 +229,9 @@ namespace BioCrowds
         private void DrawSprings()
         {
             var springSystem = World.Active.GetOrCreateManager<SpringSystem>();
+
             if (!springSystem.Enabled || springSystem.springs.Length <= 0) return;
+
             line = gameObject.GetComponent<LineRenderer>();
 
             for (int i = 0; i < springSystem.springs.Length; i++)
@@ -250,15 +251,28 @@ namespace BioCrowds
                     lineRenderers.Add(lineI);
                     lineI.material = line.material;
                     lineI.SetColors(line.startColor, line.endColor);
-                    lineI.SetWidth(line.startWidth, line.endWidth);
+                    lineI.SetWidth(line.startWidth / 3f, line.endWidth / 3f);
+
                 }
 
                 int ag1 = springSystem.springs[i].ID1;
                 int ag2 = springSystem.springs[i].ID2;
                 springSystem.AgentPosMap2.TryGetValue(ag1, out float3 pos1);
                 springSystem.AgentPosMap2.TryGetValue(ag2, out float3 pos2);
-                lineI.SetPosition(0, pos1 + (float3)Vector3.up * 2f);
-                lineI.SetPosition(1, pos2 + (float3)Vector3.up * 2f);
+
+                //TODO: Make the spring decoupling system remove the visualization of those deleted springs
+                if ((pos1 + (float3)Vector3.up * 15f).x == lineI.GetPosition(0).x && (pos1 + (float3)Vector3.up * 15f).z == lineI.GetPosition(0).z
+                    && (pos2 + (float3)Vector3.up * 15f).x == lineI.GetPosition(1).x && (pos2 + (float3)Vector3.up * 15f).z == lineI.GetPosition(1).z)
+                {
+                    var g = lineI.gameObject;
+                    lineRenderers.Remove(lineI);
+                    Destroy(g);
+                    continue;
+                }
+
+
+                lineI.SetPosition(0, pos1 + (float3)Vector3.up * 15f);
+                lineI.SetPosition(1, pos2 + (float3)Vector3.up * 15f);
 
 
             }
@@ -270,36 +284,16 @@ namespace BioCrowds
         {
 
 
+
+
             StartCoroutine(DrawPaths());
-            DrawSprings();
+            if (experiment.SpringSystem)
+            {
+                DrawSprings();
+            }
 
 
-            //TODO: Change to a visualization script
-            //private void OnGUI()
-            //{
 
-            //    var CouplingSystem = World.Active.GetOrCreateManager<CouplingSystem>();
-            //    var celltagSystem = World.Active.GetOrCreateManager<CellTagSystem>();
-            //    var fluidSystem = World.Active.GetOrCreateManager<FluidMovementOnAgent>();
-            //    if (experiment.SpringSystem)
-            //    {
-            //        for (int i = 0; i < CouplingSystem.CouplingData.Length; i++)
-            //        {
-            //            //Handles.Label(cellTagSystem.agentGroup.Position[i].Value, cellTagSystem.agentGroup.SurvivalComponent[i].survival_state.ToString());
-            //            Handles.Label(CouplingSystem.CouplingData.Position[i].Value, CouplingSystem.CouplingData.CouplingData[i].CurrentCouplings.ToString());
-            //            //Handles.Label(fluidSystem.agentGroup.AgentPos[i].Value, fluidSystem.agentGroup.FluidData[i].tau.ToString());
-            //        }
-            //    }
-
-            //    if (experiment.SpringSystem)
-            //    {
-
-
-            //       
-
-
-            //    }
-            //}
 
 
 
