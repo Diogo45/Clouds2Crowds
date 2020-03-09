@@ -118,6 +118,9 @@ namespace BioCrowds
                     //Debug.Log(i);
 
                     CommandBuffer.CreateEntity(index, AgentArchetype);
+
+
+
                     CommandBuffer.SetComponent(index, new Position { Value = new float3(x, y, z) });
                     CommandBuffer.SetComponent(index, new Rotation { Value = Quaternion.identity });
                     CommandBuffer.SetComponent(index, new AgentData
@@ -268,7 +271,7 @@ namespace BioCrowds
                ComponentType.Create<NormalLifeData>(),
                ComponentType.Create<Counter>());
 
-
+            
 
 
         }

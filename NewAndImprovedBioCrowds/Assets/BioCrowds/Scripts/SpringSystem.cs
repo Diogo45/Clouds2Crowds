@@ -15,7 +15,7 @@ namespace BioCrowds
     public class SpringSystem : JobComponentSystem
     {
 
-        //public float InitialK = Settings.instance.getFluid().springForce;
+        //public float InitialK = FluidSettings.instance.springForce;
         public float InitialK = -500f;
         public float InitialKD = 3f;
         private float TimeStep = 0.0005f;
@@ -64,17 +64,22 @@ namespace BioCrowds
         
         }
 
-
-        protected override void OnStartRunning()
+        protected override void OnCreateManager()
         {
-
             if (!Settings.experiment.SpringSystem)
             {
                 this.Enabled = false;
                 World.Active.GetExistingManager<CouplingSystem>().Enabled = false;
+                World.Active.GetExistingManager<AgentMassMapSystem>().Enabled = false;
                 World.Active.GetExistingManager<DecouplingSystem>().Enabled = false;
                 return;
             }
+        }
+
+        protected override void OnStartRunning()
+        {
+
+         
 
             AgentToForcesBeingApplied = new NativeMultiHashMap<int, float3>(Settings.agentQuantity * 5, Allocator.Persistent);
             springs = new NativeList<Spring>(Settings.agentQuantity * 2, Allocator.Persistent);
@@ -82,7 +87,7 @@ namespace BioCrowds
             AgentPosMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
             AgentStepMap = agentMovementVectors.AgentIDToStep;
             AgentStepMap2 = new NativeHashMap<int, float3>(AgentStepMap.Capacity, Allocator.TempJob);
-            //InitialK = Settings.instance.getFluid().springForce;
+            //InitialK = FluidSettings.instance.springForce;
 
         }
 

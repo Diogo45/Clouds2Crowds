@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-[CreateAssetMenu()]
-[System.Serializable]
-public class FluidSettings : ISettings
+
+public class FluidSettings : MonoBehaviour
 {
     [System.Serializable]
     public struct CubeObstacleData
@@ -15,6 +14,10 @@ public class FluidSettings : ISettings
 
     }
 
+
+    public static FluidSettings instance;
+
+    
     public bool randTau = false;
     public bool randMass = false;
 
@@ -24,9 +27,7 @@ public class FluidSettings : ISettings
 
 
     public float thresholdDist = 0.01f;
-    //1 g/cm3 = 1000 kg/m3
-    //Calculate based on the original SplishSplash code, mass = volume * density
-    //Where density = 1000kg/m^3 and volume = 0.8 * particleDiameter^3
+
     public float particleMass = 0.0001f;//kg
     //public float timeStep = 1f / BioCrowds.Settings.experiment.FramesPerSecond;
     public float timeStep = 1f / 30f;
@@ -54,4 +55,16 @@ public class FluidSettings : ISettings
         //    rotation = float3.zero
         //}
     };
+
+
+    private void Start()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+            Destroy(gameObject);
+    }
 }

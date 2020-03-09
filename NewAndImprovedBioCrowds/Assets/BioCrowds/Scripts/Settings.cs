@@ -80,10 +80,7 @@ namespace BioCrowds
         public static string ExperimentName = "BaseExperimentFluid.json";
 
 
-        public List<Color> Colors = new List<Color>();
-        public List<Mesh> Meshes = new List<Mesh>();
-        public List<MeshInstanceRenderer> Renderers = new List<MeshInstanceRenderer>();
-
+       
         public static int BatchSize = 1;
         //Real value is the sum of all groups instantiated in the bootstrap
         public static int agentQuantity = 0;
@@ -93,8 +90,7 @@ namespace BioCrowds
         public int treeHeight = 4;
         public static bool QuadTreeActive = true;
         public static bool SpawnAgentStructured = true;
-        public static bool record = true;
-        public static float waitFor = 30f;
+        public static float waitFor = 0f;
 
 
         [SerializeField]
@@ -106,16 +102,15 @@ namespace BioCrowds
         public static int simIndex = 0;
         //HACK: Change get method
         // This looks ok, to be honest
-        public FluidSettings getFluid() => ((FluidSettings)Settings.instance.ModuleSettings[simIndex]);
+        //public FluidSettings getFluid() => ((FluidSettings)Settings.instance.ModuleSettings[simIndex]);
 
         private LineRenderer line;
 
-        public MarkerSettings markerSettings;
 
         public void Awake()
         {
             var args = System.Environment.GetCommandLineArgs();
-#if UNITY_STANDALONE
+#if !UNITY_EDITOR
             if (args.Length > 0)
             {
                 ExperimentName = args[1];
@@ -126,21 +121,6 @@ namespace BioCrowds
             //line = gameObject.AddComponent<LineRenderer>();
             lineRenderers = new List<LineRenderer>();
             agentsPath = new List<LineRenderer>();
-
-            foreach (Color c in Colors)
-            {
-                Material m = new Material(Shader.Find("Standard"))
-                {
-                    color = c,
-                    enableInstancing = true
-                };
-                var renderer = new MeshInstanceRenderer()
-                {
-                    material = m,
-                    mesh = Meshes[0]
-                };
-                Renderers.Add(renderer);
-            }
 
             if (instance == null)
             {
@@ -230,7 +210,7 @@ namespace BioCrowds
         {
             var springSystem = World.Active.GetOrCreateManager<SpringSystem>();
 
-            if (!springSystem.Enabled || springSystem.springs.Length <= 0) return;
+            if (!springSystem.Enabled) return;
 
             line = gameObject.GetComponent<LineRenderer>();
 
@@ -285,7 +265,7 @@ namespace BioCrowds
 
 
 
-
+            //TODO:Figure out how to draw paths in front of everything(maybe not obstacles?)
             StartCoroutine(DrawPaths());
             if (experiment.SpringSystem)
             {

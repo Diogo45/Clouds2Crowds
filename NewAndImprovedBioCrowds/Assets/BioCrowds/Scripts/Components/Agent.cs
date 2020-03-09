@@ -514,17 +514,21 @@ namespace BioCrowds
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
 
-            
 
-            var waitForMove = Settings.waitFor;
+            //TODO:integrate the spawn walk delay with the global biocrowds lock
+            //var waitForMove = Settings.waitFor;
 
-            if(frame / Settings.experiment.FramesPerSecond < waitForMove)
+            //if(frame / Settings.experiment.FramesPerSecond < waitForMove)
+            //{
+            //    frame+=1f;
+            //    return inputDeps;
+            //}
+
+            if (ControlVariables.instance.LockBioCrowds)
             {
-                frame+=1f;
+                Debug.LogWarning("BioCrowds Locked!");
                 return inputDeps;
             }
-
-
 
             MoveCloudsJob moveJob = new MoveCloudsJob()
             {

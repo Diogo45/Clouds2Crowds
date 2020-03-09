@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Entities;
 using Unity.Collections;
+using Unity.Mathematics;
 
 public class ParticleSystemVisualization : MonoBehaviour {
 
@@ -33,7 +34,12 @@ public class ParticleSystemVisualization : MonoBehaviour {
 
     private void UpdateParticles()
     {
+        
         var positions =  fluidSimulation.FluidPos;
+        if (!positions.IsCreated)
+        {
+            return;
+        }
         for (int i = 0; i < positions.Length; i++)
         {
             
