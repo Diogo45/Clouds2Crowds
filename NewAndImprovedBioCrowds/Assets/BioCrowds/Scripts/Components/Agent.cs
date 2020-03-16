@@ -126,7 +126,7 @@ namespace BioCrowds
                 AgentIDToPos = AgentIDToPos.ToConcurrent()
             };
 
-            var mapCellToAgentsJobDep = mapCellToAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var mapCellToAgentsJobDep = mapCellToAgentsJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             mapCellToAgentsJobDep.Complete();
 
@@ -275,7 +275,7 @@ namespace BioCrowds
                 AgentPos = agentGroup.AgentPos,
                 AgentMarkers = MarkerSystem.AgentMarkers
             };
-            var computeJobHandle = computeJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var computeJobHandle = computeJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
             computeJobHandle.Complete();
             return computeJobHandle;
         }
@@ -416,7 +416,7 @@ namespace BioCrowds
                 Agent2StepMap = AgentIDToStep.ToConcurrent()
             };
                 
-            var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             calculateMoveStepDeps.Complete();
 
@@ -537,7 +537,7 @@ namespace BioCrowds
                 Goal = markersGroup.Goal
             };
 
-            var deps = moveJob.Schedule(markersGroup.Length, Settings.BatchSize, inputDeps);
+            var deps = moveJob.Schedule(markersGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             deps.Complete();
 

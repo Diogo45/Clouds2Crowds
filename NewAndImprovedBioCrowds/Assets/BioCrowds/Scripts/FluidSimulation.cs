@@ -344,7 +344,7 @@ namespace BioCrowds
 
             //};
 
-            //var momentaJobHandle = momentaJob.Schedule(cellGroup.Length, Settings.BatchSize, inputDeps);
+            //var momentaJobHandle = momentaJob.Schedule(cellGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             //momentaJobHandle.Complete();
 
@@ -368,8 +368,8 @@ namespace BioCrowds
 
             };
 
-            //var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, Settings.BatchSize, momentaJobHandle);
-            var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            //var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, momentaJobHandle);
+            var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
             applyMomentaHandle.Complete();
 
             //Write agent fluid collision data
@@ -526,6 +526,24 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
 
+           
+
+            OpenMemoryMap(memMapControl, 3);
+
+            //frameSize * 3 as there are 3 floats for every particle
+            bufferSize = frameSize * 3;
+            //TODO: Get frameSize from FluidSimulator
+
+            OpenMemoryMap(memMapName, bufferSize);
+
+            OpenMemoryMap(memMapNameVel, bufferSize);
+
+
+
+
+            Debug.Log("Fluid Simulation Initialized");
+
+
             var dirInfo = System.IO.Directory.CreateDirectory(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0]);
             //fluidBuffer = GameObject.FindObjectOfType<MeshGenerator>().pointsBuffer;
             //marchingCubes = new Dictionary<int3, List<float3>>();
@@ -542,7 +560,7 @@ namespace BioCrowds
 
         }
 
-        protected override void OnDestroyManager()
+        protected override void OnStopRunning()
         {
             FluidPos.Dispose();
             FluidVel.Dispose();
@@ -551,26 +569,8 @@ namespace BioCrowds
             AcessDLL.CloseMemoryShare(memMapName);
             AcessDLL.CloseMemoryShare(memMapNameVel);
         }
+      
 
-
-        protected override void OnCreateManager()
-        {
-
-            OpenMemoryMap(memMapControl, 3);
-
-            //frameSize * 3 as there are 3 floats for every particle
-            bufferSize = frameSize * 3;
-            //TODO: Get frameSize from FluidSimulator
-
-            OpenMemoryMap(memMapName, bufferSize);
-
-            OpenMemoryMap(memMapNameVel, bufferSize);
-
-
-
-
-            Debug.Log("Fluid Simulation Initialized");
-        }
 
 
 
@@ -745,7 +745,7 @@ namespace BioCrowds
                 FluidPos = FluidPos
             };
 
-            var FillCellJobHandle = FillCellMomentaJob.Schedule(FluidPos.Length, Settings.BatchSize, inputDeps);
+            var FillCellJobHandle = FillCellMomentaJob.Schedule(FluidPos.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             FillCellJobHandle.Complete();
 
@@ -983,7 +983,14 @@ namespace BioCrowds
         protected override void OnCreateManager()
         {
 
-
+            if (!Settings.experiment.FluidSim)
+            {
+                this.Enabled = false;
+                World.Active.GetExistingManager<FluidParticleToCell>().Enabled = false;
+                World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
+                World.Active.GetExistingManager<FluidBarrier>().Enabled = false;
+                return;
+            }
 
 
             var entityManager = World.Active.GetOrCreateManager<EntityManager>();
@@ -999,14 +1006,7 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
-            if (!Settings.experiment.FluidSim)
-            {
-                this.Enabled = false;
-                World.Active.GetExistingManager<FluidParticleToCell>().Enabled = false;
-                World.Active.GetExistingManager<FluidMovementOnAgent>().Enabled = false;
-                World.Active.GetExistingManager<FluidBarrier>().Enabled = false;
-                return;
-            }
+           
 
             settings = FluidSettings.instance;
             data = new NativeArray<CubeObstacleData>(GetObstacleData(), Allocator.Persistent);
@@ -1075,7 +1075,7 @@ namespace BioCrowds
                     LastIDUsed = LastIDUsed,
                     data = data
                 };
-                var SpawnFluidObstaclesJobHandle = SpawnFluidObstaclesJob.Schedule(data.Length, Settings.BatchSize, inputDeps);
+                var SpawnFluidObstaclesJobHandle = SpawnFluidObstaclesJob.Schedule(data.Length, SimulationConstants.instance.BatchSize, inputDeps);
                 SpawnFluidObstaclesJobHandle.Complete();
             }
 
@@ -1088,7 +1088,7 @@ namespace BioCrowds
                 CommandBuffer = commandBuffer.ToConcurrent(),
                 entities = agentGroup.entities
             };
-            var FluidDataHandle = FluidDataJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var FluidDataHandle = FluidDataJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
             FluidDataHandle.Complete();
 
 
@@ -1148,6 +1148,7 @@ namespace BioCrowds
         protected override void OnStopRunning()
         {
             AgentID2MassMap.Dispose();
+
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -1165,7 +1166,7 @@ namespace BioCrowds
                     PhysicalData = m_agentGroup.PhysicalData
                 };
 
-                var massjob_handle = massJob.Schedule(m_agentGroup.Length, Settings.BatchSize);
+                var massjob_handle = massJob.Schedule(m_agentGroup.Length, SimulationConstants.instance.BatchSize);
                 massjob_handle.Complete();
                 return massjob_handle;
 

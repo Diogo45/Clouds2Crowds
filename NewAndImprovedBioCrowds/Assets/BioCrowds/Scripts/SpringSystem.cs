@@ -69,9 +69,9 @@ namespace BioCrowds
             if (!Settings.experiment.SpringSystem)
             {
                 this.Enabled = false;
-                World.Active.GetExistingManager<CouplingSystem>().Enabled = false;
-                World.Active.GetExistingManager<AgentMassMapSystem>().Enabled = false;
-                World.Active.GetExistingManager<DecouplingSystem>().Enabled = false;
+                World.Active.GetOrCreateManager<CouplingSystem>().Enabled = false;
+                World.Active.GetOrCreateManager<AgentMassMapSystem>().Enabled = false;
+                World.Active.GetOrCreateManager<DecouplingSystem>().Enabled = false;
                 return;
             }
         }
@@ -261,7 +261,7 @@ namespace BioCrowds
                 AgentIDToPos2 = AgentPosMap2.ToConcurrent()
             };
 
-            var shittyHandle = shittyJob.Schedule(obstacleGroup.Length, Settings.BatchSize, inputDeps);
+            var shittyHandle = shittyJob.Schedule(obstacleGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
 
             AgentStepMap = agentMovementVectors.AgentIDToStep;
@@ -282,7 +282,7 @@ namespace BioCrowds
                     springs = springs
                 };
 
-                var ComputeForcesHandle = ComputeForces.Schedule(springs.Length, Settings.BatchSize, inputDeps);
+                var ComputeForcesHandle = ComputeForces.Schedule(springs.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
                 ComputeForcesHandle.Complete();
 
@@ -301,7 +301,7 @@ namespace BioCrowds
 
 
 
-                var ApplyForcesJobHandle = ApplyForces.Schedule(agentGroup.Length, Settings.BatchSize, ComputeForcesHandle);
+                var ApplyForcesJobHandle = ApplyForces.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, ComputeForcesHandle);
 
                 ApplyForcesJobHandle.Complete();
 
@@ -545,7 +545,7 @@ namespace BioCrowds
                 springConnectionsCandidates = springConnectionsCandidates.ToConcurrent()
             };
 
-            var handle = getCandidatesJob.Schedule(CouplingData.Length, Settings.BatchSize);
+            var handle = getCandidatesJob.Schedule(CouplingData.Length, SimulationConstants.instance.BatchSize);
 
             handle.Complete();
 

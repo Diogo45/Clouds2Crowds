@@ -189,7 +189,7 @@ namespace BioCrowds
                 //Seeds = Seeds
             };
 
-            var SpawnJobHandle = SpawnJob.Schedule(cellData.Length, Settings.BatchSize, inputDeps);
+            var SpawnJobHandle = SpawnJob.Schedule(cellData.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             SpawnJobHandle.Complete();
 

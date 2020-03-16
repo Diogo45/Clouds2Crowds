@@ -32,7 +32,7 @@ extern "C"
 		}
 		return false;
 	}
-	
+
 	//////////////////////////////////////////////////
 	// Returns:
 	// 0  - Success! A new memory map is opened/created.
@@ -130,7 +130,7 @@ extern "C"
 		if (offset < 0) {
 			offset = 0;
 		}
-		
+
 		if (AssertExists(memMapName)) {
 			long size = mMapBufferSizeArray.at(memMapName);
 			if (length < 0) {
@@ -143,12 +143,17 @@ extern "C"
 			LPVOID pBuf = mMapBufferArray.at(memMapName);
 			LPVOID orig = (LPVOID)((long long)pBuf + (long long)(offset * sizeof(float)));
 			//CopyMemory(val, pBuf, length * sizeof(float));
-			CopyMemory(val, orig, length * sizeof(float));
+			try {
+				CopyMemory(val, orig, length * sizeof(float));
+			}
+			catch (int e) {
+
+			}
 			return 0;
 		}
 		return -1;
 	}
-	
+
 	long UNITYCOM_API GetSize(char memMapName[NAME_SIZE])
 	{
 		if (AssertExists(memMapName)) {

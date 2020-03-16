@@ -341,7 +341,7 @@ namespace BioCrowds
                     parBuffer = parBuffer
                 };
 
-                handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+                handle = job.Schedule(parBuffer.Length, SimulationConstants.instance.BatchSize, inputDeps);
                 lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
                 handle.Complete();
                
@@ -356,7 +356,7 @@ namespace BioCrowds
                     parBuffer = parBuffer
                 };
 
-                handle = job.Schedule(parBuffer.Length, Settings.BatchSize, inputDeps);
+                handle = job.Schedule(parBuffer.Length, SimulationConstants.instance.BatchSize, inputDeps);
                 lastAgentId = AgentAtGroupQuantity[AgentAtGroupQuantity.Length - 1] + lastValue;
                 handle.Complete();
 
@@ -427,7 +427,7 @@ namespace BioCrowds
                     entities = agentGroup.entities
                 };
 
-                var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+                var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
                 CheckAreaHandle.Complete();
 
                 return CheckAreaHandle;

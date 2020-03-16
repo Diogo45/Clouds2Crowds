@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 
-public class FluidSettings : MonoBehaviour
+public class FluidSettings : ISettings
 {
     [System.Serializable]
     public struct CubeObstacleData
@@ -17,7 +17,7 @@ public class FluidSettings : MonoBehaviour
 
     public static FluidSettings instance;
 
-    
+
     public bool randTau = false;
     public bool randMass = false;
 
@@ -29,13 +29,11 @@ public class FluidSettings : MonoBehaviour
     public float thresholdDist = 0.01f;
 
     public float particleMass = 0.0001f;//kg
-    //public float timeStep = 1f / BioCrowds.Settings.experiment.FramesPerSecond;
-    public float timeStep = 1f / 30f;
-    public float particleRadius = 0.025f;
 
-    //0 --> Total inelastic collision
-    //1 --> Elastic Collision
-    public float RestitutionCoef = 0f;
+    //public float timeStep = 1f / BioCrowds.Settings.experiment.FramesPerSecond;
+    private float _particleRadius;
+    public float particleRadius { get { return _particleRadius; } set { _particleRadius = value; } }
+
 
     public float3 scale = new float3(10f, 10f, 10f);
     public float3 translate = new float3(50f, 0f, 25f);
@@ -55,7 +53,7 @@ public class FluidSettings : MonoBehaviour
         //    rotation = float3.zero
         //}
     };
-
+    
 
     private void Start()
     {
@@ -66,5 +64,15 @@ public class FluidSettings : MonoBehaviour
         }
         else
             Destroy(gameObject);
+    }
+
+    public override void SaveExperimentToFile()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void SetExperiment(ISettings exp)
+    {
+        var bla = (FluidSettings)exp;
     }
 }

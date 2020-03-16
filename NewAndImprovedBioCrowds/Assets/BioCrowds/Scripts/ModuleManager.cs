@@ -71,7 +71,7 @@ namespace BioCrowds
                 agentMovementVectors.Enabled = false;
             }
 
-            if (Settings.QuadTreeActive)
+            if (SimulationConstants.instance.GridActive)
             {
                 markerSystem.Enabled = false;
                 markerSystemQuadTree.Enabled = true;
@@ -81,7 +81,7 @@ namespace BioCrowds
                 markerSystem.Enabled = true;
                 markerSystemQuadTree.Enabled = false;
             }
-            
+
 
             //TODO: Time Machine not in Scene
             //if (!TimeMachineSettings.experiment.Enabled && World.Active.GetExistingManager<AgentMovementTimeMachine>().Enabled)

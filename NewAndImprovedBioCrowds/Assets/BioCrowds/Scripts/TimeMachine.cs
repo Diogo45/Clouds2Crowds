@@ -265,7 +265,7 @@ namespace BioCrowds
                     EnvironmentalComplexity = ECvalue
                 };
 
-                var TimeJumpJobDeps = TimeJumpJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+                var TimeJumpJobDeps = TimeJumpJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
                 TimeJumpJobDeps.Complete();
                 return TimeJumpJobDeps;

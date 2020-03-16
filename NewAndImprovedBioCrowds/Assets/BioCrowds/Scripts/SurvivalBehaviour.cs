@@ -97,7 +97,7 @@ namespace BioCrowds
                 AgentDotBuffer = GetBufferFromEntity<DotElement>(false)
             };
 
-            var survival_update_handle = survival_job.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var survival_update_handle = survival_job.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
 
             return survival_update_handle;
@@ -149,7 +149,7 @@ namespace BioCrowds
                 AgentDotBuffer = GetBufferFromEntity<DotElement>(false)
             };
 
-            var handle = survival_job.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var handle = survival_job.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
             this.Enabled = false;
             return handle;
         }

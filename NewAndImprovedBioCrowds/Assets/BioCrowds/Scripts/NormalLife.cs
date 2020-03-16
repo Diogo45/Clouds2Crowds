@@ -232,7 +232,7 @@ namespace BioCrowds
                 AgentGoal = agentGroup.AgentGoal
             };
 
-            var setGoalsHandle = SetGoals.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var setGoalsHandle = SetGoals.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             setGoalsHandle.Complete();
 
@@ -244,7 +244,7 @@ namespace BioCrowds
                 AgentStress = AgentStress.ToConcurrent()
             };
 
-            var SetStressHandle = SetStress.Schedule(agentGroup.Length, Settings.BatchSize, setGoalsHandle);
+            var SetStressHandle = SetStress.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, setGoalsHandle);
 
             SetStressHandle.Complete();
 
@@ -369,7 +369,7 @@ namespace BioCrowds
                 AgentMarkers = normalLifeMarkerSystem.AgentMarkers
             };
 
-            var contaIsso = contaEssaBosta.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var contaIsso = contaEssaBosta.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             contaIsso.Complete();
 
@@ -466,7 +466,7 @@ namespace BioCrowds
                 Counter = agentGroup.Counter
             };
 
-            var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var calculateMoveStepDeps = calculateMoveStepJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             calculateMoveStepDeps.Complete();
 
@@ -632,7 +632,7 @@ namespace BioCrowds
                 MyCell = agentGroup.MyCell
             };
 
-            var FindSurroundingAgentsHandle = FindSurroundingAgentsJob.Schedule(agentGroup.Length, Settings.BatchSize, inputDeps);
+            var FindSurroundingAgentsHandle = FindSurroundingAgentsJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
             FindSurroundingAgentsHandle.Complete();
 
@@ -644,7 +644,7 @@ namespace BioCrowds
                 AgentStep = agentGroup.AgentStep
             };
 
-            var SetStressHandle = SetStress.Schedule(agentGroup.Length, Settings.BatchSize, FindSurroundingAgentsHandle);
+            var SetStressHandle = SetStress.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, FindSurroundingAgentsHandle);
 
             SetStressHandle.Complete();
 

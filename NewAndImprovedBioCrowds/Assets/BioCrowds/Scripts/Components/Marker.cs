@@ -404,7 +404,7 @@ namespace BioCrowds
               
             };
 
-            var sq = job.Schedule(schedule.Length, Settings.BatchSize, inputDeps);
+            var sq = job.Schedule(schedule.Length, SimulationConstants.instance.BatchSize, inputDeps);
             sq.Complete();
 
             schedule.Dispose();

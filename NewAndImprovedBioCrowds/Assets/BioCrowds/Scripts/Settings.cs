@@ -81,14 +81,10 @@ namespace BioCrowds
 
 
        
-        public static int BatchSize = 1;
         //Real value is the sum of all groups instantiated in the bootstrap
         public static int agentQuantity = 0;
-        public bool ScreenCap = true;
         public static CrowdExperiment experiment = new CrowdExperiment();
 
-        public int treeHeight = 4;
-        public static bool QuadTreeActive = true;
         public static bool SpawnAgentStructured = true;
         public static float waitFor = 0f;
 

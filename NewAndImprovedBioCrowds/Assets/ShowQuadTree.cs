@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
+
 public class ShowQuadTree : MonoBehaviour
 {
     public static QuadTree qt;
@@ -11,7 +12,7 @@ public class ShowQuadTree : MonoBehaviour
 
     void Start()
     {
-        maxShowHeigth = BioCrowds.Settings.instance.treeHeight;
+        maxShowHeigth = SimulationConstants.instance.GridResolution;
     }
 
     void Update()

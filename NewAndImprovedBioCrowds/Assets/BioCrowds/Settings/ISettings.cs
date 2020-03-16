@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class ISettings : ScriptableObject
+public abstract class ISettings : MonoBehaviour
 {
+    public abstract void SaveExperimentToFile();
+
+    public abstract void SetExperiment(ISettings exp);
+
 
 }
 

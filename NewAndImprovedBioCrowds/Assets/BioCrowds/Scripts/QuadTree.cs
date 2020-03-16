@@ -200,7 +200,7 @@ public class QuadTree
 
     public bool IsSubdividable()
     {
-        return this.heigth < BioCrowds.Settings.instance.treeHeight;
+        return this.heigth < SimulationConstants.instance.GridResolution;
     }
 
 
