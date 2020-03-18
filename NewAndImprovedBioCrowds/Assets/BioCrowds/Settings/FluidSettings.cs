@@ -31,8 +31,7 @@ public class FluidSettings : ISettings
     public float particleMass = 0.0001f;//kg
 
     //public float timeStep = 1f / BioCrowds.Settings.experiment.FramesPerSecond;
-    private float _particleRadius;
-    public float particleRadius { get { return _particleRadius; } set { _particleRadius = value; } }
+    public float particleRadius = 0.25f;//Meters
 
 
     public float3 scale = new float3(10f, 10f, 10f);
@@ -73,6 +72,12 @@ public class FluidSettings : ISettings
 
     public override void SetExperiment(ISettings exp)
     {
-        var bla = (FluidSettings)exp;
+        var newFluidSettings = (FluidSettings)exp;
+        instance = newFluidSettings;
+    }
+
+    public override void LoadExperimentFromFile()
+    {
+        throw new System.NotImplementedException();
     }
 }

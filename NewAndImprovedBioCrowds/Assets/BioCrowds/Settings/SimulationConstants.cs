@@ -27,6 +27,11 @@ public class SimulationConstants : ISettings {
     [SerializeField]
     public float BioCrowdsTimeStep = 1f / 30f;
 
+    public override void LoadExperimentFromFile()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public override void SaveExperimentToFile()
     {
         throw new System.NotImplementedException();

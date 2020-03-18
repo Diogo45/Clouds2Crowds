@@ -75,13 +75,23 @@ public class ExperimentManager : MonoBehaviour
     public void SetExperiment(int index)
     {
         var tempExpList = experimentDict[index].settings;
+
         for (int i = 0; i < tempExpList.Count; i++)
         {
-            currentExp.settings[i].SetExperiment(tempExpList[i]);
+            int isExpActive = IsExperimentActive(tempExpList[i].GetType());
+            if (isExpActive == -1)
+            {
+                currentExp.activeSettings.Add(tempExpList[i].GetType());
+                currentExp.settings.Add(tempExpList[i]);               
+            } else 
+                currentExp.settings[isExpActive].SetExperiment(tempExpList[i]);
         }
+    }
 
-
-
+    private int IsExperimentActive(System.Type type)
+    {
+        if (currentExp.activeSettings.Contains(type)) return currentExp.activeSettings.IndexOf(type);
+        return -1;
     }
 
 

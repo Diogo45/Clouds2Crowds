@@ -15,6 +15,11 @@ public class ControlVariables : ISettings
 
     public bool SyncWithFluidSimulator = false;
 
+    public override void LoadExperimentFromFile()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public override void SaveExperimentToFile()
     {
         throw new System.NotImplementedException();

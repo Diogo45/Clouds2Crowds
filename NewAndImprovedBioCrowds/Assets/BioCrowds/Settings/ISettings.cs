@@ -9,6 +9,6 @@ public abstract class ISettings : MonoBehaviour
 
     public abstract void SetExperiment(ISettings exp);
 
-
+    public abstract void LoadExperimentFromFile();
 }
 
