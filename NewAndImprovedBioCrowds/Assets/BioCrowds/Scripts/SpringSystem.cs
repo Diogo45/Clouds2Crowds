@@ -16,9 +16,7 @@ namespace BioCrowds
     {
 
         //public float InitialK = FluidSettings.instance.springForce;
-        public float InitialK = -500f;
-        public float InitialKD = 3f;
-        private float TimeStep = 0.0005f;
+         
 
         [Inject] CellTagSystem cellTagSystem;
         [Inject] AgentMovementVectors agentMovementVectors;
@@ -246,7 +244,7 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            int iters = (int)math.ceil((1f / Settings.experiment.FramesPerSecond) * TimeStep);
+            int iters = (int)math.ceil((1f / Settings.experiment.FramesPerSecond) * GroupSettings.instance.SpringSystemTimeStep);
 
             AgentPosMap2.Dispose();
             AgentStepMap2.Dispose();
@@ -293,7 +291,7 @@ namespace BioCrowds
                     AgentIDToStep2 = AgentStepMap2.ToConcurrent(),
                     AgentIDToStep = AgentStepMap,
                     AgentToForcesBeingApplied = AgentToForcesBeingApplied,
-                    TimeStep = TimeStep,
+                    TimeStep = GroupSettings.instance.SpringSystemTimeStep,
                     AgentStep = agentGroup.AgentStep,
                     AgentData = agentGroup.AgentData,
                     AgentMassMap = m_AgentMassMap.AgentID2MassMap
@@ -552,9 +550,9 @@ namespace BioCrowds
             var effectSpringsJob = new CouplingEffector
             {
                 AgentData = CouplingData.AgentData,
-                k = m_springSystem.InitialK,
-                kd = m_springSystem.InitialKD,
-                l0 = 0.1f,
+                k = GroupSettings.instance.springForce,
+                kd = GroupSettings.instance.springDamping,
+                l0 = GroupSettings.instance.springRestLength,
                 CouplingData = CouplingData.CouplingData,
                 springConnectionsCandidates = springConnectionsCandidates,
                 springs = m_springSystem.springs

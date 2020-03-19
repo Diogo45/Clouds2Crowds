@@ -95,10 +95,7 @@ public class VisualizationSystem : ComponentSystem
         //    return;
 
 
-        #region BioCrowds DataRecording update CurrentAgentPosition
-
-        // TODO pegar do complete essas posições ai ?
-        
+        #region BioCrowds DataRecording update CurrentAgentPosition        
 
         //if (inst.MaxSimulationFrames == CurrentFrame - 1)
         //{

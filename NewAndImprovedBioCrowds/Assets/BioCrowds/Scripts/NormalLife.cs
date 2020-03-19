@@ -618,7 +618,6 @@ namespace BioCrowds
             SurroundingAgents.Clear();
 
 
-            //TODO: Updata after pathfinding
 
 
            

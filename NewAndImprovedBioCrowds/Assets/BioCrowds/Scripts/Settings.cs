@@ -96,9 +96,7 @@ namespace BioCrowds
         public static string FluidExpName = "Emitter.json";
         //public static int frame = 0;
         public static int simIndex = 0;
-        //HACK: Change get method
-        // This looks ok, to be honest
-        //public FluidSettings getFluid() => ((FluidSettings)Settings.instance.ModuleSettings[simIndex]);
+
 
         private LineRenderer line;
 

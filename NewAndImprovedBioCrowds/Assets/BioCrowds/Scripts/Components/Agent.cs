@@ -515,14 +515,7 @@ namespace BioCrowds
         {
 
 
-            //TODO:integrate the spawn walk delay with the global biocrowds lock
-            //var waitForMove = Settings.waitFor;
 
-            //if(frame / Settings.experiment.FramesPerSecond < waitForMove)
-            //{
-            //    frame+=1f;
-            //    return inputDeps;
-            //}
 
             if (ControlVariables.instance.LockBioCrowds)
             {

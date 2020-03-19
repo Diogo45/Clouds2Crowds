@@ -23,15 +23,18 @@ public class FluidSettings : ISettings
 
     public float initialTau = 1f;
 
-    public float springForce = -500f;
 
 
     public float thresholdDist = 0.01f;
+    public float thresholdHeigth = 2f;
 
     public float particleMass = 0.0001f;//kg
 
     //public float timeStep = 1f / BioCrowds.Settings.experiment.FramesPerSecond;
     public float particleRadius = 0.25f;//Meters
+
+    public int frameSize = 100000;
+    public float personRadius = 0.5f;
 
 
     public float3 scale = new float3(10f, 10f, 10f);
