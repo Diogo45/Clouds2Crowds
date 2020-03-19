@@ -17,8 +17,10 @@ public class FluidSettings : ISettings
 
     public static FluidSettings instance;
 
-
+    
     public bool randTau = false;
+
+  
     public bool randMass = false;
 
     public float initialTau = 1f;
@@ -40,6 +42,93 @@ public class FluidSettings : ISettings
     public float3 scale = new float3(10f, 10f, 10f);
     public float3 translate = new float3(50f, 0f, 25f);
 
+	public bool isRandTau() {
+		return this.randTau;
+	}
+
+	public void setRandTau(bool randTau) {
+		this.randTau = randTau;
+	}
+
+
+	public void setRandMass(bool randMass) {
+		this.randMass = randMass;
+	}
+
+	public float getInitialTau() {
+		return this.initialTau;
+	}
+
+	public void setInitialTau(float initialTau) {
+		this.initialTau = initialTau;
+	}
+
+	public float getThresholdDist() {
+		return this.thresholdDist;
+	}
+
+	public void setThresholdDist(float thresholdDist) {
+		this.thresholdDist = thresholdDist;
+	}
+
+	public float getThresholdHeigth() {
+		return this.thresholdHeigth;
+	}
+
+	public void setThresholdHeigth(float thresholdHeigth) {
+		this.thresholdHeigth = thresholdHeigth;
+	}
+
+	public float getParticleMass() {
+		return this.particleMass;
+	}
+
+	public void setParticleMass(float particleMass) {
+		this.particleMass = particleMass;
+	}
+
+	
+	public float getParticleRadius() {
+		return this.particleRadius;
+	}
+
+	public void setParticleRadius(float particleRadius) {
+		this.particleRadius = particleRadius;
+	}
+
+	public int getFrameSize() {
+		return this.frameSize;
+	}
+
+	public void setFrameSize(int frameSize) {
+		this.frameSize = frameSize;
+	}
+
+	public float getPersonRadius() {
+		return this.personRadius;
+	}
+
+	public void setPersonRadius(float personRadius) {
+		this.personRadius = personRadius;
+	}
+
+	public float3 getScale() {
+		return this.scale;
+	}
+
+	public void setScale(float3 scale) {
+		this.scale = scale;
+	}
+
+	public float3 getTranslate() {
+		return this.translate;
+	}
+
+	public void setTranslate(float3 translate) {
+		this.translate = translate;
+	}
+
+
     public string FluidSimPath = @"D:\BackUp\SPlisHSPlasH\data\Scenes\Emitter.json";
 
 
@@ -55,7 +144,7 @@ public class FluidSettings : ISettings
         //    rotation = float3.zero
         //}
     };
-    
+
 
     private void Start()
     {

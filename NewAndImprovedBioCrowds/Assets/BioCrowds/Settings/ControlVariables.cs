@@ -15,6 +15,23 @@ public class ControlVariables : ISettings
 
     public bool SyncWithFluidSimulator = false;
 
+	public bool isLockBioCrowds() {
+		return this.LockBioCrowds;
+	}
+
+	public void setLockBioCrowds(bool LockBioCrowds) {
+		this.LockBioCrowds = LockBioCrowds;
+	}
+
+	public bool isSyncWithFluidSimulator() {
+		return this.SyncWithFluidSimulator;
+	}
+
+	public void setSyncWithFluidSimulator(bool SyncWithFluidSimulator) {
+		this.SyncWithFluidSimulator = SyncWithFluidSimulator;
+	}
+
+
     public override void LoadExperimentFromFile()
     {
         throw new System.NotImplementedException();

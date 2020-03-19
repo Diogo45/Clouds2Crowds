@@ -19,6 +19,23 @@ public class GroupSettings : ISettings
 
     public float springRestLength = 0.1f;
 
+	public float getSpringSystemTimeStep() {
+		return this.SpringSystemTimeStep;
+	}
+
+	public void setSpringSystemTimeStep(float SpringSystemTimeStep) {
+		this.SpringSystemTimeStep = SpringSystemTimeStep;
+	}
+
+	public float getSpringRestLength() {
+		return this.springRestLength;
+	}
+
+	public void setSpringRestLength(float springRestLength) {
+		this.springRestLength = springRestLength;
+	}
+
+
     public void SetSpringK(float k) { springForce = k; }
     public void SetSpringKD(float kd) { }
 
