@@ -105,7 +105,7 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            //int qtdAgts = Settings.agentQuantity;
+            //int qtdAgts = ControlVariables.instance.agentQuantity;
             qt.Reset();
 
             if (AgentIDToPos.Capacity < agentGroup.Length)
@@ -165,10 +165,10 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
-            Rectangle size = new Rectangle { x = 0, y = 0, h = Settings.experiment.TerrainZ, w = Settings.experiment.TerrainX };
+            Rectangle size = new Rectangle { x = 0, y = 0, h = CrowdExperiment.instance.TerrainZ, w = CrowdExperiment.instance.TerrainX };
             qt = new QuadTree(size, 0);
             ShowQuadTree.qt = qt;
-            int qtdAgts = Settings.agentQuantity;
+            int qtdAgts = ControlVariables.instance.agentQuantity;
             //TODO Dynamize hash map size so there are less collisions
             CellToMarkedAgents = new NativeMultiHashMap<int3, int>(160000, Allocator.Persistent);
             //Debug.Log(CellToMarkedAgents.IsCreated);
@@ -424,7 +424,7 @@ namespace BioCrowds
             ////////////  LOGGER  ////////////
 
             
-            FluidLog log = new FluidLog { frame = frame, agentPos = new float3[Settings.agentQuantity], agentVel = new float3[Settings.agentQuantity], currentSprings = new SpringSystem.Spring[Settings.agentQuantity * 2] };
+            FluidLog log = new FluidLog { frame = frame, agentPos = new float3[ControlVariables.instance.agentQuantity], agentVel = new float3[ControlVariables.instance.agentQuantity], currentSprings = new SpringSystem.Spring[ControlVariables.instance.agentQuantity * 2] };
 
 
             for (int i = 0; i < agentGroup.Length; i++)
@@ -436,7 +436,7 @@ namespace BioCrowds
 
             FluidLogger.currentLog = log;
 
-            if (!Settings.experiment.SpringSystem) FluidLogger.WriteFrame(log);
+            if (!GroupSettings.instance.Enabled) FluidLogger.WriteFrame(log);
 
             frame++;
 
@@ -448,7 +448,7 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
-            AgentIDToStep = new NativeHashMap<int, float3>(Settings.agentQuantity * 2, Allocator.Persistent);
+            AgentIDToStep = new NativeHashMap<int, float3>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
         }
 
         protected override void OnStopRunning()
@@ -484,10 +484,10 @@ namespace BioCrowds
                 float3 newPos = old + Deltas[index].delta;
 
 
-                if (newPos.x > Settings.experiment.TerrainX) newPos.x = Settings.experiment.TerrainX;
+                if (newPos.x > CrowdExperiment.instance.TerrainX) newPos.x = CrowdExperiment.instance.TerrainX;
                 else if (newPos.x < 0f) newPos.x = 0f;
 
-                if (newPos.z > Settings.experiment.TerrainZ) newPos.z = Settings.experiment.TerrainZ;
+                if (newPos.z > CrowdExperiment.instance.TerrainZ) newPos.z = CrowdExperiment.instance.TerrainZ;
                 else if (newPos.z < 0f) newPos.z = 0f;
 
                 Positions[index] = new Position { Value = newPos };
@@ -495,16 +495,16 @@ namespace BioCrowds
 
 
                 //DONOW:Remove encherto
-                if (math.distance(old + Deltas[index].delta, Goal[index].SubGoal) <= 1f && Settings.experiment.WayPointOn)
-                {
-                    var w = AgentCalculations.RandomWayPoint();
+                //if (math.distance(old + Deltas[index].delta, Goal[index].SubGoal) <= 1f && ControlVariables.instance.WayPointOn)
+                //{
+                //    var w = AgentCalculations.RandomWayPoint();
 
-                    Goal[index] = new AgentGoal
-                    {
-                        SubGoal = w
+                //    Goal[index] = new AgentGoal
+                //    {
+                //        SubGoal = w
 
-                    };
-                }
+                //    };
+                //}
             }
         }
 
@@ -567,12 +567,12 @@ namespace BioCrowds
             return fValue / totalW;
         }
 
-        public static float3 RandomWayPoint()
-        {
-            System.Random r = new System.Random(System.DateTime.UtcNow.Millisecond);
-            int i = r.Next(0, Settings.experiment.WayPoints.Length);
-            return Settings.experiment.WayPoints[i];
-        }
+        //public static float3 RandomWayPoint()
+        //{
+        //    System.Random r = new System.Random(System.DateTime.UtcNow.Millisecond);
+        //    int i = r.Next(0, CrowdExperiment.instance.WayPoints.Length);
+        //    return CrowdExperiment.instance.WayPoints[i];
+        //}
     }
 
 }

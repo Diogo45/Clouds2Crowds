@@ -103,7 +103,7 @@ namespace BioCrowds
                     for (int j = 0; j < tempCellMarkers.Length; j++)
                     {
                         float distanceAA = math.distance(new float3(x, y, z), tempCellMarkers[j].Value);
-                        if (distanceAA < Settings.experiment.markerRadius)
+                        if (distanceAA < CrowdExperiment.instance.markerRadius)
                         {
                             canInstantiate = false;
                             break;
@@ -132,7 +132,7 @@ namespace BioCrowds
 
                         markersAdded++;
 
-                        if(Settings.experiment.showMarkers)CommandBuffer.AddSharedComponent(index, MarkerRenderer);
+                        if(CrowdExperiment.instance.showMarkers)CommandBuffer.AddSharedComponent(index, MarkerRenderer);
                         tempCellMarkers.Add(new Position { Value = new float3(x, y, z)});
                     }
                     else

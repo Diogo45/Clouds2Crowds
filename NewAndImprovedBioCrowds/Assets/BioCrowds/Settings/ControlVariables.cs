@@ -15,7 +15,18 @@ public class ControlVariables : ISettings
 
     public bool SyncWithFluidSimulator = false;
 
-	public bool isLockBioCrowds() {
+    public  int agentQuantity = 0;
+
+    public bool SpawnAgentStructured = true;
+
+    public float waitFor = 0f;
+
+    public float SimThreshold = 150f;
+
+    public int simIndex = 0;
+
+
+    public bool isLockBioCrowds() {
 		return this.LockBioCrowds;
 	}
 

@@ -14,7 +14,7 @@ public class ParticleSystemVisualization : MonoBehaviour {
     public float size = 0.25f;
     private void Start()
     {
-        if (!BioCrowds.Settings.experiment.FluidSim)
+        if (!FluidSettings.instance.Enabled)
         {
             this.enabled = false;
         }

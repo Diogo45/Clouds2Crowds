@@ -7,4 +7,12 @@ using UnityEngine;
 public class Index : MonoBehaviour
 {
     public int index;
+
+    public void LoadExperiment()
+    {
+        ExperimentManager.instance.SetExperiment(index);
+    }
+
+
+
 }

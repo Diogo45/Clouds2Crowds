@@ -10,6 +10,7 @@ public class GroupSettings : ISettings
 
     public static GroupSettings instance;
 
+
     public float springForce = -500f;
 
     public float springDamping = 3f;

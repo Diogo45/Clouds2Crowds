@@ -57,6 +57,8 @@ public class ExperimentManager : MonoBehaviour
         experiments.Add(newExp);
         experimentDict.Add(numExp++, newExp);
 
+        ExperimentListManager.instance.AddExperiment(newExp, numExp);
+
     }
 
     public void LoadExperimentFromFile(string expPath)

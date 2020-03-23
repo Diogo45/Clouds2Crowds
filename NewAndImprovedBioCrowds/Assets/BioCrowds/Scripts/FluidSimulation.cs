@@ -236,10 +236,10 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
 
-            CellMomenta = new NativeHashMap<int3, float3>((Settings.experiment.TerrainX * Settings.experiment.TerrainZ) / 4, Allocator.Persistent);
-            ParticleSetMass = new NativeHashMap<int3, float3>((Settings.experiment.TerrainX * Settings.experiment.TerrainZ) / 4, Allocator.Persistent);
+            CellMomenta = new NativeHashMap<int3, float3>((CrowdExperiment.instance.TerrainX * CrowdExperiment.instance.TerrainZ) / 4, Allocator.Persistent);
+            ParticleSetMass = new NativeHashMap<int3, float3>((CrowdExperiment.instance.TerrainX * CrowdExperiment.instance.TerrainZ) / 4, Allocator.Persistent);
 
-            AgentFluidData = new NativeHashMap<int, AgentParticlesData>(Settings.agentQuantity * 2, Allocator.Persistent);
+            AgentFluidData = new NativeHashMap<int, AgentParticlesData>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
 
             System.IO.File.Delete(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt");
 
@@ -336,7 +336,7 @@ namespace BioCrowds
             //TODO: Find a place out of update for initial parameters
             if (!wroteInitialParam)
             {
-                InitialParameters par = new InitialParameters { mass = new float[Settings.agentQuantity], tau = new float[Settings.agentQuantity] };
+                InitialParameters par = new InitialParameters { mass = new float[ControlVariables.instance.agentQuantity], tau = new float[ControlVariables.instance.agentQuantity] };
 
 
                 for (int i = 0; i < agentGroup.Length; i++)
@@ -442,7 +442,7 @@ namespace BioCrowds
                 float3 ppos = FluidPos[index];
                 //float3 ppos = FluidPos[index + (frameSize - 1) * frame];
                 if (ppos.y > FluidSettings.instance.thresholdHeigth ||
-                    ppos.x > Settings.experiment.TerrainX || ppos.z > Settings.experiment.TerrainZ ||
+                    ppos.x > CrowdExperiment.instance.TerrainX || ppos.z > CrowdExperiment.instance.TerrainZ ||
                     ppos.x < 0f || ppos.z < 0f) return;
 
                 int3 cell = new int3((int)math.floor(FluidPos[index].x / 2.0f) * 2 + 1, 0,
@@ -478,16 +478,17 @@ namespace BioCrowds
             Debug.Log("Fluid Simulation Initialized");
 
 
-            var dirInfo = System.IO.Directory.CreateDirectory(Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0]);
+            //var dirInfo = System.IO.Directory.CreateDirectory(Application.dataPath + "/../" + CrowdExperiment.instance.instanceName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0]);
 
-            CellToParticles = new NativeMultiHashMap<int3, int>(FluidSettings.instance.frameSize * Clones + ((Settings.experiment.TerrainX) / 2 * (Settings.experiment.TerrainZ) / 2), Allocator.Persistent);
+
+            CellToParticles = new NativeMultiHashMap<int3, int>(FluidSettings.instance.frameSize * Clones + ((CrowdExperiment.instance.TerrainX) / 2 * (CrowdExperiment.instance.TerrainZ) / 2), Allocator.Persistent);
             //Debug.Log(CellToParticles.Capacity);
 
             FluidPos = new NativeList<float3>(FluidSettings.instance.frameSize * Clones, Allocator.Persistent);
             FluidVel = new NativeList<float3>(FluidSettings.instance.frameSize * Clones, Allocator.Persistent);
 
-            dataPath = Application.dataPath + "/../" + Settings.ExperimentName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0];
-
+            //dataPath = Application.dataPath + "/../" + CrowdExperiment.instance.instanceName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0];
+            dataPath = ExperimentManager.instance.Directory + "/Fluid";
 
         }
 
@@ -613,10 +614,10 @@ namespace BioCrowds
             timeSplish = ControlData[0];
 
 
-            ControlData[1] = lastSyncFrame / Settings.experiment.FramesPerSecond;
+            ControlData[1] = lastSyncFrame / CrowdExperiment.instance.FramesPerSecond;
 
 
-            if (ControlData[0] > Settings.SimThreshold)
+            if (ControlData[0] > ControlVariables.instance.SimThreshold)
             {
                 AcessDLL.CloseMemoryShare(memMapControl);
                 AcessDLL.CloseMemoryShare(memMapName);
@@ -879,10 +880,9 @@ namespace BioCrowds
         }
 
 
-        protected override void OnCreateManager()
+        protected override void OnStartRunning()
         {
-
-            if (!Settings.experiment.FluidSim)
+            if (!FluidSettings.instance.Enabled)
             {
                 this.Enabled = false;
                 World.Active.GetExistingManager<FluidParticleToCell>().Enabled = false;
@@ -901,11 +901,6 @@ namespace BioCrowds
                ComponentType.Create<AgentData>(),
                ComponentType.Create<AgentGoal>(),
                ComponentType.Create<Counter>());
-        }
-
-        protected override void OnStartRunning()
-        {
-
 
             settings = FluidSettings.instance;
             data = new NativeArray<CubeObstacleData>(GetObstacleData(), Allocator.Persistent);

@@ -16,7 +16,7 @@ using UnityEngine.AI;
 namespace BioCrowds
 {
 
-    public class BioCrowdsBootStrap
+    public class BioCrowdsBootStrap : MonoBehaviour
     {
         public static EntityArchetype AgentArchetype;
         public static EntityArchetype CellArchetype;
@@ -30,26 +30,25 @@ namespace BioCrowds
 
 
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        public static void Intialize()
+        public static void Start()
         {
 
 
 
             //Getting data from settings
-            float agentRadius = Settings.experiment.agentRadius;
+            float agentRadius = CrowdExperiment.instance.agentRadius;
 
-            float framesPerSecond = Settings.experiment.FramesPerSecond;
+            float framesPerSecond = CrowdExperiment.instance.FramesPerSecond;
 
-            float markerRadius = Settings.experiment.markerRadius;
+            float markerRadius = CrowdExperiment.instance.markerRadius;
 
-            float MarkerDensity = Settings.experiment.MarkerDensity;
+            float MarkerDensity = CrowdExperiment.instance.MarkerDensity;
 
-            bool showCells = Settings.experiment.showCells;
+            bool showCells = CrowdExperiment.instance.showCells;
 
-            bool showMarkers = Settings.experiment.showMarkers;
+            bool showMarkers = CrowdExperiment.instance.showMarkers;
 
-            int2 size = new int2(Settings.experiment.TerrainX, Settings.experiment.TerrainZ);
+            int2 size = new int2(CrowdExperiment.instance.TerrainX, CrowdExperiment.instance.TerrainZ);
 
             if((size.x % 2 !=0 || size.y % 2 != 0))
             {

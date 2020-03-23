@@ -33,10 +33,10 @@ public class ExperimentListManager : MonoBehaviour
     public void AddExperiment(ExperimentManager.Experiment exp, int index)
     {
         GameObject newExp = Instantiate(buttonPrefab);
-        var ind = newExp.AddComponent<Index>();
+        var ind = newExp.GetComponent<Index>();
         ind.index = index; 
         var newExpTransform = newExp.GetComponent<RectTransform>();
-        newExpTransform.parent = myTransform;
+        newExpTransform.SetParent(myTransform, false);
         newExpTransform.SetSiblingIndex(index);
 
         //TODO: See if theres a better way to acess button text

@@ -62,9 +62,10 @@ namespace BioCrowds
         
         }
 
-        protected override void OnCreateManager()
+        protected override void OnStartRunning()
         {
-            if (!Settings.experiment.SpringSystem)
+
+            if (!GroupSettings.instance.Enabled)
             {
                 this.Enabled = false;
                 World.Active.GetOrCreateManager<CouplingSystem>().Enabled = false;
@@ -72,15 +73,9 @@ namespace BioCrowds
                 World.Active.GetOrCreateManager<DecouplingSystem>().Enabled = false;
                 return;
             }
-        }
 
-        protected override void OnStartRunning()
-        {
-
-         
-
-            AgentToForcesBeingApplied = new NativeMultiHashMap<int, float3>(Settings.agentQuantity * 5, Allocator.Persistent);
-            springs = new NativeList<Spring>(Settings.agentQuantity * 2, Allocator.Persistent);
+            AgentToForcesBeingApplied = new NativeMultiHashMap<int, float3>(ControlVariables.instance.agentQuantity * 5, Allocator.Persistent);
+            springs = new NativeList<Spring>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
             AgentPosMap = cellTagSystem.AgentIDToPos;
             AgentPosMap2 = new NativeHashMap<int, float3>(AgentPosMap.Capacity, Allocator.TempJob);
             AgentStepMap = agentMovementVectors.AgentIDToStep;
@@ -244,7 +239,7 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            int iters = (int)math.ceil((1f / Settings.experiment.FramesPerSecond) * GroupSettings.instance.SpringSystemTimeStep);
+            int iters = (int)math.ceil((1f / CrowdExperiment.instance.FramesPerSecond) * GroupSettings.instance.SpringSystemTimeStep);
 
             AgentPosMap2.Dispose();
             AgentStepMap2.Dispose();
@@ -568,7 +563,7 @@ namespace BioCrowds
         {
             springConnectionsCandidates = new NativeQueue<int2>(Allocator.Persistent);
 
-            //foreach (int2 s in Settings.experiment.SpringConnections)
+            //foreach (int2 s in CrowdExperiment.instance.SpringConnections)
             //{
             //    m_springSystem.springs.Add(new SpringSystem.Spring { k = m_springSystem.InitialK, kd = m_springSystem.InitialKD, ID1 = s.x, ID2 = s.y, l0 = 1f });
             //}

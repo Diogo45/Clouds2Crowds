@@ -83,7 +83,7 @@ public class QuadTree
         }
         else
         {
-            float densityToQtd = BioCrowds.Settings.experiment.MarkerDensity / Mathf.Pow(BioCrowds.Settings.experiment.markerRadius, 2f);
+            float densityToQtd = BioCrowds.CrowdExperiment.instance.MarkerDensity / Mathf.Pow(BioCrowds.CrowdExperiment.instance.markerRadius, 2f);
             int qtdMarkers = Mathf.FloorToInt(densityToQtd);
             myCells = new List<int3>();
             this.getCells();

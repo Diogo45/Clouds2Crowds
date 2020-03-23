@@ -263,7 +263,7 @@ namespace BioCrowds
                
             };
 
-            int qtdAgents = Settings.agentQuantity;
+            int qtdAgents = ControlVariables.instance.agentQuantity;
             var takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, qtdAgents / 4, inputDeps);
             takeMakersHandle.Complete();
 
@@ -296,8 +296,8 @@ namespace BioCrowds
 
         protected override void OnStartRunning()
         {
-            int qtdAgents = Settings.agentQuantity;
-            float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
+            int qtdAgents = ControlVariables.instance.agentQuantity;
+            float densityToQtd = CrowdExperiment.instance.MarkerDensity / Mathf.Pow(CrowdExperiment.instance.markerRadius, 2f);
             int qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
             AgentMarkers = new NativeMultiHashMap<int, float3>(qtdAgents * qtdMarkers * 4, Allocator.Persistent);
@@ -673,7 +673,7 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
             //DONOW: Change this to get from groups
-            int qtdAgents = Settings.agentQuantity;
+            int qtdAgents = ControlVariables.instance.agentQuantity;
             SurroundingAgents = new NativeHashMap<int, int>(qtdAgents * 2, Allocator.Persistent);
         }
 

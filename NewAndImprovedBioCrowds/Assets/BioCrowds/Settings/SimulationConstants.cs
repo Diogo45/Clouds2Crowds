@@ -23,6 +23,8 @@ public class SimulationConstants : ISettings {
     public float BioCrowdsTimeStep = 1f / 30f;
 
 
+
+
 	public override void SaveExperimentToFile()
 	{
 		throw new System.NotImplementedException();
@@ -44,7 +46,7 @@ public class SimulationConstants : ISettings {
 		return this.BatchSize;
 	}
 
-	public void setSize(int size) {
+	public void setBatchSize(int size) {
 		this.BatchSize = size;
 	}
 

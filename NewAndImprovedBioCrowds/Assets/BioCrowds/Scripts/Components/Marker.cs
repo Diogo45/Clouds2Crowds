@@ -209,8 +209,8 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
             UpdateInjectedComponentGroups();
-            int qtdAgents = Settings.agentQuantity;
-            float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
+            int qtdAgents = ControlVariables.instance.agentQuantity;
+            float densityToQtd = CrowdExperiment.instance.MarkerDensity / Mathf.Pow(CrowdExperiment.instance.markerRadius, 2f);
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
 
             AgentMarkers = new NativeMultiHashMap<int, float3>(agentGroup.Agents.Length * qtdMarkers * 4, Allocator.Persistent);
@@ -441,8 +441,8 @@ namespace BioCrowds
         {
             qt = CellTagSystem.qt;
             UpdateInjectedComponentGroups();
-            int qtdAgents = Settings.agentQuantity;
-            float densityToQtd = Settings.experiment.MarkerDensity / Mathf.Pow(Settings.experiment.markerRadius, 2f);
+            int qtdAgents = ControlVariables.instance.agentQuantity;
+            float densityToQtd = CrowdExperiment.instance.MarkerDensity / Mathf.Pow(CrowdExperiment.instance.markerRadius, 2f);
             //createCells = true;
             qtdMarkers = Mathf.FloorToInt(densityToQtd);
             cellMarkers = new Dictionary<int3, float3[]>();

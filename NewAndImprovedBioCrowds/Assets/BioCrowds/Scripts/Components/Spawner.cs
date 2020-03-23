@@ -126,7 +126,7 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed / Settings.experiment.FramesPerSecond,
+                        MaxSpeed = maxSpeed / CrowdExperiment.instance.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -225,7 +225,7 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed/ Settings.experiment.FramesPerSecond,
+                        MaxSpeed = maxSpeed/ CrowdExperiment.instance.FramesPerSecond,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -289,7 +289,7 @@ namespace BioCrowds
 
             lastAgentId = 0;
 
-            var exp = Settings.experiment.SpawnAreas;
+            var exp = CrowdExperiment.instance.SpawnAreas;
 
             parBuffer = new NativeList<Parameters>(exp.Length, Allocator.Persistent);
 
@@ -304,7 +304,7 @@ namespace BioCrowds
                     spawnOrigin = exp[i].min,
                     spawnDimensions = new float2(exp[i].max.x, exp[i].max.z)
                 };
-                Settings.agentQuantity += exp[i].qtd;
+                ControlVariables.instance.agentQuantity += exp[i].qtd;
                 parBuffer.Add(par);
             }
             AgentAtGroupQuantity = new NativeArray<int>(parBuffer.Length, Allocator.Persistent);
@@ -332,7 +332,7 @@ namespace BioCrowds
 
             JobHandle handle;
 
-            if (Settings.SpawnAgentStructured)
+            if (ControlVariables.instance.SpawnAgentStructured)
             {
                 var job = new InitialSpawnStructured
                 {
@@ -418,26 +418,26 @@ namespace BioCrowds
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
 
-            if (Settings.experiment.BioCloudsEnabled)
-            {
-                var CheckArea = new CheckAreas
-                {
-                    AgtPos = agentGroup.AgtPos,
-                    CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
-                    entities = agentGroup.entities
-                };
+            //if (CrowdExperiment.instance.BioCloudsEnabled)
+            //{
+            //    var CheckArea = new CheckAreas
+            //    {
+            //        AgtPos = agentGroup.AgtPos,
+            //        CommandBuffer = barrier.CreateCommandBuffer().ToConcurrent(),
+            //        entities = agentGroup.entities
+            //    };
 
-                var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
-                CheckAreaHandle.Complete();
+            //    var CheckAreaHandle = CheckArea.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
+            //    CheckAreaHandle.Complete();
 
-                return CheckAreaHandle;
-            }
-            else
-            {
+            //    return CheckAreaHandle;
+            //}
+            //else
+            //{
                 //TODO: Define other methods for despawn
                 this.Enabled = false;
                 return inputDeps;
-            }
+            //}
 
 
 
