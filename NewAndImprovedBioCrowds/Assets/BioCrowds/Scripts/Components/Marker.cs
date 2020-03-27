@@ -24,7 +24,7 @@ namespace BioCrowds
         public int agtID;
     }
 
-    [DisableAutoCreation]
+    
     [UpdateAfter(typeof(CellTagSystem))]
     [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystem : JobComponentSystem
@@ -226,7 +226,7 @@ namespace BioCrowds
 
     }
 
-    [DisableAutoCreation]
+    
     [UpdateAfter(typeof(CellTagSystem))]
     [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystemMk2 : JobComponentSystem

@@ -41,7 +41,7 @@ namespace BioCrowds
     /// Spawns markers cell by cell with random positions and a marker radius apart, given the marker density
     /// </summary>
    
-    [DisableAutoCreation]
+    
     [UpdateBefore(typeof(CellTagSystem))]
     public class MarkerSpawnSystem : JobComponentSystem
     {

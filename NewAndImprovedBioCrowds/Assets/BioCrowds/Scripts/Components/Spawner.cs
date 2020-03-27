@@ -23,7 +23,7 @@ namespace BioCrowds
     /// Spawns agents in runtime when BioClouds is active, instantiation occurs cell by cell where each one corresponds to a BioClouds cell. The data received is in the BioClouds, that is, the positions are (x,y,0) while BioCrowds is (x,0,z). 
     /// If bioclouds is not enabled for this experiment them we spawn only once with the data comming from the experiment file already in the necessary format.
     /// </summary>
-    [DisableAutoCreation]
+    
     [UpdateAfter(typeof(MarkerSpawnSystem)), UpdateInGroup(typeof(SpawnerGroup)), UpdateBefore(typeof(CellTagSystem))]
     public class AgentSpawner : JobComponentSystem
     {
@@ -377,11 +377,11 @@ namespace BioCrowds
 
 
 
-    [DisableAutoCreation]
+    
     [UpdateAfter(typeof(AgentDespawner))]
     public class DespawnAgentBarrier : BarrierSystem { }
 
-    [DisableAutoCreation]
+    
     [UpdateAfter(typeof(AgentMovementSystem))]
     public class AgentDespawner : JobComponentSystem
     {
