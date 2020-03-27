@@ -11,8 +11,8 @@ using System.IO;
 
 namespace BioCrowds
 {
-    
-    
+
+    [DisableAutoCreation]
     [UpdateBefore(typeof(AgentMovementSystem)),
      UpdateAfter(typeof(AgentMovementVectors)),
       UpdateInGroup(typeof(MovementVectorsSystemGroup))]

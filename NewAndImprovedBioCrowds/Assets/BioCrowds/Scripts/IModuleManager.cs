@@ -13,6 +13,8 @@ using UnityEditor;
 
 public abstract class IModuleManager : MonoBehaviour
 {
+
+    public bool Created = false;
     public abstract void Enable();
     public abstract void Disable();
 }

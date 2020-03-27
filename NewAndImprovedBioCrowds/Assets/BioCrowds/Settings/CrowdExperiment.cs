@@ -125,7 +125,7 @@ namespace BioCrowds
 
 
 
-        public void Start()
+        public void Awake()
         {
             if (instance == null)
             {
@@ -135,7 +135,6 @@ namespace BioCrowds
             else
                 Destroy(gameObject);
 
-            SetExperiment(null);
         } 
 
 
@@ -147,6 +146,11 @@ namespace BioCrowds
         }
 
         public override void SetExperiment(ISettings exp)
+        {
+            instance = (CrowdExperiment)(exp);
+        }
+
+        public override void LoadExperimentFromFile()
         {
             string ExperimentName = "BaseExperimentFluid.json";
 
@@ -167,11 +171,6 @@ namespace BioCrowds
                 string file = System.IO.File.ReadAllText(settingsFile);
                 JsonUtility.FromJsonOverwrite(file, instance);
             }
-        }
-
-        public override void LoadExperimentFromFile()
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace BioCrowds
 {
+    [DisableAutoCreation]
     [UpdateAfter(typeof(AgentMovementVectors))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     [UpdateAfter(typeof(AgentMassMapSystem))]
@@ -355,6 +356,7 @@ namespace BioCrowds
 
     }
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(SpringSystem))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class CouplingSystem : ComponentSystem
@@ -572,6 +574,7 @@ namespace BioCrowds
 
     }
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(SpringSystem))]
     [UpdateBefore(typeof(CouplingSystem))]
     public class DecouplingSystem : JobComponentSystem

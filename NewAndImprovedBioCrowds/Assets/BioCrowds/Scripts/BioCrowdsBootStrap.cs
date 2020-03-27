@@ -30,7 +30,7 @@ namespace BioCrowds
 
 
 
-        public static void Start()
+        public void Awake()
         {
 
 
@@ -50,7 +50,7 @@ namespace BioCrowds
 
             int2 size = new int2(CrowdExperiment.instance.TerrainX, CrowdExperiment.instance.TerrainZ);
 
-            if((size.x % 2 !=0 || size.y % 2 != 0))
+            if ((size.x % 2 !=0 || size.y % 2 != 0))
             {
                 Debug.Log("Tamanho do Terreno Invalido");
                 return;
@@ -165,35 +165,11 @@ namespace BioCrowds
             return result;
         }
 
-        [System.Obsolete("This method is deprecated, define goals by the experiment file")]
-        public static bool FindGoals(int group, out List<GameObject> res)
-        {
-            int i = 1;
-            res = new List<GameObject>();
-            GameObject g = GameObject.Find("G-" + group + "-" + i);
-            if (!g) return false;
-            res.Add(g);
-            while (g)
-            {
-                g = GameObject.Find("G-" + group + "-" + i);
-                res.Add(g);
-                i++;
-            }
-            return true;
-        }
+        
+        
 
 
     }
 
-    [System.Obsolete("Contains the data for the deprecated agent spawn method")]
-    public struct Group
-    {
-        public List<GameObject> goals;
-        public int qtdAgents;
-        public string name;
-        public int maxX, minX, maxZ, minZ;
-        public float maxSpeed;
-        public const float agentRadius = 1f;
-    }
 
 }

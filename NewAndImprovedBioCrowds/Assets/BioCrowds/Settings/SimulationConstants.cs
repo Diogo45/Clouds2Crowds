@@ -32,7 +32,7 @@ public class SimulationConstants : ISettings {
 
 	public override void SetExperiment(ISettings exp)
 	{
-		throw new System.NotImplementedException();
+		instance = (SimulationConstants)(exp);
 	}
 
 	public override void LoadExperimentFromFile()
@@ -87,7 +87,7 @@ public class SimulationConstants : ISettings {
 		this.BioCrowdsTimeStep = BioCrowdsTimeStep;
 	}
 
-    private void Start()
+    private void Awake()
     {
         if (instance == null)
         {

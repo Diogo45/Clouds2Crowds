@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using TMPro;
+using System;
+
 
 
 
@@ -13,6 +16,10 @@ public class ExperimentListManager : MonoBehaviour
 
     private RectTransform myTransform;
 
+
+
+
+    public ParameterDictonary parameterNameToInputField;
 
     public void Start()
     {
@@ -27,6 +34,7 @@ public class ExperimentListManager : MonoBehaviour
 
         myTransform = gameObject.GetComponent<RectTransform>();
 
+
     }
 
 
@@ -34,14 +42,14 @@ public class ExperimentListManager : MonoBehaviour
     {
         GameObject newExp = Instantiate(buttonPrefab);
         var ind = newExp.GetComponent<Index>();
-        ind.index = index; 
+        ind.index = index;
         var newExpTransform = newExp.GetComponent<RectTransform>();
         newExpTransform.SetParent(myTransform, false);
         newExpTransform.SetSiblingIndex(index);
 
         //TODO: See if theres a better way to acess button text
         newExpTransform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>().text = exp.name;
-        
+
     }
 
 

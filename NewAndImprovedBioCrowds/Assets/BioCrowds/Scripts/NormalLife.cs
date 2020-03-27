@@ -35,7 +35,7 @@ namespace BioCrowds
 
 
 
-    
+    [DisableAutoCreation]
     [UpdateInGroup(typeof(MarkerSystemGroup)), UpdateAfter(typeof(CellTagSystem))]
     public class NormalLifeMarkerSystem : JobComponentSystem
     {
@@ -314,6 +314,7 @@ namespace BioCrowds
 
     }
 
+    [DisableAutoCreation]
     [UpdateBefore(typeof(NormaLifeAgentMovementVectors)), UpdateAfter(typeof(NormalLifeMarkerSystem))]
     public class MarkerCounter : JobComponentSystem
     {
@@ -378,6 +379,7 @@ namespace BioCrowds
 
     }
 
+    [DisableAutoCreation]
     [UpdateInGroup(typeof(MovementVectorsSystemGroup)), UpdateAfter(typeof(MarkerWeightSystem))]
     public class NormaLifeAgentMovementVectors : JobComponentSystem
     {
@@ -475,7 +477,7 @@ namespace BioCrowds
 
     }
 
-    
+    [DisableAutoCreation]
     [UpdateBefore(typeof(AgentMovementSystem))]//DONOW: ADD to update group before move system
     public class StressSystem : JobComponentSystem
     {

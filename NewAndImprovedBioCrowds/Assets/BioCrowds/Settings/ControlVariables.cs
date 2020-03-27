@@ -15,7 +15,7 @@ public class ControlVariables : ISettings
 
     public bool SyncWithFluidSimulator = false;
 
-    public  int agentQuantity = 0;
+    public int agentQuantity = 0;
 
     public bool SpawnAgentStructured = true;
 
@@ -55,10 +55,10 @@ public class ControlVariables : ISettings
 
     public override void SetExperiment(ISettings exp)
     {
-        throw new System.NotImplementedException();
+        instance = (ControlVariables)(exp);
     }
 
-    private void Start()
+    private void Awake()
     {
         if (instance == null)
         {

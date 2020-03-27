@@ -30,7 +30,7 @@ namespace BioCrowds
         // 0 = calm, 1 = panicked
         public int survival_state;
     }
-
+    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidMovementOnAgent))]
     public class SurvivalInstinctSystem : JobComponentSystem
     {
@@ -105,7 +105,7 @@ namespace BioCrowds
 
     }
 
-
+    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidBarrier))]
     [UpdateBefore(typeof(FluidMovementOnAgent))]
     public class FillBufferSystem : JobComponentSystem

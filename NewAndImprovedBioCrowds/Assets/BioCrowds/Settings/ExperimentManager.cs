@@ -27,7 +27,7 @@ public class ExperimentManager : MonoBehaviour
 
 
 
-    private int numExp = 0;
+    private int numExp = 1;
     private Dictionary<int, Experiment> experimentDict;
     public string Directory { get; private set; }
 
@@ -42,23 +42,38 @@ public class ExperimentManager : MonoBehaviour
             Destroy(gameObject);
         Directory = Application.dataPath;
 
+        currentExp.settings = new List<ISettings>();
+
+        currentExp.settings.Add(BioCrowds.CrowdExperiment.instance);
+        currentExp.settings.Add(SimulationConstants.instance);
+        currentExp.settings.Add(ControlVariables.instance);
+
+        currentExp.activeSettings = new List<System.Type>();
+
+        currentExp.activeSettings.Add(typeof(BioCrowds.CrowdExperiment));
+        currentExp.activeSettings.Add(typeof(SimulationConstants));
+        currentExp.activeSettings.Add(typeof(ControlVariables));
+
+
         experimentDict = new Dictionary<int, Experiment>();
+        experimentDict.Add(0, currentExp);
     }
 
     public void AddExperiment()
     {
-        List<ISettings> temp = new List<ISettings>(currentExp.settings);
-        Experiment newExp = new Experiment { name = string.Copy(currentExp.name), settings = temp };
-        foreach (var item in temp)
+        List<ISettings> tempSettings = new List<ISettings>(currentExp.settings);
+        Experiment newExp = new Experiment { name = string.Copy(currentExp.name), settings = tempSettings, activeSettings = new List<System.Type>()};
+        foreach (var item in tempSettings)
         {
             newExp.activeSettings.Add(item.GetType());
 
         }
         experiments.Add(newExp);
-        experimentDict.Add(numExp++, newExp);
+        experimentDict.Add(numExp, newExp);
 
         ExperimentListManager.instance.AddExperiment(newExp, numExp);
 
+        numExp++;
     }
 
     public void LoadExperimentFromFile(string expPath)
@@ -88,6 +103,8 @@ public class ExperimentManager : MonoBehaviour
             } else 
                 currentExp.settings[isExpActive].SetExperiment(tempExpList[i]);
         }
+
+        currentExp.name = experimentDict[index].name;
     }
 
     private int IsExperimentActive(System.Type type)
@@ -102,6 +119,8 @@ public class ExperimentManager : MonoBehaviour
         currentExp.name = input;
     }
 
+
+   
 
 
 

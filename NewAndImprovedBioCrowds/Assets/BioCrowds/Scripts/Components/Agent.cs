@@ -37,7 +37,7 @@ namespace BioCrowds
 
 
 
-
+    [DisableAutoCreation]
     [UpdateAfter(typeof(EarlyUpdate))]
     public class CellTagSystem : JobComponentSystem
     {
@@ -185,6 +185,7 @@ namespace BioCrowds
 
     public class MarkerSystemGroup { }
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(MarkerSystemGroup))]
     public class MarkerSystemView : ComponentSystem
     {
@@ -203,7 +204,7 @@ namespace BioCrowds
         }
     }
 
-
+    [DisableAutoCreation]
     [UpdateAfter(typeof(MarkerSystemGroup)), UpdateAfter(typeof(MarkerSystemView))]
     public class MarkerWeightSystem : JobComponentSystem
     {
@@ -301,7 +302,7 @@ namespace BioCrowds
 
     public class MovementVectorsSystemGroup { }
 
-
+    [DisableAutoCreation]
     [UpdateInGroup(typeof(MovementVectorsSystemGroup)), UpdateAfter(typeof(MarkerWeightSystem))]
     public class AgentMovementVectors : JobComponentSystem
     {
@@ -457,7 +458,7 @@ namespace BioCrowds
         }
     }
 
-    
+    [DisableAutoCreation]
     [UpdateAfter(typeof(AgentMovementVectors))]
     public class AgentMovementSystem : JobComponentSystem
     {

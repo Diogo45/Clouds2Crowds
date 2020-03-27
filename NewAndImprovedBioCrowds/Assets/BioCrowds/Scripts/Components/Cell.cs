@@ -31,17 +31,17 @@ namespace BioCrowds
     }
 
 
-    
 
 
 
     [UpdateBefore(typeof(CellTagSystem)), UpdateAfter(typeof(MarkerSpawnSystem))]
     public class SpawnBarrier : BarrierSystem { }
 
-
     /// <summary>
     /// Spawns markers cell by cell with random positions and a marker radius apart, given the marker density
     /// </summary>
+   
+    [DisableAutoCreation]
     [UpdateBefore(typeof(CellTagSystem))]
     public class MarkerSpawnSystem : JobComponentSystem
     {
@@ -69,6 +69,10 @@ namespace BioCrowds
         }
         [Inject] CellData cellData;
 
+        public MarkerSpawnSystem()
+        {
+            this.Enabled = true;
+        }
 
        
 

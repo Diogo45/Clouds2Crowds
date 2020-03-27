@@ -28,6 +28,7 @@ namespace BioCrowds
     }
 
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidParticleToCell)), UpdateAfter(typeof(AgentMassMapSystem))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidMovementOnAgent : JobComponentSystem
@@ -385,6 +386,7 @@ namespace BioCrowds
 
     }
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(AgentMovementVectors))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidParticleToCell : JobComponentSystem
@@ -755,11 +757,13 @@ namespace BioCrowds
     }
 
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class FluidBarrier : BarrierSystem { }
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(SpawnAgentBarrier))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class FluidInitializationSystem : JobComponentSystem
@@ -1002,6 +1006,7 @@ namespace BioCrowds
         }
     }
 
+    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidMovementOnAgent))]
     public class AgentMassMapSystem : JobComponentSystem
