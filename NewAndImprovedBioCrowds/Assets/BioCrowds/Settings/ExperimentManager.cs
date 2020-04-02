@@ -22,6 +22,7 @@ public class ExperimentManager : MonoBehaviour
 
 
     public Experiment currentExp;
+    public int curentSpawnAreaIndex;
 
     public List<Experiment> experiments;
 
@@ -105,7 +106,10 @@ public class ExperimentManager : MonoBehaviour
         }
 
         currentExp.name = experimentDict[index].name;
+        curentSpawnAreaIndex = 0;
     }
+
+
 
     private int IsExperimentActive(System.Type type)
     {
@@ -113,6 +117,34 @@ public class ExperimentManager : MonoBehaviour
         return -1;
     }
 
+
+
+    public void SetGoal(string s)
+    {
+        if (IsExperimentActive(typeof(BioCrowds.CrowdExperiment)) != -1)
+        {
+            BioCrowds.CrowdExperiment.instance.SetGoal(s, curentSpawnAreaIndex);
+        }
+
+    }
+
+
+    public void NextSpawnArea()
+    {
+        if(curentSpawnAreaIndex < BioCrowds.CrowdExperiment.instance.SpawnAreas.Count)
+        {
+            curentSpawnAreaIndex++;
+            ExperimentListManager.instance.NextSpawnArea(curentSpawnAreaIndex);
+        }
+    }
+    public void PreviousSpawnArea()
+    {
+        if (curentSpawnAreaIndex > 0)
+        {
+            curentSpawnAreaIndex--;
+            ExperimentListManager.instance.PreviousSpawnArea(curentSpawnAreaIndex);
+        }
+    }
 
     public void WriteName(string input)
     {

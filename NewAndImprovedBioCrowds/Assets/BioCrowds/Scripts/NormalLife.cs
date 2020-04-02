@@ -482,6 +482,8 @@ namespace BioCrowds
     public class StressSystem : JobComponentSystem
     {
         [Inject] CellTagSystem cellTagSystem;
+
+
         public NativeHashMap<int, int> SurroundingAgents;
 
 

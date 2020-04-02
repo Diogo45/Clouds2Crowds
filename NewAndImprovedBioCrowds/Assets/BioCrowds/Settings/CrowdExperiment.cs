@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Unity.Mathematics;
 //using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -10,20 +10,26 @@ namespace BioCrowds
     public class CrowdExperiment : ISettings
     {
         [System.Serializable]
-        public struct SpawnArea
+        public class SpawnArea
         {
             public int qtd;
             public int3 max;
             public int3 min;
             public float3 goal;
             public float maxSpeed;
+        
         }
 
-        public struct ObstacleArea
+        public List<SpawnArea> SpawnAreas;
+
+
+        public class ObstacleArea
         {
             public float3 start;
             public float3 end;
         }
+
+        public List<ObstacleArea> obstacleAreas;
 
         public static CrowdExperiment instance;
 
@@ -32,13 +38,31 @@ namespace BioCrowds
         public float MarkerDensity = 0.65f;
         public int TerrainX = 100;
         public int TerrainZ = 50;
-        public float FramesPerSecond = 32f;
+        public float FramesPerSecond = 30f;
+
 
 
         public bool showMarkers = false;
         public bool showCells = false;
 
         #region GETTER_SETTER
+
+        public void SetGoal(string s , int index)
+        {
+            //Remove blank spaces
+            s = s.Replace(" ", "");
+            var floats = s.Split(',');
+
+            SpawnAreas[index].goal.x = float.Parse(floats[0]);
+            SpawnAreas[index].goal.y = float.Parse(floats[1]);
+            SpawnAreas[index].goal.z = float.Parse(floats[2]);
+            
+
+
+
+            
+        }
+
         public float getAgentRadius() {
             return this.agentRadius;
         }
@@ -103,11 +127,11 @@ namespace BioCrowds
             this.showCells = showCells;
         }
 
-        public SpawnArea[] getSpawnAreas() {
+        public List<SpawnArea> getSpawnAreas() {
             return this.SpawnAreas;
         }
 
-        public void setSpawnAreas(SpawnArea[] SpawnAreas) {
+        public void setSpawnAreas(List<SpawnArea> SpawnAreas) {
             this.SpawnAreas = SpawnAreas;
         }
  
@@ -115,12 +139,6 @@ namespace BioCrowds
         #endregion
 
 
-        public SpawnArea[] SpawnAreas= { new SpawnArea{qtd = 50,
-                                         goal = new float3{x = 100, y = 0, z = 25},
-                                         max = new int3 {x = 15, y = 0, z = 40},
-                                         min = new int3 {x = 0, y = 0, z = 10 },
-                                         maxSpeed = 1.3f}
-                                        };
 
 
 
@@ -135,7 +153,10 @@ namespace BioCrowds
             else
                 Destroy(gameObject);
 
-        } 
+            SpawnAreas = new List<SpawnArea>();
+            obstacleAreas = new List<ObstacleArea>();
+
+        }
 
 
 

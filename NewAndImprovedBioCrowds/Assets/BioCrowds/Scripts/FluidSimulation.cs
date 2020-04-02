@@ -872,6 +872,7 @@ namespace BioCrowds
                             MaxSpeed = 0f,
                             Radius = 1f
                         });
+                        
                         CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
                         CommandBuffer.AddComponent(index, new CouplingComponent { CouplingDistance = 1f, CurrentCouplings = 0, MaxCouplings = 7 });
 

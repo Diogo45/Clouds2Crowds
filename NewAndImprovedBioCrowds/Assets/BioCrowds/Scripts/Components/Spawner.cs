@@ -292,9 +292,9 @@ namespace BioCrowds
 
             var exp = CrowdExperiment.instance.SpawnAreas;
 
-            parBuffer = new NativeList<Parameters>(exp.Length, Allocator.Persistent);
+            parBuffer = new NativeList<Parameters>(exp.Count, Allocator.Persistent);
 
-            for (int i = 0; i < exp.Length; i++)
+            for (int i = 0; i < exp.Count; i++)
             {
                 Parameters par = new Parameters
                 {
