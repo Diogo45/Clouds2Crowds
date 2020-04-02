@@ -15,7 +15,7 @@ public struct MemoryData : IComponentData
     public int idNode;
 }
 
-
+[DisableAutoCreation]
 [UpdateAfter(typeof(BioCrowds.CellTagSystem))]
 public class DataGatheringSystem : JobComponentSystem
 {

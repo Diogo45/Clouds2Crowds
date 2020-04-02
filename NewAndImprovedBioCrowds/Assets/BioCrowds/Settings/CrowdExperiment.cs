@@ -153,12 +153,22 @@ namespace BioCrowds
             else
                 Destroy(gameObject);
 
-            SpawnAreas = new List<SpawnArea>();
+            if(SpawnAreas.Count == 0)
+            {
+                SpawnAreas = new List<SpawnArea>();
+                SpawnAreas.Add(new SpawnArea());
+            }
+                
+
             obstacleAreas = new List<ObstacleArea>();
+            obstacleAreas.Add(new ObstacleArea());
 
         }
 
-
+        public void AddSpawnArea()
+        {
+            SpawnAreas.Add(new SpawnArea());
+        }
 
 
         public override void SaveExperimentToFile()

@@ -11,6 +11,7 @@ public class Index : MonoBehaviour
     public void LoadExperiment()
     {
         ExperimentManager.instance.SetExperiment(index);
+        ExperimentListManager.instance.ShowVariablesInputField();
     }
 
 

@@ -55,6 +55,8 @@ public class ExperimentManager : MonoBehaviour
         currentExp.activeSettings.Add(typeof(SimulationConstants));
         currentExp.activeSettings.Add(typeof(ControlVariables));
 
+        currentExp.name = "EXPERIMENT 1";
+
 
         experimentDict = new Dictionary<int, Experiment>();
         experimentDict.Add(0, currentExp);
