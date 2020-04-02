@@ -130,6 +130,44 @@ public class ExperimentManager : MonoBehaviour
 
     }
 
+    public void SetMin(string s)
+    {
+        if (IsExperimentActive(typeof(BioCrowds.CrowdExperiment)) != -1)
+        {
+            BioCrowds.CrowdExperiment.instance.SetMin(s, curentSpawnAreaIndex);
+        }
+
+    }
+
+
+    public void SetMax(string s)
+    {
+        if (IsExperimentActive(typeof(BioCrowds.CrowdExperiment)) != -1)
+        {
+            BioCrowds.CrowdExperiment.instance.SetMax(s, curentSpawnAreaIndex);
+        }
+
+    }
+
+
+    public void SetQtd(string s)
+    {
+        if (IsExperimentActive(typeof(BioCrowds.CrowdExperiment)) != -1)
+        {
+            BioCrowds.CrowdExperiment.instance.SetAgentQTD(s, curentSpawnAreaIndex);
+        }
+
+    }
+
+
+    public void SetMaxSpeed(string s)
+    {
+        if (IsExperimentActive(typeof(BioCrowds.CrowdExperiment)) != -1)
+        {
+            BioCrowds.CrowdExperiment.instance.SetMaxSpeed(s, curentSpawnAreaIndex);
+        }
+
+    }
 
     public void NextSpawnArea()
     {

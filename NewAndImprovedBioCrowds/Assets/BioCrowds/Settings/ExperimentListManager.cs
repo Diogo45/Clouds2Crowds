@@ -73,7 +73,6 @@ public class ExperimentListManager : MonoBehaviour
             {
                 case "name":
                     textComp.text = ExperimentManager.instance.currentExp.name;
-                    Debug.Log(textComp.text);
                     break;
                 case "agentQuantity":
                     textComp.text = CrowdExperiment.SpawnAreas[currentSpawnArea].qtd.ToString();

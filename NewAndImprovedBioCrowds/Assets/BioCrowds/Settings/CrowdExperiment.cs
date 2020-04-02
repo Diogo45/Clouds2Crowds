@@ -47,20 +47,103 @@ namespace BioCrowds
 
         #region GETTER_SETTER
 
+
+        public void SetAgentQTD(string s, int index)
+        {
+            s = s.Replace(" ", "");
+            s = s.Replace("(", "");
+            s = s.Trim();
+            try
+            {
+                SpawnAreas[index].qtd = int.Parse(s);
+
+            }catch(Exception e)
+            {
+                //TODO: Make error viseble in menu interface 
+            }
+        }
+
+
+        public void SetMaxSpeed(string s, int index)
+        {
+            s = s.Replace(" ", "");
+            s = s.Replace("(", "");
+            s = s.Trim();
+            try
+            {
+                SpawnAreas[index].maxSpeed = float.Parse(s);
+
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("WTF");
+                //TODO: Make error viseble in menu interface 
+            }
+        }
         public void SetGoal(string s , int index)
         {
             //Remove blank spaces
             s = s.Replace(" ", "");
+            s = s.Replace("(", "");
+            s = s.Trim();
             var floats = s.Split(',');
 
-            SpawnAreas[index].goal.x = float.Parse(floats[0]);
-            SpawnAreas[index].goal.y = float.Parse(floats[1]);
-            SpawnAreas[index].goal.z = float.Parse(floats[2]);
             
+            try
+            {
+                SpawnAreas[index].goal.x = float.Parse(floats[0]);
+                SpawnAreas[index].goal.y = float.Parse(floats[1]);
+                SpawnAreas[index].goal.z = float.Parse(floats[2]);
 
+            }
+            catch (Exception e)
+            {
+                //TODO: Make error viseble in menu interface 
+            }
+        }
 
+        public void SetMin(string s, int index)
+        {
+            //Remove blank spaces
+            s = s.Replace(" ", "");
+            s = s.Replace("(", "");
+            s = s.Trim();
+            var ints = s.Split(',');
 
-            
+        
+            try
+            {
+                SpawnAreas[index].min.x = int.Parse(ints[0]);
+                SpawnAreas[index].min.y = int.Parse(ints[1]);
+                SpawnAreas[index].min.z = int.Parse(ints[2]);
+
+            }
+            catch (Exception e)
+            {
+                //TODO: Make error viseble in menu interface 
+            }
+        }
+
+        public void SetMax(string s, int index)
+        {
+            //Remove blank spaces
+            s = s.Replace(" ", "");
+            s = s.Replace("(", "");
+            s = s.Trim();
+            var floats = s.Split(',');
+
+          
+            try
+            {
+                SpawnAreas[index].max.x = int.Parse(floats[0]);
+                SpawnAreas[index].max.y = int.Parse(floats[1]);
+                SpawnAreas[index].max.z = int.Parse(floats[2]);
+
+            }
+            catch (Exception e)
+            {
+                //TODO: Make error viseble in menu interface 
+            }
         }
 
         public float getAgentRadius() {
@@ -91,16 +174,16 @@ namespace BioCrowds
             return this.TerrainX;
         }
 
-        public void setTerrainX(int TerrainX) {
-            this.TerrainX = TerrainX;
+        public void setTerrainX(string TerrainX) {
+            this.TerrainX = int.Parse(TerrainX);
         }
 
         public int getTerrainZ() {
             return this.TerrainZ;
         }
 
-        public void setTerrainZ(int TerrainZ) {
-            this.TerrainZ = TerrainZ;
+        public void setTerrainZ(string TerrainZ) {
+            this.TerrainZ = int.Parse(TerrainZ);
         }
 
         public float getFramesPerSecond() {
@@ -127,13 +210,7 @@ namespace BioCrowds
             this.showCells = showCells;
         }
 
-        public List<SpawnArea> getSpawnAreas() {
-            return this.SpawnAreas;
-        }
 
-        public void setSpawnAreas(List<SpawnArea> SpawnAreas) {
-            this.SpawnAreas = SpawnAreas;
-        }
  
 
         #endregion
