@@ -177,7 +177,7 @@ public class ExperimentManager : MonoBehaviour
 
     public void NextSpawnArea()
     {
-        if(curentSpawnAreaIndex < BioCrowds.CrowdExperiment.instance.SpawnAreas.Count)
+        if(curentSpawnAreaIndex < BioCrowds.CrowdExperiment.instance.SpawnAreas.Count - 1)
         {
             curentSpawnAreaIndex++;
             ExperimentListManager.instance.NextSpawnArea(curentSpawnAreaIndex);

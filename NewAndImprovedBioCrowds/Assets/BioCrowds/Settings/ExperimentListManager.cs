@@ -112,11 +112,11 @@ public class ExperimentListManager : MonoBehaviour
 
     internal void PreviousSpawnArea(int curentSpawnAreaIndex)
     {
-        throw new NotImplementedException();
+        ShowVariablesInputField();
     }
 
     internal void NextSpawnArea(int curentSpawnAreaIndex)
     {
-        throw new NotImplementedException();
+        ShowVariablesInputField();
     }
 }
