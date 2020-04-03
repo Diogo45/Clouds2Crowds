@@ -8,6 +8,8 @@ namespace BioCrowds
     public class CrowdExperimentModuleManager : IModuleManager
     {
 
+        public static CrowdExperimentModuleManager instance;
+
         private MarkerSpawnSystem markerSpawnSystem;
         private AgentSpawner agentSpawner;
         private CellTagSystem cellTagSystem;
@@ -19,6 +21,14 @@ namespace BioCrowds
 
         public void Awake()
         {
+            if (instance == null)
+            {
+                instance = this;
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+                Destroy(gameObject);
+
             var world = World.Active;
 
             markerSpawnSystem = world.GetExistingManager<MarkerSpawnSystem>();

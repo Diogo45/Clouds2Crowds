@@ -190,6 +190,7 @@ MonoBehaviour:
     settings: []
   curentSpawnAreaIndex: 0
   experiments: []
+  canvas: {fileID: 0}
 --- !u!114 &114135306752528340
 MonoBehaviour:
   m_ObjectHideFlags: 1

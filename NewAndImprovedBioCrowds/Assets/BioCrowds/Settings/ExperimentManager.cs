@@ -26,7 +26,7 @@ public class ExperimentManager : MonoBehaviour
 
     public List<Experiment> experiments;
 
-
+    public GameObject canvas;
 
     private int numExp = 1;
     private Dictionary<int, Experiment> experimentDict;
@@ -111,6 +111,12 @@ public class ExperimentManager : MonoBehaviour
         curentSpawnAreaIndex = 0;
     }
 
+
+    public void Play()
+    {
+        BioCrowds.CrowdExperimentModuleManager.instance.Enable();
+        canvas.SetActive(false);
+    }
 
 
     private int IsExperimentActive(System.Type type)
