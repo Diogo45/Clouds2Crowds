@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Entities;
+using Unity.Mathematics;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 
 namespace BioCrowds
@@ -60,22 +64,6 @@ namespace BioCrowds
 
         public override void Enable()
         {
-            //if (!Created)
-            //{
-            //    Debug.Log("RODANDO");
-
-            //    var world = World.Active;
-                
-            //    markerSpawnSystem = world.CreateManager<MarkerSpawnSystem>();
-
-            //    agentSpawner = world.CreateManager<AgentSpawner>();
-            //    cellTagSystem = world.CreateManager<CellTagSystem>();
-            //    markerSystemMk2 = world.CreateManager<MarkerSystemMk2>();
-            //    markerSystemView = world.CreateManager<MarkerSystemView>();
-            //    markerWeightSystem = world.CreateManager<MarkerWeightSystem>();
-            //    agentMovementVectors = world.CreateManager<AgentMovementVectors>();
-            //    agentMovementSystem = world.CreateManager<AgentMovementSystem>();
-            //}
             markerSpawnSystem.Enabled = true;
             agentSpawner.Enabled = true;
             cellTagSystem.Enabled = true;
@@ -86,5 +74,24 @@ namespace BioCrowds
             agentMovementSystem.Enabled = true;
 
         }
+
+
+#if UNITY_EDITOR
+        [Inject] CellTagSystem CellTagSystem;
+        //public void OnDrawGizmos()
+        //{
+        //    if (!CellTagSystem.Enabled) { return; }
+        //    var agentData = CellTagSystem.agentGroup.AgentData;
+        //    var agentPos = CellTagSystem.agentGroup.AgentPos;
+        //    for (int i = 0; i < agentData.Length; i++)
+        //    {
+        //        Handles.Label(agentPos[i].Value + (float3)Vector3.up, agentData[i].ID.ToString());
+        //    }
+
+        //}
+#endif
+
+
+
     }
 }

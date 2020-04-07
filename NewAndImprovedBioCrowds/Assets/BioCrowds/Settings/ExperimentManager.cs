@@ -115,6 +115,8 @@ public class ExperimentManager : MonoBehaviour
     public void Play()
     {
         BioCrowds.CrowdExperimentModuleManager.instance.Enable();
+        //VICTOR
+        InteractionModuleManager.instance.Enable();
         canvas.SetActive(false);
     }
 
