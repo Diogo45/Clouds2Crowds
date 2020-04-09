@@ -72,23 +72,22 @@ namespace BioCrowds
             markerWeightSystem.Enabled = true;
             agentMovementVectors.Enabled = true;
             agentMovementSystem.Enabled = true;
-
+            Created = true;
         }
 
 
 #if UNITY_EDITOR
-        [Inject] CellTagSystem CellTagSystem;
-        //public void OnDrawGizmos()
-        //{
-        //    if (!CellTagSystem.Enabled) { return; }
-        //    var agentData = CellTagSystem.agentGroup.AgentData;
-        //    var agentPos = CellTagSystem.agentGroup.AgentPos;
-        //    for (int i = 0; i < agentData.Length; i++)
-        //    {
-        //        Handles.Label(agentPos[i].Value + (float3)Vector3.up, agentData[i].ID.ToString());
-        //    }
+        public void OnDrawGizmos()
+        {
+            if (!Created) { return; }
+            var agentData = cellTagSystem.agentGroup.AgentData;
+            var agentPos = cellTagSystem.agentGroup.AgentPos;
+            for (int i = 0; i < agentData.Length; i++)
+            {
+                Handles.Label(agentPos[i].Value + (float3)Vector3.up, agentData[i].ID.ToString());
+            }
 
-        //}
+        }
 #endif
 
 
