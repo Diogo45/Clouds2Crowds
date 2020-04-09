@@ -48,12 +48,17 @@ public class ExperimentManager : MonoBehaviour
         currentExp.settings.Add(BioCrowds.CrowdExperiment.instance);
         currentExp.settings.Add(SimulationConstants.instance);
         currentExp.settings.Add(ControlVariables.instance);
+        //VICTOR
+        currentExp.settings.Add(InteractionSettings.instance);
+
 
         currentExp.activeSettings = new List<System.Type>();
 
         currentExp.activeSettings.Add(typeof(BioCrowds.CrowdExperiment));
         currentExp.activeSettings.Add(typeof(SimulationConstants));
         currentExp.activeSettings.Add(typeof(ControlVariables));
+        //VICTOR
+        currentExp.activeSettings.Add(typeof(InteractionSettings));
 
         currentExp.name = "EXPERIMENT 1";
 
@@ -116,7 +121,11 @@ public class ExperimentManager : MonoBehaviour
     {
         BioCrowds.CrowdExperimentModuleManager.instance.Enable();
         //VICTOR
-        InteractionModuleManager.instance.Enable();
+        if (IsExperimentActive(typeof(InteractionSettings)) != -1)
+        {
+            InteractionModuleManager.instance.Enable();
+        }
+        
         canvas.SetActive(false);
     }
 
@@ -192,6 +201,21 @@ public class ExperimentManager : MonoBehaviour
             curentSpawnAreaIndex--;
             ExperimentListManager.instance.PreviousSpawnArea(curentSpawnAreaIndex);
         }
+    }
+
+    public void AddSpawnArea()
+    {
+        BioCrowds.CrowdExperiment.instance.SpawnAreas.Add(new BioCrowds.CrowdExperiment.SpawnArea());
+    }
+
+    public void DeleteSpawnArea()
+    {
+        if (curentSpawnAreaIndex > 0)
+        {
+            BioCrowds.CrowdExperiment.instance.SpawnAreas.RemoveAt(curentSpawnAreaIndex);
+            curentSpawnAreaIndex--;
+        }
+        
     }
 
     public void WriteName(string input)

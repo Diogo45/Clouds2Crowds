@@ -82,6 +82,8 @@ public class AddInteractionBuffer : JobComponentSystem
 
         var handle =  addbufferJob.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
 
+        handle.Complete();
+
         this.Enabled = false;
         return handle;
 

@@ -757,7 +757,6 @@ namespace BioCrowds
     }
 
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidParticleToCell))]
