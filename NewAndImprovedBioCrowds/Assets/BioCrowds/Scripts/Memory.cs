@@ -149,7 +149,6 @@ public class InitializeInteractionBuffer : JobComponentSystem
 }
 
 
-
 [UpdateAfter(typeof(BioCrowds.CellTagSystem))]
 public class DataGatheringSystem : JobComponentSystem
 {

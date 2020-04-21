@@ -1,0 +1,7 @@
+﻿  stdafx.cpp
+  dllmain.cpp
+  UnityCom.cpp
+E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\UnityCom.cpp(149,15): warning C4101: 'e': unreferenced local variable
+  Generating Code...
+     Creating library E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\Debug\UnityCom.lib and object E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\Debug\UnityCom.exp
+  UnityCom.vcxproj -> E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\Debug\UnityCom.dll

@@ -11,10 +11,12 @@ public class ExperimentListManager : MonoBehaviour
     public static ExperimentListManager instance;
 
     public GameObject buttonPrefab;
-
     private RectTransform myTransform;
+    public GameObject canvas;
 
 
+    private int currentExperimentTab = 0;
+    public List<GameObject> ExperimentTabs;
 
 
     public ParameterDictonary parameterNameToInputField;
@@ -96,8 +98,9 @@ public class ExperimentListManager : MonoBehaviour
                     textComp.text = CrowdExperiment.SpawnAreas[currentSpawnArea].maxSpeed.ToString();
 
                     break;
-                //case "name":
-                //    break;
+                case "Cmd":
+                    textComp.text = FluidSettings.instance.customComandLine;
+                    break;
                 //case "name":
                 //    break;
                 //case "name":
@@ -109,6 +112,34 @@ public class ExperimentListManager : MonoBehaviour
         }
     }
 
+
+
+    public void NextExperimentTab()
+    {
+        if(currentExperimentTab + 1 < ExperimentTabs.Count)
+        {
+            ExperimentTabs[currentExperimentTab].SetActive(false);
+            ExperimentTabs[++currentExperimentTab].SetActive(true);
+            ShowVariablesInputField();
+        }
+    }
+
+    internal void Play()
+    {
+        canvas.SetActive(false);
+
+    }
+
+    public void PreviousExperimentTab()
+    {
+        if(currentExperimentTab > 0)
+        {
+            ExperimentTabs[currentExperimentTab].SetActive(false);
+            ExperimentTabs[--currentExperimentTab].SetActive(true);
+            ShowVariablesInputField();
+        }
+    
+    }
 
     internal void PreviousSpawnArea(int curentSpawnAreaIndex)
     {

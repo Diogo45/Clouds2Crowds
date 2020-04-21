@@ -175,10 +175,10 @@ namespace BioCrowds
 
             //TODO:Figure out how to draw paths in front of everything(maybe not obstacles?)
             StartCoroutine(DrawPaths());
-            if (FluidSettings.instance.Enabled)
-            {
-                DrawSprings();
-            }
+            //if (FluidSettings.instance.Enabled)
+            //{
+            //    DrawSprings();
+            //}
 
 
 

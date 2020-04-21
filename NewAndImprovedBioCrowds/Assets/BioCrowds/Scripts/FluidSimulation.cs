@@ -28,7 +28,6 @@ namespace BioCrowds
     }
 
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidParticleToCell)), UpdateAfter(typeof(AgentMassMapSystem))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidMovementOnAgent : JobComponentSystem
@@ -330,7 +329,7 @@ namespace BioCrowds
 
             }
 
-            System.IO.File.AppendAllText(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt", text);
+            //System.IO.File.AppendAllText(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt", text);
 
 
 
@@ -386,7 +385,6 @@ namespace BioCrowds
 
     }
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(AgentMovementVectors))]
     [UpdateBefore(typeof(AgentMovementSystem))]
     public class FluidParticleToCell : JobComponentSystem
@@ -490,7 +488,8 @@ namespace BioCrowds
             FluidVel = new NativeList<float3>(FluidSettings.instance.frameSize * Clones, Allocator.Persistent);
 
             //dataPath = Application.dataPath + "/../" + CrowdExperiment.instance.instanceName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0];
-            dataPath = ExperimentManager.instance.Directory + "/Fluid";
+            dataPath = ExperimentManager.instance.Directory + "\\Fluid";
+            System.IO.Directory.CreateDirectory(dataPath);
 
         }
 
@@ -499,9 +498,7 @@ namespace BioCrowds
             FluidPos.Dispose();
             FluidVel.Dispose();
             CellToParticles.Dispose();
-            AcessDLL.CloseMemoryShare(memMapControl);
-            AcessDLL.CloseMemoryShare(memMapName);
-            AcessDLL.CloseMemoryShare(memMapNameVel);
+            AcessDLL.CloseAllMemoryShare();
         }
 
 
@@ -691,7 +688,7 @@ namespace BioCrowds
 
 
 
-            ScreenCapture.CaptureScreenshot(dataPath + "/frame" + frame.ToString().PadLeft(8, '0') + ".png");
+            //ScreenCapture.CaptureScreenshot(dataPath + "/frame" + frame.ToString().PadLeft(8, '0') + ".png");
 
 
 
@@ -762,7 +759,6 @@ namespace BioCrowds
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class FluidBarrier : BarrierSystem { }
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(SpawnAgentBarrier))]
     [UpdateBefore(typeof(FluidParticleToCell))]
     public class FluidInitializationSystem : JobComponentSystem
@@ -1006,7 +1002,6 @@ namespace BioCrowds
         }
     }
 
-    [DisableAutoCreation]
     [UpdateAfter(typeof(FluidInitializationSystem))]
     [UpdateBefore(typeof(FluidMovementOnAgent))]
     public class AgentMassMapSystem : JobComponentSystem

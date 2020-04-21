@@ -54,15 +54,17 @@ GameObject:
   m_Component:
   - component: {fileID: 4113292084795446}
   - component: {fileID: 114559101804427576}
-  - component: {fileID: 114889874191659396}
-  - component: {fileID: 114135306752528340}
+  - component: {fileID: 114315395903531542}
+  - component: {fileID: 114045078618101730}
+  - component: {fileID: 114424224717474500}
   - component: {fileID: 114740191966733172}
   - component: {fileID: 114315260981230180}
-  - component: {fileID: 114045078618101730}
+  - component: {fileID: 114011984248535310}
   - component: {fileID: 114857294100300716}
-  - component: {fileID: 114777707434661758}
   - component: {fileID: 114879044847318390}
-  - component: {fileID: 114315395903531542}
+  - component: {fileID: 114777707434661758}
+  - component: {fileID: 114889874191659396}
+  - component: {fileID: 114135306752528340}
   - component: {fileID: 120649464856031822}
   m_Layer: 0
   m_Name: BCSettings
@@ -174,6 +176,19 @@ Transform:
   m_Father: {fileID: 4113292084795446}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114011984248535310
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1698001449062166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87663cfdc1844044eb3c7274ec8521ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Enabled: 0
+  interactionDistance: 1
 --- !u!114 &114045078618101730
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -190,7 +205,6 @@ MonoBehaviour:
     settings: []
   curentSpawnAreaIndex: 0
   experiments: []
-  canvas: {fileID: 0}
 --- !u!114 &114135306752528340
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -320,6 +334,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114424224717474500
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1698001449062166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e344b96897c7e243a2d77f3cc0eb099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonPrefab: {fileID: 1382874833870160, guid: 6c6ed4faaf4a93b47bc02ea21d709a66,
+    type: 2}
+  canvas: {fileID: 0}
+  ExperimentTabs:
+  - {fileID: 0}
+  - {fileID: 0}
+  parameterNameToInputField:
+    _Buckets: 020000000400000005000000ffffffff00000000ffffffff06000000
+    _HashCodes: 4bcdc50aeac09f0481c72e0c75ddd83c2bd8744253846473aac2de1e
+    _Next: ffffffffffffffffffffffffffffffff0100000003000000ffffffff
+    _Count: 7
+    _Version: 210
+    _FreeList: -1
+    _FreeCount: 0
+    _Keys:
+    - name
+    - agentQuantity
+    - Goal
+    - SpawnMin
+    - SpawnMax
+    - MaxSpeed
+    - Cmd
+    _Values:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
 --- !u!114 &114559101804427576
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -417,7 +472,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f8a49efc853fa348b6662e755f77568, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enabled: 0
+  Enabled: 1
   randTau: 0
   randMass: 0
   initialTau: 1
@@ -427,6 +482,7 @@ MonoBehaviour:
   particleRadius: 0.25
   frameSize: 100000
   personRadius: 0.5
+  customComandLine: 
   scale:
     x: 10
     y: 10
@@ -435,7 +491,6 @@ MonoBehaviour:
     x: 50
     y: 0
     z: 25
-  FluidSimPath: D:\BackUp\SPlisHSPlasH\data\Scenes\Emitter.json
   cubeObstacleDatas: []
 --- !u!114 &114879044847318390
 MonoBehaviour:

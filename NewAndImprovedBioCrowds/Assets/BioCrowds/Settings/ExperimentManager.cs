@@ -26,11 +26,16 @@ public class ExperimentManager : MonoBehaviour
 
     public List<Experiment> experiments;
 
-    public GameObject canvas;
 
     private int numExp = 1;
     private Dictionary<int, Experiment> experimentDict;
     public string Directory { get; private set; }
+
+
+    public void OnApplicationQuit()
+    {
+        Exit();
+    }
 
     public void Start()
     {
@@ -41,13 +46,14 @@ public class ExperimentManager : MonoBehaviour
         }
         else
             Destroy(gameObject);
-        Directory = Application.dataPath;
+        
 
         currentExp.settings = new List<ISettings>();
 
         currentExp.settings.Add(BioCrowds.CrowdExperiment.instance);
         currentExp.settings.Add(SimulationConstants.instance);
         currentExp.settings.Add(ControlVariables.instance);
+        currentExp.settings.Add(FluidSettings.instance);
         //VICTOR
         currentExp.settings.Add(InteractionSettings.instance);
 
@@ -57,14 +63,20 @@ public class ExperimentManager : MonoBehaviour
         currentExp.activeSettings.Add(typeof(BioCrowds.CrowdExperiment));
         currentExp.activeSettings.Add(typeof(SimulationConstants));
         currentExp.activeSettings.Add(typeof(ControlVariables));
+        currentExp.activeSettings.Add(typeof(FluidSettings));
+
+
         //VICTOR
         currentExp.activeSettings.Add(typeof(InteractionSettings));
 
         currentExp.name = "EXPERIMENT 1";
-
+        Directory = Application.dataPath + "\\" + currentExp.name;
 
         experimentDict = new Dictionary<int, Experiment>();
         experimentDict.Add(0, currentExp);
+
+
+        
     }
 
     public void AddExperiment()
@@ -114,21 +126,49 @@ public class ExperimentManager : MonoBehaviour
 
         currentExp.name = experimentDict[index].name;
         curentSpawnAreaIndex = 0;
+        Directory = Application.dataPath + "\\" + currentExp.name;
     }
 
 
     public void Play()
     {
+
+        System.IO.Directory.CreateDirectory(Directory);
+
         BioCrowds.CrowdExperimentModuleManager.instance.Enable();
+        if (IsExperimentActive(typeof(FluidSettings)) != -1 && currentExp.settings[IsExperimentActive(typeof(FluidSettings))].Enabled)
+        {
+            BioCrowds.FluidExperimentModuleManager.instance.Enable();
+        }
+
+
         //VICTOR
-        if (IsExperimentActive(typeof(InteractionSettings)) != -1)
+        if (IsExperimentActive(typeof(FluidSettings)) != -1 && currentExp.settings[IsExperimentActive(typeof(FluidSettings))].Enabled)
         {
             InteractionModuleManager.instance.Enable();
         }
-        
-        canvas.SetActive(false);
+
+        ExperimentListManager.instance.Play();
+
+
+
+
     }
 
+
+    
+
+    public void Exit()
+    {
+        if (IsExperimentActive(typeof(FluidSettings)) != -1 && currentExp.settings[IsExperimentActive(typeof(FluidSettings))].Enabled)
+        {
+            BioCrowds.FluidExperimentModuleManager.instance.Disable();
+            
+        }
+    }
+
+
+    
 
     private int IsExperimentActive(System.Type type)
     {

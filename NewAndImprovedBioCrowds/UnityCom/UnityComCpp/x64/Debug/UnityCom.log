@@ -1,3 +1,0 @@
-﻿  UnityCom.cpp
-d:\unitycomdll\unitycom\unitycomcpp\unitycom.cpp(58): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-  UnityCom.vcxproj -> D:\UnityComDLL\UnityCom\x64\Debug\UnityCom.dll

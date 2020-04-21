@@ -149,6 +149,7 @@ extern "C"
 			catch (int e) {
 
 			}
+
 			return 0;
 		}
 		return -1;

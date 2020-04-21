@@ -1,10 +1,10 @@
 ﻿  UnityCom.cpp
-d:\clouds2crowds\clouds2crowds\unitycom\unitycomcpp\unitycom.cpp(58): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-d:\clouds2crowds\clouds2crowds\unitycom\unitycomcpp\unitycom.cpp(149): warning C4101: 'e': unreferenced local variable
-     Creating library D:\Clouds2Crowds\Clouds2Crowds\UnityCom\x64\Release\UnityCom.lib and object D:\Clouds2Crowds\Clouds2Crowds\UnityCom\x64\Release\UnityCom.exp
+E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\UnityCom.cpp(58,34): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\UnityCom.cpp(149,15): warning C4101: 'e': unreferenced local variable
+     Creating library E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\x64\Release\UnityCom.lib and object E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\x64\Release\UnityCom.exp
   Generating code
-  1 of 301 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  1 of 280 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  UnityCom.vcxproj -> D:\Clouds2Crowds\Clouds2Crowds\UnityCom\x64\Release\UnityCom.dll
+  UnityCom.vcxproj -> E:\PUCRS\Clouds2Crowds\UnityCom\UnityComCpp\x64\Release\UnityCom.dll

@@ -38,6 +38,7 @@ public class FluidSettings : ISettings
     public int frameSize = 100000;
     public float personRadius = 0.5f;
 
+	public string customComandLine;
 
     public float3 scale = new float3(10f, 10f, 10f);
     public float3 translate = new float3(50f, 0f, 25f);
@@ -129,9 +130,6 @@ public class FluidSettings : ISettings
 	}
 
 
-    public string FluidSimPath = @"D:\BackUp\SPlisHSPlasH\data\Scenes\Emitter.json";
-
-
 
 
     [SerializeField]
@@ -155,7 +153,13 @@ public class FluidSettings : ISettings
         }
         else
             Destroy(gameObject);
-    }
+
+		//Initial Value
+		//TODO:Make the path of the SplishSplash Simulator automatic detect or choosable in interface
+		customComandLine = @"E:\PUCRS\BioSplishSplash\BioSPlisHSPlasH\bin\DynamicBoundarySimulator.exe \..\data\Scenes\Emitter.json";
+
+
+	}
 
     public override void SaveExperimentToFile()
     {
