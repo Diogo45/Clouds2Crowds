@@ -5,7 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/BioCrowds/Scenes/FluidScene.unity
     guid: 44e7a69dce7eb5645836f5bc2f8b0596
+  - enabled: 1
+    path: Assets/BioCrowds/Scenes/Menu.unity
+    guid: cafcfd4f4800ca949b7ccb1c6fe5fbb5
   m_configObjects: {}

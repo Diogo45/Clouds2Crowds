@@ -12,7 +12,7 @@ public class SimulationConstants : ISettings {
     public int BatchSize = 1;
 
     //Take ScreenShots of simulation
-    public bool ScreenCaptureSimulation = true;
+    public bool ScreenCaptureSimulation = false;
     //TODO: Figure out naming scheme for several prints of simulations
 
     //BioCrowds Grid Parameters//

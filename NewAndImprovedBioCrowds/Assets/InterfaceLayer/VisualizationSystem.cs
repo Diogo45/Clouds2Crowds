@@ -17,6 +17,8 @@ public class VisualizationSystem : ComponentSystem
     {
         public int AgentID;
         public float3 Position;
+        public bool Ragdoll;
+
 
         public override string ToString()
         {
@@ -55,6 +57,7 @@ public class VisualizationSystem : ComponentSystem
 
     public int frames = 0;
 
+   
 
     public struct AgentGroup
     {
@@ -72,11 +75,23 @@ public class VisualizationSystem : ComponentSystem
 
         for (int i = 0; i < agentGroup.Length; i++)
         {
+            bool Ragdoll = false;
+
+            if (FluidSettings.instance.Enabled)
+            {
+                World.Active.GetExistingManager<FluidMovementOnAgent>().AgentRagdoll.TryGetValue(agentGroup.Data[i].ID, out int flag);
+                if(flag == 1)
+                {
+                    Ragdoll = true;
+                }
+                
+            }
+
             processing.records.Add(new AgentRecord
             {
                 AgentID = agentGroup.Data[i].ID,
                 Position = agentGroup.Position[i].Value,
-                
+                Ragdoll = Ragdoll
                 //Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
                 //CloudID = agentGroup.OwnerCloud[i].CloudID
             });
@@ -86,6 +101,7 @@ public class VisualizationSystem : ComponentSystem
         //update complete
         FrameRecord aux = complete;
         complete = processing;
+        CurrentAgentPositions = complete.records;
         processing = aux;
 
 

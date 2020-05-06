@@ -128,6 +128,7 @@ namespace BioCrowds
                     {
                         ID = i,
                         MaxSpeed = maxSpeed / CrowdExperiment.instance.FramesPerSecond,
+                        Group_ID = index,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -145,8 +146,8 @@ namespace BioCrowds
                         incStress = 0f
                     });
 
-
-                    CommandBuffer.AddSharedComponent(index, AgentRenderer);
+                    if(CrowdExperiment.instance.showAgentCapsule)
+                        CommandBuffer.AddSharedComponent(index, AgentRenderer);
 
                     if (x < maxX)
                     {
@@ -226,7 +227,8 @@ namespace BioCrowds
                     CommandBuffer.SetComponent(index, new AgentData
                     {
                         ID = i,
-                        MaxSpeed = maxSpeed/ CrowdExperiment.instance.FramesPerSecond,
+                        MaxSpeed = maxSpeed / CrowdExperiment.instance.FramesPerSecond,
+                        Group_ID = index,
                         Radius = 1f
                     });
                     CommandBuffer.SetComponent(index, new AgentStep
@@ -245,7 +247,8 @@ namespace BioCrowds
                     });
 
 
-                    CommandBuffer.AddSharedComponent(index, AgentRenderer);
+                    if (CrowdExperiment.instance.showAgentCapsule)
+                        CommandBuffer.AddSharedComponent(index, AgentRenderer);
 
 
                 }

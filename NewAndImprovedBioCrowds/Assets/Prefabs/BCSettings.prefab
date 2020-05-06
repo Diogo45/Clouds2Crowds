@@ -268,12 +268,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Enabled: 1
   LockBioCrowds: 0
-  SyncWithFluidSimulator: 0
+  SyncWithFluidSimulator: 1
   agentQuantity: 0
   SpawnAgentStructured: 1
   waitFor: 0
   SimThreshold: 150
   simIndex: 0
+  DrawAgentMarkers: 0
 --- !u!114 &114315395903531542
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -287,33 +288,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Enabled: 1
   SpawnAreas:
-  - qtd: 50
+  - qtd: 51
     max:
-      x: 15
+      x: 10
       y: 0
-      z: 40
+      z: 35
     min:
       x: 0
       y: 0
-      z: 10
-    goal:
-      x: 100.25
-      y: 0
-      z: 25
-    maxSpeed: 1.3
-  - qtd: 50
-    max:
-      x: 150
-      y: 0
-      z: 40
-    min:
-      x: 0
-      y: 0
-      z: 10
+      z: 15
     goal:
       x: 100
       y: 0
       z: 25
+    maxSpeed: 1.3
+  - qtd: 49
+    max:
+      x: 100
+      y: 0
+      z: 50
+    min:
+      x: 0
+      y: 0
+      z: 5
+    goal:
+      x: 50
+      y: 0
+      z: 50
     maxSpeed: 1.3
   agentRadius: 1
   markerRadius: 0.1
@@ -323,6 +324,7 @@ MonoBehaviour:
   FramesPerSecond: 32
   showMarkers: 0
   showCells: 0
+  showAgentCapsule: 0
 --- !u!114 &114366138225136310
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -352,13 +354,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   parameterNameToInputField:
-    _Buckets: 020000000400000005000000ffffffff00000000ffffffff06000000
-    _HashCodes: 4bcdc50aeac09f0481c72e0c75ddd83c2bd8744253846473aac2de1e
-    _Next: ffffffffffffffffffffffffffffffff0100000003000000ffffffff
-    _Count: 7
-    _Version: 210
-    _FreeList: -1
-    _FreeCount: 0
+    _Buckets: ffffffffffffffff03000000ffffffff0600000005000000ffffffffffffffffffffffffffffffffffffffff0100000002000000ffffffffffffffffffffffff04000000
+    _HashCodes: 4bcdc50aeac09f0481c72e0c75ddd83c2bd8744253846473aac2de1effffffff000000000000000000000000000000000000000000000000000000000000000000000000
+    _Next: ffffffff00000000ffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000
+    _Count: 8
+    _Version: 213
+    _FreeList: 7
+    _FreeCount: 1
     _Keys:
     - name
     - agentQuantity
@@ -367,7 +369,27 @@ MonoBehaviour:
     - SpawnMax
     - MaxSpeed
     - Cmd
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
+    - 
     _Values:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
     - {fileID: 0}
@@ -475,7 +497,7 @@ MonoBehaviour:
   Enabled: 1
   randTau: 0
   randMass: 0
-  initialTau: 1
+  initialTau: 0.6
   thresholdDist: 0.01
   thresholdHeigth: 10
   particleMass: 0.0001
@@ -579,9 +601,7 @@ LineRenderer:
   m_SortingLayerID: -1786704711
   m_SortingLayer: -1
   m_SortingOrder: 10000
-  m_Positions:
-  - {x: -0.5, y: 0.54, z: 0.39}
-  - {x: 0, y: 2.64, z: 1}
+  m_Positions: []
   m_Parameters:
     serializedVersion: 2
     widthMultiplier: 1
@@ -590,7 +610,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 1
+        value: 0.5086212
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -602,9 +622,9 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 0.18472636, g: 1, b: 0, a: 1}
-      key1: {r: 0.18472636, g: 1, b: 0, a: 1}
-      key2: {r: 1, g: 1, b: 1, a: 1}
+      key0: {r: 0, g: 0, b: 0, a: 1}
+      key1: {r: 0, g: 0, b: 0, a: 1}
+      key2: {r: 0.18472636, g: 1, b: 0, a: 1}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}

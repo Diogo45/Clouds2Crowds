@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityObject = UnityEngine.Object;
+using UnityEditor;
 
 public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
 {
@@ -172,9 +174,9 @@ public abstract class DictionaryDrawer<TK, TV> : PropertyDrawer
     }
 }
 
-
+[CustomPropertyDrawer(typeof(ParameterDictonary))]
+public class ParameterDrawer : DictionaryDrawer<string, GameObject> { }
+#endif
 [System.Serializable]
 public class ParameterDictonary : SerializableDictionary<string, GameObject> { }
 
-[CustomPropertyDrawer(typeof(ParameterDictonary))]
-public class ParameterDrawer : DictionaryDrawer<string, GameObject> { }

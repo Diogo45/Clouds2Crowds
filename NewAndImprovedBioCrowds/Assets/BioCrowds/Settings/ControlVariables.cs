@@ -10,10 +10,9 @@ public class ControlVariables : ISettings
     public static ControlVariables instance;
 
     //Global lock for completing biocrowds 
-    [HideInInspector]
     public bool LockBioCrowds = false;
 
-    public bool SyncWithFluidSimulator = false;
+    public bool SyncWithFluidSimulator = true;
 
     public int agentQuantity = 0;
 
@@ -25,7 +24,7 @@ public class ControlVariables : ISettings
 
     public int simIndex = 0;
 
-
+    public bool DrawAgentMarkers = false;
     public bool isLockBioCrowds() {
 		return this.LockBioCrowds;
 	}

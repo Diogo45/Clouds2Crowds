@@ -17,6 +17,7 @@ namespace BioCrowds
     public struct AgentData : IComponentData
     {
         public int ID;
+        public int Group_ID;
         public float Radius;
         public float MaxSpeed;
     }

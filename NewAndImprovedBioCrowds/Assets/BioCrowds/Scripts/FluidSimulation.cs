@@ -53,6 +53,8 @@ namespace BioCrowds
         public NativeHashMap<int, AgentParticlesData> AgentFluidData;
 
 
+        public NativeHashMap<int, int> LastFrameAgentRagdoll;
+        public NativeHashMap<int, int> AgentRagdoll;
 
 
 
@@ -84,7 +86,7 @@ namespace BioCrowds
         private bool wroteInitialParam = false;
         #endregion
 
-      
+
 
         struct ApplyFluidMomentaOnAgents : IJobParallelFor
         {
@@ -102,6 +104,10 @@ namespace BioCrowds
             [ReadOnly] public NativeList<float3> FluidVel;
 
 
+            [ReadOnly] public NativeHashMap<int, int> LastFrameAgentRagdoll;
+            [WriteOnly, NativeDisableParallelForRestriction] public NativeHashMap<int, int>.Concurrent AgentRagdoll;
+
+
             [WriteOnly, NativeDisableParallelForRestriction] public NativeHashMap<int, AgentParticlesData>.Concurrent AgentFluidData;
 
 
@@ -115,6 +121,15 @@ namespace BioCrowds
 
                 float3 M_r = float3.zero;
                 int numPart = 0;
+
+                int agentID = AgentData[index].ID;
+                int ragdoll;
+                if (!LastFrameAgentRagdoll.TryGetValue(agentID, out ragdoll))
+                {
+                    ragdoll = 0;
+                }
+
+
 
                 //Mean Vel for data gathering
                 float3 meanVel = float3.zero;
@@ -143,9 +158,9 @@ namespace BioCrowds
                         }
 
                         float3 pos = FluidPos[particleID];
-                        pos.y = 0f;
+                        if(ragdoll == 0) pos.y = 0f;
                         var agentPos = AgentPos[index].Value;
-                        agentPos.y = 0;
+                        if (ragdoll == 0) agentPos.y = 0;
                         float centerDist = math.distance(pos, agentPos);
 
                         if (centerDist < math.abs(FluidSettings.instance.personRadius - FluidSettings.instance.particleRadius))
@@ -170,9 +185,7 @@ namespace BioCrowds
                         {
 
                             pos = FluidPos[particleID];
-                            pos.y = 0f;
-                            agentPos = AgentPos[index].Value;
-                            agentPos.y = 0;
+                            if (ragdoll == 0) pos.y = 0f;
                             centerDist = math.distance(pos, agentPos);
 
 
@@ -189,15 +202,21 @@ namespace BioCrowds
                             }
                         }
 
-
+                       
                     }
                 }
+
+               
 
 
                 float3 particleSetMomenta = M_r;
                 float particleSetMass = numPart * FluidSettings.instance.particleMass;
 
-
+                if (particleSetMass > 0f)
+                {
+                    ragdoll = 1;
+                    AgentRagdoll.TryAdd(agentID, ragdoll);
+                }
 
                 //bool keepgoing = CellMomenta.TryGetValue(cell, out float3 particleVel);
                 //if (!keepgoing) return;
@@ -236,14 +255,15 @@ namespace BioCrowds
         protected override void OnStartRunning()
         {
 
-            CellMomenta = new NativeHashMap<int3, float3>((CrowdExperiment.instance.TerrainX * CrowdExperiment.instance.TerrainZ) / 4, Allocator.Persistent);
-            ParticleSetMass = new NativeHashMap<int3, float3>((CrowdExperiment.instance.TerrainX * CrowdExperiment.instance.TerrainZ) / 4, Allocator.Persistent);
+
 
             AgentFluidData = new NativeHashMap<int, AgentParticlesData>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
+            LastFrameAgentRagdoll = new NativeHashMap<int, int>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
+            AgentRagdoll = new NativeHashMap<int, int>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
 
             System.IO.File.Delete(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt");
 
-            string text = "ID; Velocity in m/s; Qtd of Particles; Agent Mass in kg \n";
+            string text = "Frame;ID;Fluid Velocity;Agent Velocity;Qtd of Particles;Agent Mass in kg \n";
             System.IO.File.AppendAllText(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt", text);
 
             //1 g/cm3 = 1000 kg/m3
@@ -260,14 +280,58 @@ namespace BioCrowds
 
         protected override void OnDestroyManager()
         {
-            //CellMomenta.Dispose();
-            //ParticleSetMass.Dispose();
             AgentFluidData.Dispose();
+            LastFrameAgentRagdoll.Dispose();
+            AgentRagdoll.Dispose();
         }
         #endregion
 
+        struct CopyOverDoubleBuffer : IJobParallelFor
+        {
+            [ReadOnly] public ComponentDataArray<AgentData> AgentData;
+            public NativeHashMap<int, int>.Concurrent LastFrameAgentRagdoll;
+            [ReadOnly] public NativeHashMap<int, int> AgentRagdoll;
+
+
+
+            public void Execute(int index)
+            {
+                int id = AgentData[index].ID;
+
+                int rag;
+                AgentRagdoll.TryGetValue(id, out rag);
+                LastFrameAgentRagdoll.TryAdd(id, rag);
+
+
+
+
+            }
+        }
+
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+
+            if (ControlVariables.instance.LockBioCrowds)
+            {
+                frame = m_fluidParticleToCell.frame;
+                return inputDeps;
+            }
+
+            LastFrameAgentRagdoll.Clear();
+
+            var job = new CopyOverDoubleBuffer
+            {
+                AgentRagdoll = AgentRagdoll,
+                LastFrameAgentRagdoll = LastFrameAgentRagdoll.ToConcurrent(),
+                AgentData = agentGroup.AgentData
+            };
+
+            var handle = job.Schedule(ControlVariables.instance.agentQuantity, SimulationConstants.instance.BatchSize, inputDeps);
+
+
+            handle.Complete();
+
+           
 
             //WriteData();
             AgentFluidData.Clear();
@@ -308,12 +372,14 @@ namespace BioCrowds
                 AgentFluidData = AgentFluidData.ToConcurrent(),
                 //ParticleSetMass = ParticleSetMass,
                 FluidData = agentGroup.FluidData,
-                PhysicalData = agentGroup.PhysicalData
+                PhysicalData = agentGroup.PhysicalData,
+                AgentRagdoll = AgentRagdoll.ToConcurrent(),
+                LastFrameAgentRagdoll = LastFrameAgentRagdoll
 
             };
 
             //var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, momentaJobHandle);
-            var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, inputDeps);
+            var applyMomentaHandle = applyMomenta.Schedule(agentGroup.Length, SimulationConstants.instance.BatchSize, handle);
             applyMomentaHandle.Complete();
 
             //Write agent fluid collision data
@@ -329,7 +395,7 @@ namespace BioCrowds
 
             }
 
-            //System.IO.File.AppendAllText(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt", text);
+            System.IO.File.AppendAllText(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt", text);
 
 
 
@@ -355,32 +421,8 @@ namespace BioCrowds
             return applyMomentaHandle;
         }
 
-        private void WriteData()
-        {
-            string data = "";
-            for (int i = 0; i < cellGroup.Length; i++)
-            {
-                int3 cell = cellGroup.CellName[i].Value;
-                float3 particleVel;
-                CellMomenta.TryGetValue(cell, out particleVel);
-                data += i + ";" + ((Vector3)particleVel).magnitude + "\n";
 
-            }
 
-            System.IO.File.AppendAllText(AcessDLL.dataPath, data);
-        }
-
-        private void DrawMomenta()
-        {
-            for (int i = 0; i < cellGroup.Length; i++)
-            {
-                int3 cell = cellGroup.CellName[i].Value;
-                float3 particleVel;
-                CellMomenta.TryGetValue(cell, out particleVel);
-                Debug.DrawLine(new float3(cell), new float3(cell) + particleVel, Color.red);
-
-            }
-        }
 
 
     }
@@ -441,8 +483,7 @@ namespace BioCrowds
 
                 float3 ppos = FluidPos[index];
                 //float3 ppos = FluidPos[index + (frameSize - 1) * frame];
-                if (ppos.y > FluidSettings.instance.thresholdHeigth ||
-                    ppos.x > CrowdExperiment.instance.TerrainX || ppos.z > CrowdExperiment.instance.TerrainZ ||
+                if (ppos.x > CrowdExperiment.instance.TerrainX || ppos.z > CrowdExperiment.instance.TerrainZ ||
                     ppos.x < 0f || ppos.z < 0f) return;
 
                 int3 cell = new int3((int)math.floor(FluidPos[index].x / 2.0f) * 2 + 1, 0,
@@ -487,9 +528,10 @@ namespace BioCrowds
             FluidPos = new NativeList<float3>(FluidSettings.instance.frameSize * Clones, Allocator.Persistent);
             FluidVel = new NativeList<float3>(FluidSettings.instance.frameSize * Clones, Allocator.Persistent);
 
-            //dataPath = Application.dataPath + "/../" + CrowdExperiment.instance.instanceName.Split('.')[0] + "_" + Settings.simIndex + "_" + Settings.FluidExpName.Split('.')[0];
+
             dataPath = ExperimentManager.instance.Directory + "\\Fluid";
             System.IO.Directory.CreateDirectory(dataPath);
+            System.IO.Directory.CreateDirectory(dataPath + "\\Prints");
 
         }
 
@@ -613,14 +655,15 @@ namespace BioCrowds
             timeSplish = ControlData[0];
 
 
+
             ControlData[1] = lastSyncFrame / CrowdExperiment.instance.FramesPerSecond;
+
+            //Debug.Log(ControlData[0] + " " + ControlData[1]);
 
 
             if (ControlData[0] > ControlVariables.instance.SimThreshold)
             {
-                AcessDLL.CloseMemoryShare(memMapControl);
-                AcessDLL.CloseMemoryShare(memMapName);
-                AcessDLL.CloseMemoryShare(memMapNameVel);
+                AcessDLL.CloseAllMemoryShare();
 
                 FluidLogger.WriteToFile(dataPath + "/log.txt");
 
@@ -628,7 +671,6 @@ namespace BioCrowds
             }
 
             AcessDLL.WriteMemoryShare(memMapControl, ControlData);
-            //Debug.Log(ControlData[0]);
 
             if (ControlData[1] > ControlData[0] && ControlVariables.instance.SyncWithFluidSimulator)
             {
@@ -649,9 +691,15 @@ namespace BioCrowds
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            //HACK: Write better sync between fluid sim and biocrowds
-            // Actually giving control back to unity is hard to do here....
+
             WaitForFluidSim();
+
+            if (ControlVariables.instance.LockBioCrowds)
+            {
+                //frame++;
+                return inputDeps;
+
+            }
 
             FluidPos.Clear();
             FluidVel.Clear();
@@ -683,12 +731,16 @@ namespace BioCrowds
             if (frame % 300 == 0)
             {
                 CellToParticles.Clear();
+
+
+
             }
 
 
 
+            if(SimulationConstants.instance.ScreenCaptureSimulation && frame % 30 == 0) 
+                ScreenCapture.CaptureScreenshot(dataPath + "\\Prints" + "\\frame" + frame.ToString().PadLeft(8, '0') + ".png");
 
-            //ScreenCapture.CaptureScreenshot(dataPath + "/frame" + frame.ToString().PadLeft(8, '0') + ".png");
 
 
 
@@ -867,7 +919,7 @@ namespace BioCrowds
                             MaxSpeed = 0f,
                             Radius = 1f
                         });
-                        
+
                         CommandBuffer.SetComponent(index, new AgentGoal { SubGoal = g, EndGoal = g });
                         CommandBuffer.AddComponent(index, new CouplingComponent { CouplingDistance = 1f, CurrentCouplings = 0, MaxCouplings = 7 });
 

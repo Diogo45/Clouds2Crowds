@@ -75,7 +75,7 @@ public class ExperimentManager : MonoBehaviour
         experimentDict = new Dictionary<int, Experiment>();
         experimentDict.Add(0, currentExp);
 
-
+        Time.timeScale = SimulationConstants.instance.BioCrowdsTimeStep;
         
     }
 

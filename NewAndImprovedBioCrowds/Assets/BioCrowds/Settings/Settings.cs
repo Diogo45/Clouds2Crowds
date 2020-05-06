@@ -33,15 +33,7 @@ namespace BioCrowds
 
         public void Start()
         {
-            var args = System.Environment.GetCommandLineArgs();
-#if !UNITY_EDITOR
-            if (args.Length > 0)
-            {
-                ExperimentName = args[1];
-                simIndex = int.Parse(args[2]);
-                FluidExpName = args[3];
-            }
-#endif
+
             //line = gameObject.AddComponent<LineRenderer>();
             lineRenderers = new List<LineRenderer>();
             agentsPath = new List<LineRenderer>();
@@ -87,6 +79,17 @@ namespace BioCrowds
                         lineRend.material = line.material;
                         lineRend.SetVertexCount(500);
                         lineRend.SetColors(Color.black, Color.black);
+
+                        //if(tagSystem.agentGroup.AgentData[i].Group_ID == 0)
+                        //{
+                        //    lineRend.SetColors(Color.green, Color.green);
+
+                        //}
+                        //if (tagSystem.agentGroup.AgentData[i].Group_ID == 1)
+                        //{
+                        //    lineRend.SetColors(Color.red, Color.red);
+
+                        //}
                         lineRend.SetWidth(line.startWidth / 4f, line.endWidth / 5f);
                         lineRend.numCornerVertices = line.numCornerVertices;
                         lineRend.numCapVertices = line.numCapVertices;
@@ -174,7 +177,7 @@ namespace BioCrowds
 
 
             //TODO:Figure out how to draw paths in front of everything(maybe not obstacles?)
-            StartCoroutine(DrawPaths());
+            //StartCoroutine(DrawPaths());
             //if (FluidSettings.instance.Enabled)
             //{
             //    DrawSprings();

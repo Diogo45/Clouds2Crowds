@@ -25,6 +25,7 @@ namespace BioCrowds
     }
 
     
+    [DisableAutoCreation]
     [UpdateAfter(typeof(CellTagSystem))]
     [UpdateInGroup(typeof(MarkerSystemGroup))]
     public class MarkerSystem : JobComponentSystem
@@ -175,7 +176,8 @@ namespace BioCrowds
                 JobHandle takeMakersHandle = takeMarkersJob.Schedule(markerGroup.Length, 64, inputDeps);
                 takeMakersHandle.Complete();
 
-
+            if (ControlVariables.instance.DrawAgentMarkers)
+            {
                 NativeMultiHashMap<int, float3> agtM = AgentMarkers;
 
                 NativeMultiHashMapIterator<int> iter;
@@ -198,7 +200,7 @@ namespace BioCrowds
 
                 }
 
-
+            }
             return takeMakersHandle;
            // }
             

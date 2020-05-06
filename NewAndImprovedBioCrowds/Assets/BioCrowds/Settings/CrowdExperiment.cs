@@ -44,6 +44,7 @@ namespace BioCrowds
 
         public bool showMarkers = false;
         public bool showCells = false;
+        public bool showAgentCapsule = false;
 
         #region GETTER_SETTER
 
@@ -218,7 +219,7 @@ namespace BioCrowds
 
 
 
-
+        
 
         public void Awake()
         {

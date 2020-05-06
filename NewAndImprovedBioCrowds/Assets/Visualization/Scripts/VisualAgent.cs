@@ -16,6 +16,7 @@ public class VisualAgent : MonoBehaviour {
     private bool updated;
     private bool initialized;
 
+    public bool Ragdoll = false;
 
     public Vector3 force;
     //public Vector3[] forceByLimb;
@@ -25,9 +26,24 @@ public class VisualAgent : MonoBehaviour {
         if (!initialized) {
             Initialize(0);
         }
+
+        DontDestroyOnLoad(gameObject);
     }
 	// Update is called once per frame
 	void Update () {
+
+        if (ControlVariables.instance.isLockBioCrowds())
+        {
+            return;
+        }
+
+        if (Ragdoll)
+        {
+            //Debug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            //this.enabled = false;
+            anim.enabled = false;
+        }
+
         /*
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
@@ -37,10 +53,10 @@ public class VisualAgent : MonoBehaviour {
         
         
         */
-        if (!updated)
-        {
-            Destroy(this.gameObject);
-        }
+        //if (!updated)
+        //{
+        //    Destroy(this.gameObject);
+        //}
 
         
         //atualiza histórico de movimento
@@ -49,13 +65,13 @@ public class VisualAgent : MonoBehaviour {
         moveMem.Enqueue(currMoveVect.magnitude);
 
 
-        //float angleDifSum = 0;
-        //var prevV = moveMem.Peek();       //não parece é usado em nenhum lugar
+        float angleDifSum = 0;
+        var prevV = moveMem.Peek();       //não parece é usado em nenhum lugar
         float speedSum = 0;
         foreach (float v in moveMem){
             speedSum += v;
             //angleDifSum += Vector3.SignedAngle(prevV, v,Vector3.back);
-            //prevV = v;
+            prevV = v;
         }
         float presentAvgSpeed = (speedSum  / moveMem.Count) ;
         float estFutureSpeed = currMoveVect.magnitude;
@@ -64,15 +80,15 @@ public class VisualAgent : MonoBehaviour {
         //float presentAvgAngleDif = angleDifSum / moveMem.Count;
         //float estFutureAngDif = Vector3.SignedAngle(prevV, currMoveVect, Vector3.back);
         //float avgAngleDif = (presentAvgAngleDif + estFutureAngDif) / 2;
-        float totalAngleDiff = Vector3.SignedAngle(transform.forward, currMoveVect, Vector3.forward);
+        float totalAngleDiff = Vector3.SignedAngle(transform.forward, currMoveVect, Vector3.up);
 
         float angFact = totalAngleDiff / 90f;
-        anim.SetFloat("AngSpeed", angFact * 0.5f);// Mathf.Clamp(angDif/6f,-1f,1f));
+        //anim.SetFloat("AngSpeed", angFact * 0.5f);// Mathf.Clamp(angDif/6f,-1f,1f));
 
 
-        transform.Rotate(new Vector3(0,0, totalAngleDiff * 0.05f), Space.World);
+        transform.Rotate(new Vector3(0, totalAngleDiff * 0.05f, 0), Space.World);
         //transform.rotation = Quaternion.Euler(0, Mathf.Atan2(speed.x,speed.z)*180f,0);
-        anim.SetFloat("Speed", presentAvgSpeed*3);
+        anim.SetFloat("Speed", (AvgSpeed*5)/SimulationConstants.instance.BioCrowdsTimeStep);
         //anim.SetFloat("AngSpeed", presentAvgAngleDif/3f);
 
         transform.position = currPosition;
@@ -92,7 +108,7 @@ public class VisualAgent : MonoBehaviour {
 
     public void Initialize(float3 pos)
     {
-        transform.Rotate(Vector3.right,-90) ;
+        //transform.Rotate(Vector3.right, -90);
         anim = GetComponent<Animator>();
         moveMem = new Queue<float>();
         currPosition = new Vector3(pos.x, pos.y, pos.z);
