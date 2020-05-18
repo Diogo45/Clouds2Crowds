@@ -2415,6 +2415,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   qview: []
+  Ragdoll: 0
+  hips: {fileID: 1631594170516918}
   force: {x: 0, y: 0, z: 0}
 --- !u!135 &135574397508641394
 SphereCollider:

@@ -17,6 +17,11 @@ public class VisualAgent : MonoBehaviour {
     private bool initialized;
 
     public bool Ragdoll = false;
+    public Vector3 ParticleMeanPos = Vector3.up;
+    public Vector3 ParticleDeltaVel { get; internal set; }
+
+    public GameObject hips;
+    private Rigidbody hips_rigdbody;
 
     public Vector3 force;
     //public Vector3[] forceByLimb;
@@ -27,21 +32,34 @@ public class VisualAgent : MonoBehaviour {
             Initialize(0);
         }
 
+        
+        hips_rigdbody = hips.GetComponent<Rigidbody>();
+
         DontDestroyOnLoad(gameObject);
     }
 	// Update is called once per frame
 	void Update () {
 
-        if (ControlVariables.instance.isLockBioCrowds())
-        {
-            return;
-        }
+        //if (ControlVariables.instance.isLockBioCrowds())
+        //{
+
+        //    for (int i = 0; i < anim.layerCount; i++)
+        //    {
+        //        anim.
+        //    } 
+
+            
+
+        //    return;
+            
+        //}
 
         if (Ragdoll)
         {
             //Debug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             //this.enabled = false;
             anim.enabled = false;
+            //hips_rigdbody.isKinematic = true;
         }
 
         /*
@@ -86,12 +104,29 @@ public class VisualAgent : MonoBehaviour {
         //anim.SetFloat("AngSpeed", angFact * 0.5f);// Mathf.Clamp(angDif/6f,-1f,1f));
 
 
-        transform.Rotate(new Vector3(0, totalAngleDiff * 0.05f, 0), Space.World);
-        //transform.rotation = Quaternion.Euler(0, Mathf.Atan2(speed.x,speed.z)*180f,0);
-        anim.SetFloat("Speed", (AvgSpeed*5)/SimulationConstants.instance.BioCrowdsTimeStep);
-        //anim.SetFloat("AngSpeed", presentAvgAngleDif/3f);
+        if (!Ragdoll)
+        {
+            transform.Rotate(new Vector3(0, totalAngleDiff * 0.05f, 0), Space.World);
+            //transform.rotation = Quaternion.Euler(0, Mathf.Atan2(speed.x,speed.z)*180f,0);
+            //anim.SetFloat("AngSpeed", presentAvgAngleDif/3f);
+            anim.SetFloat("Speed", (AvgSpeed*5) / SimulationConstants.instance.BioCrowdsTimeStep);
 
-        transform.position = currPosition;
+            transform.position = currPosition;
+        }
+        else
+        {
+            //Debug.Log(ParticleMeanPos);
+            hips_rigdbody.AddForce( currPosition -  hips.transform.position, ForceMode.VelocityChange);
+
+            //hips.transform.position = currPosition + Vector3.up * ParticleMeanPos.y;
+
+            //Debug.DrawRay(ParticleMeanPos, ParticleDeltaVel, Color.red, 5f);
+
+            // hips_rigdbody.
+
+
+        }
+
         qview = moveMem.ToArray();
         updated = false;
 

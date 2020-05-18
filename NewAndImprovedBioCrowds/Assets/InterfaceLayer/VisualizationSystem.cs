@@ -17,7 +17,9 @@ public class VisualizationSystem : ComponentSystem
     {
         public int AgentID;
         public float3 Position;
-        public bool Ragdoll;
+        public int Ragdoll;
+        public float3 particleCollisionPos;
+        public float3 particleCollisionVel;
 
 
         public override string ToString()
@@ -75,23 +77,25 @@ public class VisualizationSystem : ComponentSystem
 
         for (int i = 0; i < agentGroup.Length; i++)
         {
-            bool Ragdoll = false;
+            int Ragdoll = 0;
+            float3 particleCollisionPos = float3.zero;
+            float3 particleCollisionVel = float3.zero;
 
             if (FluidSettings.instance.Enabled)
             {
-                World.Active.GetExistingManager<FluidMovementOnAgent>().AgentRagdoll.TryGetValue(agentGroup.Data[i].ID, out int flag);
-                if(flag == 1)
-                {
-                    Ragdoll = true;
-                }
-                
+                World.Active.GetExistingManager<FluidMovementOnAgent>().AgentRecords.TryGetValue(agentGroup.Data[i].ID, out AgentRecord flag);
+                Ragdoll = flag.Ragdoll;
+                particleCollisionPos = flag.particleCollisionPos;
+                particleCollisionVel = flag.particleCollisionVel;
             }
 
             processing.records.Add(new AgentRecord
             {
                 AgentID = agentGroup.Data[i].ID,
                 Position = agentGroup.Position[i].Value,
-                Ragdoll = Ragdoll
+                Ragdoll = Ragdoll,
+                particleCollisionPos = particleCollisionPos,
+                particleCollisionVel = particleCollisionVel
                 //Position = WindowManager.Crowds2Clouds(agentGroup.Position[i].Value),
                 //CloudID = agentGroup.OwnerCloud[i].CloudID
             });

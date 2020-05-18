@@ -70,7 +70,7 @@ public class ExperimentManager : MonoBehaviour
         currentExp.activeSettings.Add(typeof(InteractionSettings));
 
         currentExp.name = "EXPERIMENT 1";
-        Directory = Application.dataPath + "\\" + currentExp.name;
+        Directory = @"E:\PUCRS\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments" + "\\" + currentExp.name;
 
         experimentDict = new Dictionary<int, Experiment>();
         experimentDict.Add(0, currentExp);

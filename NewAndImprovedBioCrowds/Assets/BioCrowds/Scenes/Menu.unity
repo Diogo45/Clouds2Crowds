@@ -203,7 +203,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 15.47
+  orthographic size: 19.1
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -225,13 +225,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 534669902}
-  m_LocalRotation: {x: 0.2266135, y: 0.30363902, z: -0.07459467, w: 0.92243445}
-  m_LocalPosition: {x: 8.185649, y: 39.64806, z: -36.02798}
+  m_LocalRotation: {x: 0.21761501, y: 0.39803237, z: -0.09778421, w: 0.88580596}
+  m_LocalPosition: {x: -1.3, y: 39.64806, z: -22.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 450, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 387.605, y: 48.393, z: 0}
 --- !u!114 &534669906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5144,7 +5144,7 @@ Prefab:
     - target: {fileID: 114740191966733172, guid: 6369cc13a744b4c4c8a381171c2a1902,
         type: 2}
       propertyPath: ScreenCaptureSimulation
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6369cc13a744b4c4c8a381171c2a1902, type: 2}
@@ -5529,12 +5529,12 @@ Prefab:
     - target: {fileID: 224559710943294954, guid: bc306045f19fba449a19b414471e56af,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 0.0000035336886
+      value: -0.00018663947
       objectReference: {fileID: 0}
     - target: {fileID: 224559710943294954, guid: bc306045f19fba449a19b414471e56af,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000029619823
+      value: 0.000027559849
       objectReference: {fileID: 0}
     - target: {fileID: 114167910871905498, guid: bc306045f19fba449a19b414471e56af,
         type: 2}
@@ -6464,6 +6464,10 @@ Prefab:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1365691665414658, guid: bc306045f19fba449a19b414471e56af, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bc306045f19fba449a19b414471e56af, type: 2}
   m_IsPrefabAsset: 0
@@ -6512,7 +6516,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 1edec0c12d7310242875691d07d0a767, type: 2}
+  - {fileID: 2100000, guid: aadd5a709a48466c887296bb5b1b8110, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

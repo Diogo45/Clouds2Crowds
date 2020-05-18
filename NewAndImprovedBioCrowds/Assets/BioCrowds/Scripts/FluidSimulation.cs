@@ -53,8 +53,8 @@ namespace BioCrowds
         public NativeHashMap<int, AgentParticlesData> AgentFluidData;
 
 
-        public NativeHashMap<int, int> LastFrameAgentRagdoll;
-        public NativeHashMap<int, int> AgentRagdoll;
+        public NativeHashMap<int, VisualizationSystem.AgentRecord> LastFrameAgentRecords;
+        public NativeHashMap<int, VisualizationSystem.AgentRecord> AgentRecords;
 
 
 
@@ -104,8 +104,8 @@ namespace BioCrowds
             [ReadOnly] public NativeList<float3> FluidVel;
 
 
-            [ReadOnly] public NativeHashMap<int, int> LastFrameAgentRagdoll;
-            [WriteOnly, NativeDisableParallelForRestriction] public NativeHashMap<int, int>.Concurrent AgentRagdoll;
+            [ReadOnly] public NativeHashMap<int, VisualizationSystem.AgentRecord> LastFrameAgentRagdoll;
+            [WriteOnly, NativeDisableParallelForRestriction] public NativeHashMap<int, VisualizationSystem.AgentRecord>.Concurrent AgentRagdoll;
 
 
             [WriteOnly, NativeDisableParallelForRestriction] public NativeHashMap<int, AgentParticlesData>.Concurrent AgentFluidData;
@@ -122,9 +122,14 @@ namespace BioCrowds
                 float3 M_r = float3.zero;
                 int numPart = 0;
 
+                float3 TotalVel = float3.zero;
+                float3 MeanPos = float3.zero;
+
+
                 int agentID = AgentData[index].ID;
-                int ragdoll;
-                if (!LastFrameAgentRagdoll.TryGetValue(agentID, out ragdoll))
+                VisualizationSystem.AgentRecord record;
+                int ragdoll = 0;
+                if (!LastFrameAgentRagdoll.TryGetValue(agentID, out record))
                 {
                     ragdoll = 0;
                 }
@@ -171,6 +176,9 @@ namespace BioCrowds
                             float3 P = vel * FluidSettings.instance.particleMass;
                             M_r += P;
                             numPart++;
+
+                            MeanPos += FluidPos[particleID];
+
                         }
 
 
@@ -199,6 +207,8 @@ namespace BioCrowds
                                 var P = vel * FluidSettings.instance.particleMass;
                                 M_r += P;
                                 numPart++;
+
+                                MeanPos += FluidPos[particleID];
                             }
                         }
 
@@ -212,11 +222,6 @@ namespace BioCrowds
                 float3 particleSetMomenta = M_r;
                 float particleSetMass = numPart * FluidSettings.instance.particleMass;
 
-                if (particleSetMass > 0f)
-                {
-                    ragdoll = 1;
-                    AgentRagdoll.TryAdd(agentID, ragdoll);
-                }
 
                 //bool keepgoing = CellMomenta.TryGetValue(cell, out float3 particleVel);
                 //if (!keepgoing) return;
@@ -231,12 +236,31 @@ namespace BioCrowds
                 //TOTAL INELASTIC COLLISION
                 if (numPart > 0)
                 {
-                    OldAgentVel = (OldAgentVel * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
+
+                    if (particleSetMass > 0f)
+                    {
+                        ragdoll = 1;
+                       
+                        AgentRagdoll.TryAdd(agentID, new VisualizationSystem.AgentRecord { Ragdoll = ragdoll, particleCollisionPos = MeanPos / numPart, particleCollisionVel = OldAgentVel + new float3(0, 1, 0) * 0.1f });
+                    }
+
+                    if (ragdoll == 1)
+                    {
+                        OldAgentVel = (0f * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
+
+                    }
+                    else
+                    {
+                        OldAgentVel = (OldAgentVel * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
+
+                    }
                 }
 
 
-                //HACK: For now, while we dont have ragdolls or the buoyancy(upthrust) force, not making use of the y coordinate 
-                OldAgentVel.y = 0f;
+              
+
+
+                if(ragdoll == 1) OldAgentVel.y = 0f;
 
                 AgentStep[index] = new AgentStep { delta = OldAgentVel };
 
@@ -258,8 +282,8 @@ namespace BioCrowds
 
 
             AgentFluidData = new NativeHashMap<int, AgentParticlesData>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
-            LastFrameAgentRagdoll = new NativeHashMap<int, int>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
-            AgentRagdoll = new NativeHashMap<int, int>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
+            LastFrameAgentRecords = new NativeHashMap<int, VisualizationSystem.AgentRecord>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
+            AgentRecords = new NativeHashMap<int, VisualizationSystem.AgentRecord>(ControlVariables.instance.agentQuantity * 2, Allocator.Persistent);
 
             System.IO.File.Delete(m_fluidParticleToCell.dataPath + "/fluidAgentData.txt");
 
@@ -281,16 +305,16 @@ namespace BioCrowds
         protected override void OnDestroyManager()
         {
             AgentFluidData.Dispose();
-            LastFrameAgentRagdoll.Dispose();
-            AgentRagdoll.Dispose();
+            LastFrameAgentRecords.Dispose();
+            AgentRecords.Dispose();
         }
         #endregion
 
         struct CopyOverDoubleBuffer : IJobParallelFor
         {
             [ReadOnly] public ComponentDataArray<AgentData> AgentData;
-            public NativeHashMap<int, int>.Concurrent LastFrameAgentRagdoll;
-            [ReadOnly] public NativeHashMap<int, int> AgentRagdoll;
+            public NativeHashMap<int, VisualizationSystem.AgentRecord>.Concurrent LastFrameAgentRecords;
+            [ReadOnly] public NativeHashMap<int, VisualizationSystem.AgentRecord> AgentRecords;
 
 
 
@@ -298,9 +322,9 @@ namespace BioCrowds
             {
                 int id = AgentData[index].ID;
 
-                int rag;
-                AgentRagdoll.TryGetValue(id, out rag);
-                LastFrameAgentRagdoll.TryAdd(id, rag);
+                VisualizationSystem.AgentRecord record;
+                AgentRecords.TryGetValue(id, out record);
+                LastFrameAgentRecords.TryAdd(id, record);
 
 
 
@@ -317,12 +341,12 @@ namespace BioCrowds
                 return inputDeps;
             }
 
-            LastFrameAgentRagdoll.Clear();
+            LastFrameAgentRecords.Clear();
 
             var job = new CopyOverDoubleBuffer
             {
-                AgentRagdoll = AgentRagdoll,
-                LastFrameAgentRagdoll = LastFrameAgentRagdoll.ToConcurrent(),
+                AgentRecords = AgentRecords,
+                LastFrameAgentRecords = LastFrameAgentRecords.ToConcurrent(),
                 AgentData = agentGroup.AgentData
             };
 
@@ -373,8 +397,8 @@ namespace BioCrowds
                 //ParticleSetMass = ParticleSetMass,
                 FluidData = agentGroup.FluidData,
                 PhysicalData = agentGroup.PhysicalData,
-                AgentRagdoll = AgentRagdoll.ToConcurrent(),
-                LastFrameAgentRagdoll = LastFrameAgentRagdoll
+                AgentRagdoll = AgentRecords.ToConcurrent(),
+                LastFrameAgentRagdoll = LastFrameAgentRecords
 
             };
 
@@ -738,7 +762,7 @@ namespace BioCrowds
 
 
 
-            if(SimulationConstants.instance.ScreenCaptureSimulation && frame % 30 == 0) 
+            //if(SimulationConstants.instance.ScreenCaptureSimulation && frame % 3 == 0) 
                 ScreenCapture.CaptureScreenshot(dataPath + "\\Prints" + "\\frame" + frame.ToString().PadLeft(8, '0') + ".png");
 
 
