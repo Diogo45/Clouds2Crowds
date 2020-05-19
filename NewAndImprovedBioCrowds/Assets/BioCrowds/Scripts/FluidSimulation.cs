@@ -4,14 +4,8 @@ using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Transforms;
 using Unity.Jobs;
-using UnityEngine.Experimental.PlayerLoop;
 using UnityEngine;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
-using System.Collections;
-using System.Threading;
 using static FluidSettings;
 using Unity.Rendering;
 
@@ -121,18 +115,20 @@ namespace BioCrowds
 
                 float3 M_r = float3.zero;
                 int numPart = 0;
-
-                float3 TotalVel = float3.zero;
                 float3 MeanPos = float3.zero;
 
 
                 int agentID = AgentData[index].ID;
                 VisualizationSystem.AgentRecord record;
                 int ragdoll = 0;
-                if (!LastFrameAgentRagdoll.TryGetValue(agentID, out record))
-                {
-                    ragdoll = 0;
-                }
+                //if (!LastFrameAgentRagdoll.TryGetValue(agentID, out record))
+                //{
+                //    ragdoll = 0;
+                //}
+                //else
+                //{
+                //    ragdoll = record.Ragdoll;
+                //}
 
 
 
@@ -163,7 +159,7 @@ namespace BioCrowds
                         }
 
                         float3 pos = FluidPos[particleID];
-                        if(ragdoll == 0) pos.y = 0f;
+                        if (ragdoll == 0) pos.y = 0f;
                         var agentPos = AgentPos[index].Value;
                         if (ragdoll == 0) agentPos.y = 0;
                         float centerDist = math.distance(pos, agentPos);
@@ -212,11 +208,11 @@ namespace BioCrowds
                             }
                         }
 
-                       
+
                     }
                 }
 
-               
+
 
 
                 float3 particleSetMomenta = M_r;
@@ -233,34 +229,52 @@ namespace BioCrowds
                 float agentMass = PhysicalData[index].mass;
                 //tau is how much the fluid acts on the agent, or (1 - tau) is how much the agent resists the fluid
                 float tau = FluidData[index].tau;
+                var particlePos = MeanPos / numPart;
                 //TOTAL INELASTIC COLLISION
                 if (numPart > 0)
                 {
 
-                    if (particleSetMass > 0f)
+
+
+
+                    if (particlePos.y * new Vector3(meanVel.x, meanVel.y, meanVel.z).magnitude >= 0.75 * SimulationConstants.instance.getBioCrowdsTimeStep())
                     {
                         ragdoll = 1;
-                       
-                        AgentRagdoll.TryAdd(agentID, new VisualizationSystem.AgentRecord { Ragdoll = ragdoll, particleCollisionPos = MeanPos / numPart, particleCollisionVel = OldAgentVel + new float3(0, 1, 0) * 0.1f });
+                        OldAgentVel = (particleSetMomenta) / (agentMass + particleSetMass);
                     }
+                    else
+                    {
+                        ragdoll = 0;
+                        OldAgentVel = (OldAgentVel * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
+                    }
+
 
                     if (ragdoll == 1)
                     {
-                        OldAgentVel = (0f * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
+
+                        
 
                     }
                     else
                     {
-                        OldAgentVel = (OldAgentVel * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
-
+                        
                     }
                 }
 
+                
 
-              
+
+                //Debug.Log("2: " + ragdoll);
+                if(AgentData[index].ID == 94)
+                {
+                    Debug.Log("RAGDOLL " + ragdoll + " " + particleSetMomenta + " " + particleSetMass);
+
+                }
+
+                AgentRagdoll.TryAdd(agentID, new VisualizationSystem.AgentRecord { Ragdoll = ragdoll, particleCollisionPos = particlePos, particleCollisionVel = meanVel / numPart });
 
 
-                if(ragdoll == 1) OldAgentVel.y = 0f;
+                if (ragdoll == 0) OldAgentVel.y = 0f;
 
                 AgentStep[index] = new AgentStep { delta = OldAgentVel };
 
@@ -355,7 +369,7 @@ namespace BioCrowds
 
             handle.Complete();
 
-           
+            AgentRecords.Clear();
 
             //WriteData();
             AgentFluidData.Clear();
@@ -412,6 +426,8 @@ namespace BioCrowds
             for (int i = 0; i < agentGroup.Length; i++)
             {
                 AgentFluidData.TryGetValue(agentGroup.AgentData[i].ID, out AgentParticlesData item);
+
+                Debug.DrawLine(agentGroup.AgentPos[i].Value, agentGroup.AgentPos[i].Value + agentGroup.AgentStep[i].delta * 10f, Color.red);
 
                 //text += agentGroup.AgentData[i].ID + ";" + Math.Sqrt(item.meanParticleVelocity.x * item.meanParticleVelocity.x + item.meanParticleVelocity.y * item.meanParticleVelocity.y + item.meanParticleVelocity.z * item.meanParticleVelocity.z) + ";" + item.numParticles + ";" + item.agentMass + "\n";
                 text += item.frame + ";" + agentGroup.AgentData[i].ID + ";" + item.meanParticleVelocity + ";" + item.agentVel + ";" + item.numParticles + ";" + item.agentMass + "\n";
@@ -763,7 +779,7 @@ namespace BioCrowds
 
 
             //if(SimulationConstants.instance.ScreenCaptureSimulation && frame % 3 == 0) 
-                ScreenCapture.CaptureScreenshot(dataPath + "\\Prints" + "\\frame" + frame.ToString().PadLeft(8, '0') + ".png");
+            ScreenCapture.CaptureScreenshot(dataPath + "\\Prints" + "\\frame" + frame.ToString().PadLeft(8, '0') + ".png");
 
 
 

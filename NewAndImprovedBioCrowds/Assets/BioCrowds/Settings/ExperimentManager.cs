@@ -132,8 +132,9 @@ public class ExperimentManager : MonoBehaviour
 
     public void Play()
     {
-
+        Directory = @"E:\PUCRS\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments" + "\\" + currentExp.name;
         System.IO.Directory.CreateDirectory(Directory);
+        
 
         BioCrowds.CrowdExperimentModuleManager.instance.Enable();
         if (IsExperimentActive(typeof(FluidSettings)) != -1 && currentExp.settings[IsExperimentActive(typeof(FluidSettings))].Enabled)
@@ -261,6 +262,7 @@ public class ExperimentManager : MonoBehaviour
     public void WriteName(string input)
     {
         currentExp.name = input;
+        Debug.Log(currentExp.name);
     }
 
 

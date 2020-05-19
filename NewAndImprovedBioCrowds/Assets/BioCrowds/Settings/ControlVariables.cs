@@ -25,6 +25,9 @@ public class ControlVariables : ISettings
     public int simIndex = 0;
 
     public bool DrawAgentMarkers = false;
+
+    public float SpawnAgentStructuredIncrement = 1.5f;
+
     public bool isLockBioCrowds() {
 		return this.LockBioCrowds;
 	}

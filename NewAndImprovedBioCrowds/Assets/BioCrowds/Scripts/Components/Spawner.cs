@@ -82,8 +82,8 @@ namespace BioCrowds
                 float2 dim = spawnList.spawnDimensions;
 
                 int qtdAgtTotal = spawnList.qtdAgents;
-                int maxZ = (int)(origin.z + dim.y);
-                int maxX = (int)(origin.x + dim.x);
+                int maxZ = (int)(dim.y);
+                int maxX = (int)(dim.x);
                 int minZ = (int)origin.z;
                 int minX = (int)origin.x;
                 float maxSpeed = spawnList.maxSpeed;
@@ -151,14 +151,14 @@ namespace BioCrowds
 
                     if (x < maxX)
                     {
-                        x += 5f;
+                        x += ControlVariables.instance.SpawnAgentStructuredIncrement;
                     }
                     else
                     {
                         if (z < maxZ)
                         {
                             x = minX;
-                            z++;
+                            z += ControlVariables.instance.SpawnAgentStructuredIncrement;
                         }
                     }
 

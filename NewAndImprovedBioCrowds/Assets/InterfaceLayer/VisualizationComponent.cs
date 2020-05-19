@@ -54,7 +54,7 @@ public class VisualizationComponent : MonoBehaviour
             if (agentList.ContainsKey(ar.AgentID))
             {
                 agentList[ar.AgentID].CurrPosition = (ar.Position);
-                agentList[ar.AgentID].Ragdoll = ar.Ragdoll == 1 ? true : false;
+                agentList[ar.AgentID].Ragdoll = ar.Ragdoll;
                 agentList[ar.AgentID].ParticleMeanPos = (Vector3)(ar.particleCollisionPos);
                 agentList[ar.AgentID].ParticleDeltaVel = (Vector3)(ar.particleCollisionVel);
                 //Debug.Log("updating" + ar.AgentID + "'s position");
