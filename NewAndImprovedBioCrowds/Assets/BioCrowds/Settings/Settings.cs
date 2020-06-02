@@ -80,23 +80,18 @@ namespace BioCrowds
                         lineRend.SetVertexCount(500);
                         lineRend.SetColors(Color.black, Color.black);
 
-                        //if(tagSystem.agentGroup.AgentData[i].Group_ID == 0)
-                        //{
-                        //    lineRend.SetColors(Color.green, Color.green);
 
-                        //}
-                        //if (tagSystem.agentGroup.AgentData[i].Group_ID == 1)
-                        //{
-                        //    lineRend.SetColors(Color.red, Color.red);
+                        lineRend.SetColors(Color.red, Color.red);
 
-                        //}
+
+
                         lineRend.SetWidth(line.startWidth / 4f, line.endWidth / 5f);
                         lineRend.numCornerVertices = line.numCornerVertices;
                         lineRend.numCapVertices = line.numCapVertices;
                         float3 posInit = tagSystem.agentGroup.AgentPos[i].Value;
                         for (int j = 0; j < lineRend.positionCount; j++)
                         {
-                            lineRend.SetPosition(j, posInit + (float3)Vector3.up * 25f);
+                            lineRend.SetPosition(j, posInit + (float3)Vector3.up * 15f);
                         }
 
                         agentsPath.Add(lineRend);
@@ -108,7 +103,7 @@ namespace BioCrowds
                         lineRend.SetPosition(j, lineRend.GetPosition(j - 1));
                     }
 
-                    lineRend.SetPosition(0, pos + (float3)Vector3.up * 25f);
+                    lineRend.SetPosition(0, pos + (float3)Vector3.up * 15f);
 
 
                 }
@@ -177,7 +172,7 @@ namespace BioCrowds
 
 
             //TODO:Figure out how to draw paths in front of everything(maybe not obstacles?)
-            //StartCoroutine(DrawPaths());
+            StartCoroutine(DrawPaths());
             //if (FluidSettings.instance.Enabled)
             //{
             //    DrawSprings();

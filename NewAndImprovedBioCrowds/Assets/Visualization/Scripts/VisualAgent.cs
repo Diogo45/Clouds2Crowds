@@ -10,8 +10,10 @@ public class VisualAgent : MonoBehaviour {
     
     private Animator anim;
     private int queueLength = 30;
+    private int queueAltLength = 120;
     public Queue<float> moveMem;        //fila com deslocamentos/magnitudes dos últimos moveMemLength movimentos
     public Queue<float> ragMem;        
+    public Queue<float> heightMem;        
     public float[] qview;
     public float[] ragdoll;
     private Vector3 currPosition;
@@ -25,9 +27,25 @@ public class VisualAgent : MonoBehaviour {
     public GameObject hips;
     private Rigidbody hips_rigdbody;
 
+    public GameObject handL;
+    private Rigidbody handL_rigdbody;
+
+    public GameObject handR;
+    private Rigidbody handR_rigdbody;
+
+    public GameObject kneeL;
+    private Rigidbody kneeL_rigdbody;
+
+    public GameObject kneeR;
+    private Rigidbody kneeR_rigdbody;
+
     public Vector3 force;
     //public Vector3[] forceByLimb;
 
+
+    public float ragMean;
+
+    private float side_rotate;
     void Start()
     {
         if (!initialized) {
@@ -36,6 +54,10 @@ public class VisualAgent : MonoBehaviour {
 
         
         hips_rigdbody = hips.GetComponent<Rigidbody>();
+        handL_rigdbody = handL.GetComponent<Rigidbody>();
+        handR_rigdbody = handR.GetComponent<Rigidbody>();
+        kneeL_rigdbody = kneeL.GetComponent<Rigidbody>();
+        kneeR_rigdbody = kneeR.GetComponent<Rigidbody>();
 
         DontDestroyOnLoad(gameObject);
     }
@@ -74,59 +96,93 @@ public class VisualAgent : MonoBehaviour {
 
         
         //atualiza histórico de movimento
-        Vector3 currMoveVect = currPosition - transform.position;
         
 
         ragMem.Dequeue();
         ragMem.Enqueue(Ragdoll);
 
-      
+        heightMem.Dequeue();
+        heightMem.Enqueue(ParticleMeanPos.y > 0 ? ParticleMeanPos.y : 1f);
+        
 
-        var ragMean = 0f;
+
+        ragMean = 0f;
         foreach (float v in ragMem)
         {
             ragMean += v;
         }
 
-        ragMean /= queueLength;
+        var heighMean = 0f;
+        foreach (float v in heightMem)
+        {
+            heighMean += v;
+        }
+
+
+        heighMean /= queueAltLength;
+        ragMean /= queueAltLength;
+
 
         
 
-
-        if (ragMean >= 0.9)
+        if (ragMean > 0)
         {
             //Debug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             //this.enabled = false;
             anim.enabled = false;
-            //hips_rigdbody.isKinematic = true;
+            hips_rigdbody.isKinematic = true;
 
             //Debug.Log(ParticleMeanPos);
-            var diff = currPosition - hips.transform.position;
-            //diff.y = (ParticleMeanPos.y - hips.transform.position.y) * 0.8f;
+            
 
-            hips_rigdbody.AddForce(diff, ForceMode.VelocityChange);
+            var partVel = math.abs(ParticleDeltaVel.x)> 0f && math.abs(ParticleDeltaVel.y) > 0f && math.abs(ParticleDeltaVel.z) > 0f ? ParticleDeltaVel : Vector3.zero;
+            
+            hips.transform.position = currPosition + Vector3.up * heighMean;
+            hips.transform.Rotate(partVel.x + (UnityEngine.Random.Range(0.1f, 0.5f) * side_rotate), partVel.y + (UnityEngine.Random.Range(0.1f, 0.5f) * side_rotate), partVel.z + (UnityEngine.Random.Range(0.1f, 0.5f) * side_rotate));
 
-           
-
-            //hips.transform.position = currPosition + Vector3.up * ParticleMeanPos.y;
-
+            //var rotate = partVel * UnityEngine.Random.Range(1.5f, 3.5f);
+            //Debug.Log(rotate + " " + ParticleDeltaVel);
+            //hips.transform.Rotate(rotate);
             //Debug.DrawRay(ParticleMeanPos, ParticleDeltaVel, Color.red, 5f);
 
-            // hips_rigdbody.
+            ////var diff = handL.transform.position;
+            //var diff = Vector3.zero;
+            //diff.y = (heighMean - handL.transform.position.y) * 0.5f;
+
+            //handL_rigdbody.AddForce(diff, ForceMode.VelocityChange);
+
+
+            ////diff = handR.transform.position;
+            //diff = Vector3.zero;
+            //diff.y = (heighMean - handR.transform.position.y) * 0.5f;
+
+            //handR_rigdbody.AddForce(diff, ForceMode.VelocityChange);
+
+
+            //// diff = kneeL.transform.position;
+            //diff = Vector3.zero;
+            //diff.y = (heighMean - kneeL.transform.position.y) * 0.8f;
+
+            //kneeL_rigdbody.AddForce(diff, ForceMode.VelocityChange);
+
+            ////diff = kneeR.transform.position;
+            //diff = Vector3.zero;
+            //diff.y = (heighMean - kneeR.transform.position.y) * 0.8f;
+
+            //kneeR_rigdbody.AddForce(diff, ForceMode.VelocityChange);
 
 
         }
         else
         {
-            if (ragMean <= 0.3)
-            {
+                side_rotate = UnityEngine.Random.Range(-1f, 1f) > 0f ? 1f : -1f;
 
+                Vector3 currMoveVect = currPosition - transform.position;
 
 
                 anim.enabled = true;
 
-                moveMem.Dequeue();
-                moveMem.Enqueue(currMoveVect.magnitude);
+                
 
 
                 float angleDifSum = 0;
@@ -155,27 +211,15 @@ public class VisualAgent : MonoBehaviour {
                 transform.Rotate(new Vector3(0, totalAngleDiff * 0.05f, 0), Space.World);
                 //transform.rotation = Quaternion.Euler(0, Mathf.Atan2(speed.x,speed.z)*180f,0);
                 //anim.SetFloat("AngSpeed", presentAvgAngleDif/3f);
-                anim.SetFloat("Speed", (AvgSpeed * 5) / SimulationConstants.instance.BioCrowdsTimeStep);
+                anim.SetFloat("Speed", (AvgSpeed * 3) / SimulationConstants.instance.BioCrowdsTimeStep);
 
                 transform.position = currPosition;
-            }
-            
 
         }
 
 
 
 
-
-        if (ragMean < 0.5)
-        {
-            
-        }
-        else
-        {
-           
-
-        }
 
         qview = moveMem.ToArray();
         ragdoll = ragMem.ToArray();
@@ -198,15 +242,25 @@ public class VisualAgent : MonoBehaviour {
         anim = GetComponent<Animator>();
         moveMem = new Queue<float>();
         ragMem = new Queue<float>();
+        heightMem = new Queue<float>();
         currPosition = new Vector3(pos.x, pos.y, pos.z);
         transform.position = currPosition;
         updated = false;
         for (int i = 0; i < queueLength; i++)
         {
             moveMem.Enqueue(0);
-            ragMem.Enqueue(0);
+            
         }
 
+        for (int i = 0; i < queueAltLength; i++)
+        {
+            ragMem.Enqueue(0);
+            heightMem.Enqueue(0);
+
+        }
+
+        
+        side_rotate = UnityEngine.Random.Range(-1f, 1f) > 0f ? 1f : -1f;
         initialized = true;
     }
 }

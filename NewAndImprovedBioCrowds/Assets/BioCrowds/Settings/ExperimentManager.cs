@@ -75,7 +75,6 @@ public class ExperimentManager : MonoBehaviour
         experimentDict = new Dictionary<int, Experiment>();
         experimentDict.Add(0, currentExp);
 
-        Time.timeScale = SimulationConstants.instance.BioCrowdsTimeStep;
         
     }
 
@@ -132,8 +131,26 @@ public class ExperimentManager : MonoBehaviour
 
     public void Play()
     {
+
+        Time.timeScale = SimulationConstants.instance.BioCrowdsTimeStep;
+
+
+        var dirs = System.IO.Directory.GetDirectories(@"E:\PUCRS\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments");
+
+        int repeated = 0;
+
+        foreach(string s in dirs)
+        {
+            if (s.Contains(currentExp.name)) repeated++;
+            Debug.Log(s + " " + currentExp.name);
+        }
+
+        currentExp.name = currentExp.name + (repeated > 0 ? " (" + repeated + ")" : "");
+
         Directory = @"E:\PUCRS\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments" + "\\" + currentExp.name;
         System.IO.Directory.CreateDirectory(Directory);
+
+
         
 
         BioCrowds.CrowdExperimentModuleManager.instance.Enable();

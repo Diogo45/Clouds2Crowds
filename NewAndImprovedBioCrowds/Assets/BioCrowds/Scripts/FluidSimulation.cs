@@ -87,7 +87,7 @@ namespace BioCrowds
 
             //[ReadOnly] public NativeHashMap<int3, float3> CellMomenta;
             //[ReadOnly] public NativeHashMap<int3, float3> ParticleSetMass;
-            [ReadOnly] public ComponentDataArray<FluidData> FluidData;
+            public ComponentDataArray<FluidData> FluidData;
             [ReadOnly] public ComponentDataArray<PhysicalData> PhysicalData;
             [ReadOnly] public ComponentDataArray<Position> AgentPos;
             public ComponentDataArray<AgentStep> AgentStep;
@@ -121,14 +121,14 @@ namespace BioCrowds
                 int agentID = AgentData[index].ID;
                 VisualizationSystem.AgentRecord record;
                 int ragdoll = 0;
-                //if (!LastFrameAgentRagdoll.TryGetValue(agentID, out record))
-                //{
-                //    ragdoll = 0;
-                //}
-                //else
-                //{
-                //    ragdoll = record.Ragdoll;
-                //}
+                if (!LastFrameAgentRagdoll.TryGetValue(agentID, out record))
+                {
+                    ragdoll = 0;
+                }
+                else
+                {
+                    ragdoll = record.Ragdoll;
+                }
 
 
 
@@ -159,9 +159,11 @@ namespace BioCrowds
                         }
 
                         float3 pos = FluidPos[particleID];
-                        if (ragdoll == 0) pos.y = 0f;
+                        /*if (ragdoll == 0)*/
+                        pos.y = 0f;
                         var agentPos = AgentPos[index].Value;
-                        if (ragdoll == 0) agentPos.y = 0;
+                        /*if (ragdoll == 0)*/
+                        agentPos.y = 0;
                         float centerDist = math.distance(pos, agentPos);
 
                         if (centerDist < math.abs(FluidSettings.instance.personRadius - FluidSettings.instance.particleRadius))
@@ -189,7 +191,8 @@ namespace BioCrowds
                         {
 
                             pos = FluidPos[particleID];
-                            if (ragdoll == 0) pos.y = 0f;
+                            /*if (ragdoll == 0)*/
+                            pos.y = 0f;
                             centerDist = math.distance(pos, agentPos);
 
 
@@ -229,49 +232,44 @@ namespace BioCrowds
                 float agentMass = PhysicalData[index].mass;
                 //tau is how much the fluid acts on the agent, or (1 - tau) is how much the agent resists the fluid
                 float tau = FluidData[index].tau;
+                //if (frame >= 870)
+                //{
+                //    tau = 0f;
+                //}
+
                 var particlePos = MeanPos / numPart;
                 //TOTAL INELASTIC COLLISION
                 if (numPart > 0)
                 {
+                    //if (particlePos.y * new Vector3(meanVel.x, meanVel.y, meanVel.z).magnitude * tau >= 0.75 * SimulationConstants.instance.getBioCrowdsTimeStep())
+                    //{
+                    //if (tau != 0)
+                    //{
+                    //    ragdoll = 1;
+                    //}
+                    //else
+                    //{
+                    //    ragdoll = 0;
+                    //}
+                    //OldAgentVel = (particleSetMomenta) / (agentMass + particleSetMass);
+                    OldAgentVel = (OldAgentVel * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
+                    //}
 
 
-
-
-                    if (particlePos.y * new Vector3(meanVel.x, meanVel.y, meanVel.z).magnitude >= 0.75 * SimulationConstants.instance.getBioCrowdsTimeStep())
-                    {
-                        ragdoll = 1;
-                        OldAgentVel = (particleSetMomenta) / (agentMass + particleSetMass);
-                    }
-                    else
-                    {
-                        ragdoll = 0;
-                        OldAgentVel = (OldAgentVel * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
-                    }
-
-
-                    if (ragdoll == 1)
-                    {
-
-                        
-
-                    }
-                    else
-                    {
-                        
-                    }
                 }
-
-                
-
-
+                //else
+                //{
+                //    ragdoll = 0;
+                //    OldAgentVel = (OldAgentVel * agentMass + tau * particleSetMomenta) / (agentMass + tau * particleSetMass);
+                //}
                 //Debug.Log("2: " + ragdoll);
-                if(AgentData[index].ID == 94)
+                if (AgentData[index].ID == 94)
                 {
-                    Debug.Log("RAGDOLL " + ragdoll + " " + particleSetMomenta + " " + particleSetMass);
+                    //Debug.Log("RAGDOLL " + ragdoll + " " + particleSetMomenta + " " + particleSetMass);
 
                 }
 
-                AgentRagdoll.TryAdd(agentID, new VisualizationSystem.AgentRecord { Ragdoll = ragdoll, particleCollisionPos = particlePos, particleCollisionVel = meanVel / numPart });
+                AgentRagdoll.TryAdd(agentID, new VisualizationSystem.AgentRecord { Ragdoll = ragdoll, particleCollisionPos = particlePos, particleCollisionVel = meanVel });
 
 
                 if (ragdoll == 0) OldAgentVel.y = 0f;
@@ -427,7 +425,7 @@ namespace BioCrowds
             {
                 AgentFluidData.TryGetValue(agentGroup.AgentData[i].ID, out AgentParticlesData item);
 
-                Debug.DrawLine(agentGroup.AgentPos[i].Value, agentGroup.AgentPos[i].Value + agentGroup.AgentStep[i].delta * 10f, Color.red);
+                //Debug.DrawLine(agentGroup.AgentPos[i].Value, agentGroup.AgentPos[i].Value + agentGroup.AgentStep[i].delta * 10f, Color.red);
 
                 //text += agentGroup.AgentData[i].ID + ";" + Math.Sqrt(item.meanParticleVelocity.x * item.meanParticleVelocity.x + item.meanParticleVelocity.y * item.meanParticleVelocity.y + item.meanParticleVelocity.z * item.meanParticleVelocity.z) + ";" + item.numParticles + ";" + item.agentMass + "\n";
                 text += item.frame + ";" + agentGroup.AgentData[i].ID + ";" + item.meanParticleVelocity + ";" + item.agentVel + ";" + item.numParticles + ";" + item.agentMass + "\n";

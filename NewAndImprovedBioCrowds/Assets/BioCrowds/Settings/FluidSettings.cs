@@ -156,7 +156,7 @@ public class FluidSettings : ISettings
 
 		//Initial Value
 		//TODO:Make the path of the SplishSplash Simulator automatic detect or choosable in interface
-		customComandLine = @"E:\PUCRS\BioSplishSplash\BioSPlisHSPlasH\bin\DynamicBoundarySimulator.exe \..\data\Scenes\Emitter1,5.json";
+		customComandLine = @"E:\PUCRS\BioSplishSplash\BioSPlisHSPlasH\bin\DynamicBoundarySimulator.exe \..\data\Scenes\Emitter2,5.json";
 
 
 	}

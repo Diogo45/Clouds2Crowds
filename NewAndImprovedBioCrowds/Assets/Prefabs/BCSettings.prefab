@@ -275,7 +275,7 @@ MonoBehaviour:
   SimThreshold: 150
   simIndex: 0
   DrawAgentMarkers: 0
-  SpawnAgentStructuredIncrement: 1.5
+  SpawnAgentStructuredIncrement: 2.5
 --- !u!114 &114315395903531542
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -289,7 +289,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Enabled: 1
   SpawnAreas:
-  - qtd: 50
+  - qtd: 0
     max:
       x: 5
       y: 0
@@ -305,15 +305,15 @@ MonoBehaviour:
     maxSpeed: 1.3
   - qtd: 50
     max:
-      x: 90
+      x: 87
       y: 0
-      z: 35
+      z: 10
     min:
-      x: 70
+      x: 65
       y: 0
-      z: 15
+      z: 0
     goal:
-      x: 50
+      x: 75
       y: 0
       z: 50
     maxSpeed: 1.3
@@ -498,7 +498,7 @@ MonoBehaviour:
   Enabled: 1
   randTau: 0
   randMass: 0
-  initialTau: 0.6
+  initialTau: 0.8
   thresholdDist: 0.01
   thresholdHeigth: 10
   particleMass: 0.0001
@@ -601,7 +601,7 @@ LineRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1786704711
   m_SortingLayer: -1
-  m_SortingOrder: 10000
+  m_SortingOrder: 0
   m_Positions: []
   m_Parameters:
     serializedVersion: 2
@@ -611,7 +611,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.5086212
+        value: 0.41233063
         inSlope: 0
         outSlope: 0
         tangentMode: 0
