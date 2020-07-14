@@ -28,7 +28,40 @@ namespace BioCrowds
         public static MeshInstanceRenderer MarkerRenderer;
         public static Settings BioSettings;
 
+        public List<GameObject> Obstacles;
 
+        bool IsInside(GameObject target, Vector3 pos)
+        {
+            float minx, maxx, minz, maxz;
+            minx = target.transform.position.x - target.transform.localScale.x / 2.0f;
+            maxx = target.transform.position.x + target.transform.localScale.x / 2.0f;
+            minz = target.transform.position.z - target.transform.localScale.z / 2.0f;
+            maxz = target.transform.position.z + target.transform.localScale.z / 2.0f;
+
+            return (pos.x >= minx && pos.x < maxx) && (pos.z > minz && pos.z < maxz);
+        }
+
+        bool IsCompletelyInside(GameObject target, Vector3 pos)
+        {
+            return IsInside(target, pos + Vector3.right + Vector3.forward) &&
+                    IsInside(target, pos + Vector3.right - Vector3.forward) &&
+                    IsInside(target, pos - Vector3.right + Vector3.forward) &&
+                    IsInside(target, pos - Vector3.right - Vector3.forward);
+                    
+
+
+        }
+
+        //bool IsCompletelyInside(GameObject target, Vector3 pos)
+        //{
+        //    return IsInside(target, pos + Vector3.right * 2 + Vector3.forward * 2) &&
+        //            IsInside(target, pos + Vector3.right * 2) &&
+        //            IsInside(target, pos + Vector3.forward * 2) &&
+        //            IsInside(target, pos);
+
+
+
+        //}
 
         public void Awake()
         {
@@ -96,6 +129,12 @@ namespace BioCrowds
             CellRenderer = GetLookFromPrototype("CellMesh");
 
 
+            var exp = CrowdExperiment.instance;
+            foreach(GameObject obstacle in Obstacles)
+            {
+                exp.obstacleAreas.Add(new CrowdExperiment.ObstacleArea { start = obstacle.transform.position, end = obstacle.transform.localScale });
+            }
+
             //Now for each Entity of CellArchetype we define the proper data to the Components int the archetype.  
 
             int qtd = qtdX;
@@ -111,6 +150,18 @@ namespace BioCrowds
                     float z = j * (agentRadius * 2);
 
                     int index = j * qtd + i;
+
+                    var cell_pos = new Vector3(x+ 1, 0, z + 1);
+
+                    bool is_inside = false;
+                    foreach(GameObject obstacle in Obstacles)
+                    {
+                        if (IsCompletelyInside(obstacle, cell_pos))
+                            is_inside = true;
+                    }
+
+                    if (is_inside) continue;
+
 
                     entityManager.SetComponentData(cells[index], new Position
                     {

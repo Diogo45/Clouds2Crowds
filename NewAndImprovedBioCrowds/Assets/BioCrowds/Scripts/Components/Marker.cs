@@ -248,6 +248,7 @@ namespace BioCrowds
 
         private static float3[] GetMarkers(int3 key)
         {
+
             return cellMarkers[key];
         }
 
@@ -287,6 +288,9 @@ namespace BioCrowds
 
             public void Execute(int index)
             {
+                var aux = cells[index];
+                if (!cellMarkers.ContainsKey(aux)) return;
+
                 var markers = GetMarkers(cells[index]);
                 //Debug.Log(markers.Length);
 

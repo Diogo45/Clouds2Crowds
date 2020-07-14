@@ -22,14 +22,17 @@ namespace BioCrowds
 
         public List<SpawnArea> SpawnAreas;
 
-
-        public class ObstacleArea
+        [System.Serializable]
+        public struct ObstacleArea
         {
-            public float3 start;
-            public float3 end;
+            public Vector3 start;
+            public Vector3 end;
         }
 
+
         public List<ObstacleArea> obstacleAreas;
+
+        public List<GameObject> Obstacles;
 
         public static CrowdExperiment instance;
 

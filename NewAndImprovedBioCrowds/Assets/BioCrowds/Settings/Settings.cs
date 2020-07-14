@@ -77,7 +77,7 @@ namespace BioCrowds
                         var g = new GameObject("LineRenderer" + i);
                         lineRend = g.AddComponent<LineRenderer>();
                         lineRend.material = line.material;
-                        lineRend.SetVertexCount(500);
+                        lineRend.SetVertexCount(100);
                         lineRend.SetColors(Color.black, Color.black);
 
 

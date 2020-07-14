@@ -70,7 +70,7 @@ public class ExperimentManager : MonoBehaviour
         currentExp.activeSettings.Add(typeof(InteractionSettings));
 
         currentExp.name = "EXPERIMENT 1";
-        Directory = @"E:\PUCRS\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments" + "\\" + currentExp.name;
+        Directory = @"F:\Code\GitRepos\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments\" + currentExp.name;
 
         experimentDict = new Dictionary<int, Experiment>();
         experimentDict.Add(0, currentExp);
@@ -132,10 +132,10 @@ public class ExperimentManager : MonoBehaviour
     public void Play()
     {
 
-        Time.timeScale = SimulationConstants.instance.BioCrowdsTimeStep;
+        Time.timeScale = 3* SimulationConstants.instance.BioCrowdsTimeStep;
 
 
-        var dirs = System.IO.Directory.GetDirectories(@"E:\PUCRS\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments");
+        var dirs = System.IO.Directory.GetDirectories(@"F:\Code\GitRepos\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments");
 
         int repeated = 0;
 
@@ -147,7 +147,7 @@ public class ExperimentManager : MonoBehaviour
 
         currentExp.name = currentExp.name + (repeated > 0 ? " (" + repeated + ")" : "");
 
-        Directory = @"E:\PUCRS\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments" + "\\" + currentExp.name;
+        Directory = @"F:\Code\GitRepos\Clouds2Crowds\NewAndImprovedBioCrowds\Experiments" + "\\" + currentExp.name;
         System.IO.Directory.CreateDirectory(Directory);
 
 

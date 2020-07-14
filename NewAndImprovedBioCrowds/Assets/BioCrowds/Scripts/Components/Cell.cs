@@ -74,7 +74,10 @@ namespace BioCrowds
             this.Enabled = true;
         }
 
-       
+
+
+
+        
 
         struct SpawnMarkers : IJobParallelFor
         {
@@ -83,6 +86,17 @@ namespace BioCrowds
             public EntityCommandBuffer.Concurrent CommandBuffer;
             [ReadOnly] public ComponentDataArray<SpawnData> SpawnData;
             //[ReadOnly] public NativeArray<int> Seeds;
+
+            bool IsInside(Vector3 t_pos, Vector3 t_scale, Vector3 pos)
+            {
+                float minx, maxx, minz, maxz;
+                minx = t_pos.x - t_scale.x / 2.0f;
+                maxx = t_pos.x + t_scale.x / 2.0f;
+                minz = t_pos.z - t_scale.z / 2.0f;
+                maxz = t_pos.z + t_scale.z / 2.0f;
+
+                return (pos.x >= minx && pos.x <= maxx) && (pos.z >= minz && pos.z <= maxz);
+            }
 
             public void Execute(int index)
             {
@@ -102,7 +116,22 @@ namespace BioCrowds
                     float y = 0f;
                     float z = ((float)r.NextDouble()*2f - 1f) + cellNames[index].Value.z;
 
+                    var cell_pos = new Vector3(x, y, z);
+
+
+
+
                     bool canInstantiate = true;
+                    bool is_inside = false;
+
+                    foreach (CrowdExperiment.ObstacleArea obstacle in CrowdExperiment.instance.obstacleAreas)
+                    {
+                        if (IsInside(obstacle.start, obstacle.end, cell_pos))
+                        {
+                            is_inside = true;
+                        }
+
+                    }
 
                     for (int j = 0; j < tempCellMarkers.Length; j++)
                     {
@@ -116,7 +145,7 @@ namespace BioCrowds
 
                     
                    
-                    if (canInstantiate)
+                    if (canInstantiate && !is_inside)
                     {
                         CommandBuffer.CreateEntity(index, MakerArchetype);
 

@@ -289,7 +289,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Enabled: 1
   SpawnAreas:
-  - qtd: 0
+  - qtd: 50
     max:
       x: 5
       y: 0
@@ -299,7 +299,7 @@ MonoBehaviour:
       y: 0
       z: 25
     goal:
-      x: 100
+      x: 50
       y: 0
       z: 25
     maxSpeed: 1.3
@@ -317,13 +317,18 @@ MonoBehaviour:
       y: 0
       z: 50
     maxSpeed: 1.3
+  Obstacles:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   agentRadius: 1
   markerRadius: 0.1
   MarkerDensity: 0.65
   TerrainX: 100
   TerrainZ: 50
   FramesPerSecond: 32
-  showMarkers: 0
+  showMarkers: 1
   showCells: 0
   showAgentCapsule: 0
 --- !u!114 &114366138225136310
@@ -409,6 +414,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a6e3387b6422494cbf20d4685437447, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Obstacles:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &114589363930878032
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -495,7 +505,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f8a49efc853fa348b6662e755f77568, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enabled: 1
+  Enabled: 0
   randTau: 0
   randMass: 0
   initialTau: 0.8
